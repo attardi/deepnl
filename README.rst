@@ -16,7 +16,7 @@ Dependencies
 The POS and NER command line taggers expect instead properly tokenized input.
 
 Cython_ is required in development for generating C++ extensions that run faster.
-You probably won't need it, since the generated ``.cpp`` files are already provided with `deepnl`, but you will need a C++ compiler.
+The generated ``.cpp`` files are already provided with ``deepnl``, but you will need a C++ compiler.
 
 .. _numpy: http://www.numpy.org
 .. _Cython: http://cython.org
@@ -29,14 +29,16 @@ Basic usage
 Library usage
 ~~~~~~~~~~~~~
 
-You can use ``deepnl`` as a library in Python code as follows:
+You can use ``deepnl`` as a library in Python code as follows, where
+``filename`` is the name of the file containing the model produced through training:
 
 .. code-block:: python
 
     >>> import deepnl
-    >>> tagger = deepnl.PosTagger()
-    >>> tagger.tag('O rato roeu a roupa do rei de Roma.')
-    [[(u'O', u'ART'), (u'rato', u'N'), (u'roeu', u'V'), (u'a', u'ART'), (u'roupa', u'N'), (u'do', u'PREP+ART'), (u'rei', u'N'), (u'de', u'PREP'), (u'Roma', u'NPROP'), (u'.', 'PU')]]
+    >>> tagger = deepnl.Tagger.load(filename)
+    >>> sent = 'The quick brown fox jumped over the lazy dog.'
+    >>> tagger.tag_sentence(sent.split(), return_tokens=True)
+    [[(u'The', u'DT'), (u'quick', u'JJ'), (u'brown', u'JJ'), (u'fox', u'NN'), (u'jumped', u'VBD'), (u'over', u'IN'), (u'the', u'DT'), (u'lazy', u'JJ'), (u'dog', u'NN'), (u'.', '.')]]
 
 Calling a tagger is pretty straightforward. The provided taggers are:
 ``POSTagger``, ``NERTagger`` and ``SRLTagger``, all having a method ``tag`` which receives strings with text to be tagged. The tagger splits the text into sentences and then tokenizes each one (hence the return of the POSTagger is a list of lists).
@@ -51,10 +53,11 @@ Standalone scripts
 The scripts expect tokenized input, one token per line, with an empty
 line to separate sentences.
 When training, the token attributes are supplied in tsv format.
+Here is an example of POS tagging, using the model in file ``pos.dnn``:
 
 .. code-block:: bash
 
-    $ dl-po.py pos.model
+    $ dl-pos.py pos.dnn
     The
     quick
     brown
@@ -63,7 +66,7 @@ When training, the token attributes are supplied in tsv format.
     over
     the
     lazy
-    cat
+    dog
     .
 
     The DT  
@@ -74,7 +77,7 @@ When training, the token attributes are supplied in tsv format.
     over IN  
     the DT  
     lazy JJ  
-    cat NN  
+    dog NN  
     . .
 
 Benchmarks

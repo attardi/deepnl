@@ -1,0 +1,197 @@
+2015-01-08  Giuseppe Attardi  <attardi@di.unipi.it>
+
+	* reader.py (TextReader.read): removed any logger commands:
+	logging should be done by callers.
+
+2015-01-04  Giuseppe Attardi  <attardi@di.unipi.it>
+
+	* extractors.py (Extractor): feature are now extracted by Extractor
+	objects, each one dealing with one kind of features, e.g. embeddings,
+	pos, caps, etc.
+	Each one is responsible for saving and loading its own data to a
+	single model file.
+
+2015-01-03  Giuseppe Attardi  <attardi@di.unipi.it>
+
+	* srl/srl_reader.py (read_conll): split fields at \t.
+	(SRLReader._codify_sentences): use SentencexsConverter instead of
+	TokenConverter.
+
+	* attributes.py (TokenConverter): renamed SentenceConverter since
+	it needs to operate at the sentence level, e.g. the NER converter
+	needs to lookup ngrams in the gazetteers.
+
+	* reader.py (Reader.create_converter): return converter rather
+	than assign it to self.
+
+	* taggers.py (load_data): pass  parameter path instead of using
+	property sys.paths.
+
+	* network.pyx: method load_features() does the job previously done
+	in load_data() in taggers.py.
+	(load_from_file): renamed to load_weights.
+
+	* corpus.py: reader/writer for various corpus formats.
+
+2014-12-30  Giuseppe Attardi  <attardi@di.unipi.it>
+
+	* networklm.pyx: split half_window into left_context and
+	right_context since they might not be necessarily the same.
+
+	* srl/srl_reader.py: moved here relevant parts from nlpnet/read_data.py
+	* nlpnet/read_data.py: removed.
+
+2014-12-26  Giuseppe Attardi  <attardi@di.unipi.it>
+
+	* word_dictionary.py (WordDictionary): make senna the default variant
+	(WordDictionary): just use a single padding for both left and right
+
+2014-12-23  Giuseppe Attardi  <attardi@di.unipi.it>
+
+	* metadata.py (Metadata.save_to_file): use file names from config.py
+
+	* config.py: added sslm portion.
+	Use consistent naming convenion of prefix task nae rather than postfix.
+
+	* reader.py (TextReader.codify_sentences): convert_sentences -> convert
+
+	* network.pyx (hardtanhe): derivative of hardtanh in terms of its
+	output.
+
+	* networklm.pyx (_train_pair): use hardtanhe instead of hardtanhd.
+
+2014-12-22  Giuseppe Attardi  <attardi@di.unipi.it>
+
+	* networklm.pyx (_new_random_pool): generate a simple list, not a
+	list of singletons.
+
+2014-05-06  Giuseppe Attardi  <attardi@di.unipi.it>
+
+	* utils.py (generate_feature_vectors): use random.uniform.
+
+	* network.pyx (_viterbi): fixed bug.
+
+2014-05-05  Giuseppe Attardi  <attardi@di.unipi.it>
+
+	* network.pyx (_calculate_gradients_sll): use softmax(delta[-1]).
+
+	* ner/ner_reader.py (noGazetteer): for cases where there is on
+	entry for a class in the gazetteer dictionary.
+
+2014-05-03  Giuseppe Attardi  <attardi@di.unipi.it>
+
+	* network.pyx (softmax): added softmax function, for computing
+	softmax directly, without resorting to logsumexp.
+
+2014-05-02  Giuseppe Attardi  <attardi@di.unipi.it>
+
+	* network.pyx (_calculate_delta): avoid transpose by using
+            logadd = logsumexp(delta[token - 1][:,np.newaxis] + transitions, 0)
+	instead of
+            logadd = logsumexp(delta[token - 1] + transitions_T, 1)
+
+2014-04-23  Giuseppe Attardi  <attardi@di.unipi.it>
+
+	* networkconv.pyx (_convolution_lookup): use lookup().
+
+	* networklm.pyx (_train_pair): use lookup().
+
+	* network.pyx (lookup): added, so that run() method can get the
+	input directly and we need not to store the input in the network.
+
+	* networkconv.pyx (_tag_sentence): use logsumexp to avoid numeric
+	instability.
+
+	* networklm.pyx: class LanguageModel derived from Network so that
+	it inherits attributes and methods, including run().
+
+	* arguments.py (get_args): set default to 0.01 for --lf and -lt.
+	(get_args): made option --gold required.
+
+2014-04-22  Giuseppe Attardi  <attardi@di.unipi.it>
+
+	* network.pyx (_tag_sentence): use concatenate instead of vstack,
+	since it is twice faster.
+	(create_new): set seed for replicability.
+	(_backpropagate): completely rewritten, following closely the paper.
+	(run): introduced layer2, according to paper.
+
+2014-04-20  Giuseppe Attardi  <attardi@di.unipi.it>
+
+	* attributes.py (Suffix.get_suffix): fixed handling of padding
+
+2014-04-19  Giuseppe Attardi  <attardi@di.unipi.it>
+
+	* network.pyx (create_new): initialize transitions here.
+
+2014-04-18  Giuseppe Attardi  <attardi@di.unipi.it>
+
+	* network.pyx (train): terminate when both error increases and
+	accuracy decreases.
+
+2014-04-15  Giuseppe Attardi  <attardi@di.unipi.it>
+
+	* network.pyx (_calculate_all_scores): use logsumexp instead of
+	computing log(sum(exp()))
+	(_calculate_gradients_sll): use logsumexp also for computing
+	net_gradients.
+	(_calculate_all_scores): no need for np.longdouble(scores) since we
+	now use logsumexp.
+
+2014-04-14  Giuseppe Attardi  <attardi@di.unipi.it>
+
+	* network.pyx (train): normalize error.
+
+2014-04-13  Giuseppe Attardi  <attardi@di.unipi.it>
+
+	* taggers.py (load_network): associate list of files to gaz_features_ner.
+
+	* arguments.py (get_args): option --lt is not just for SRL.
+
+	* network.pyx (tag_sentence): eliminated unused argument logprob.
+	(_viterbi): dropped unused param allow_repeats.
+	(Network): renamed train_hits to validation_hits, train_items to
+	validation_items
+	(_validate): perform validation on held out sentences.
+
+2014-04-12  Giuseppe Attardi  <attardi@di.unipi.it>
+
+	* network.pyx (train): dump model whenever accuracy improves.
+	Eliminated termination on dropping accuracy.
+	Replaced print with logging.
+	(create_new): use uniform distribution with variance = 1/sqrt(fanin)
+
+2014-04-10  Giuseppe Attardi  <attardi@di.unipi.it>
+
+	* attributes.py (Suffix.get_suffix): check for PADDING.
+	(get_capitalization): check for PADDING.
+
+	* word_dictionary.py (isNumber): use regexp.
+	(WordDictionary.__getitem__): replace digits with '0'
+
+2014-04-07  Giuseppe Attardi  <attardi@di.unipi.it>
+
+	* attributes.py (TokenConverter.convert_sentence): aded to deal
+	with context in conversion.
+
+	* reader.py (TextReader.codify_sentences): use convert(sent).
+
+	* taggers.py (POSTagger.tag_tokens): drop use of clean_text.
+
+	* config.py (set_data_dir): added NER files.
+
+	* attributes.py (get_capitalization): added upper.
+
+2014-03-10  Giuseppe Attardi  <attardi@di.unipi.it>
+
+	* taggers.py (NERTagger): added.
+
+	* ner/ner_reader.py (NerReader): added.
+
+	* pos/pos_reader.py (POSReader.get_inverse_tag_dictionary):
+	removed: it is inherited from TaggerReader
+
+2013-12-15  Giuseppe Attardi  <attardi@di.unipi.it>
+
+	* networklm.pyx (train): save language model at every 100th batch.
+

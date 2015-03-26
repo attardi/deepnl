@@ -41,9 +41,9 @@ You can use ``deepnl`` as a library in Python code as follows, where
     [[(u'The', u'DT'), (u'quick', u'JJ'), (u'brown', u'JJ'), (u'fox', u'NN'), (u'jumped', u'VBD'), (u'over', u'IN'), (u'the', u'DT'), (u'lazy', u'JJ'), (u'dog', u'NN'), (u'.', '.')]]
 
 Calling a tagger is pretty straightforward. The provided taggers are:
-``POSTagger``, ``NERTagger`` and ``SRLTagger``, all having a method ``tag`` which receives strings with text to be tagged. The tagger splits the text into sentences and then tokenizes each one (hence the return of the POSTagger is a list of lists).
+``PosTagger``, ``NerTagger`` and ``SrlTagger``, all having a method ``tag`` which receives strings with text to be tagged. The tagger splits the text into sentences and then tokenizes each one (hence the return of the ``PosTagger`` is a list of lists).
 
-The output of the ``NERTagger`` is in ``IOB`` notation.
+The output of the ``NerTagger`` is in ``IOB`` notation.
 
 
 Standalone scripts
@@ -138,8 +138,9 @@ The benchmark can be run as:
 
 The results I achieved are::
 
-processed 46435 tokens with 5648 phrases; found: 5640 phrases; correct: 5031.
-accuracy:  97.62%; precision:  89.20%; recall:  89.08%; FB1:  89.14
+.. code-block:: bash
+    processed 46435 tokens with 5648 phrases; found: 5640 phrases; correct: 5031.
+    accuracy:  97.62%; precision:  89.20%; recall:  89.08%; FB1:  89.14
               LOC: precision:  93.30%; recall:  91.01%; FB1:  92.14
              MISC: precision:  78.24%; recall:  77.35%; FB1:  77.79
               ORG: precision:  84.59%; recall:  87.24%; FB1:  85.89

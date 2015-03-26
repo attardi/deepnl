@@ -1,33 +1,35 @@
-===============================================================
+************************************************************
 ``deepnl`` --- Deep Learning for Natural Language Processing
-===============================================================
+************************************************************
 
 ``deepnl`` is a Python library for Natural Language Processing tasks based on
 neural networks.
 
 The library currently provides tools for performing part-of-speech tagging,
-Named Entity tagging and semantic role labeling.
+Named Entity tagging and Semantic Role Labeling.
+
+``deepnl`` also provides code for creating *word embeddings* from text, using
+either the Language Model by Collobert et al. (2011), or using Hellinger PCA,
+as in (Lebret and Collobert 2014).
+
 
 Dependencies
 ------------
 
 ``deepnl`` requires numpy_.
 
-The POS and NER command line taggers expect instead properly tokenized input.
-
-Cython_ is required in development for generating C++ extensions that run faster.
-The generated ``.cpp`` files are already provided with ``deepnl``, but you will need a C++ compiler.
-
-.. _numpy: http://www.numpy.org
-.. _Cython: http://cython.org
+A C++ compiler is also needed for compiling the C++ extensions produced with
+Cython_.
+The generated ``.cpp`` files are already provided with ``deepnl``, but you
+will need Cython_ if you want to develop or odify the C++ extensions.
 
 Basic usage
------------
+===========
 
-``deepnl`` can be used both as a Python library or through command line scripts. Both usages are explained below.
+``deepnl`` can be used both as a Python library or through command line scripts.
 
 Library usage
-~~~~~~~~~~~~~
+-------------
 
 You can use ``deepnl`` as a library in Python code as follows, where
 ``filename`` is the name of the file containing the model produced through training:
@@ -40,20 +42,34 @@ You can use ``deepnl`` as a library in Python code as follows, where
     >>> tagger.tag_sentence(sent.split(), return_tokens=True)
     [[(u'The', u'DT'), (u'quick', u'JJ'), (u'brown', u'JJ'), (u'fox', u'NN'), (u'jumped', u'VBD'), (u'over', u'IN'), (u'the', u'DT'), (u'lazy', u'JJ'), (u'dog', u'NN'), (u'.', '.')]]
 
-Calling a tagger is pretty straightforward. The provided taggers are:
-``PosTagger``, ``NerTagger`` and ``SrlTagger``, all having a method ``tag`` which receives strings with text to be tagged. The tagger splits the text into sentences and then tokenizes each one (hence the return of the ``PosTagger`` is a list of lists).
+Class ``Tagger`` is a generic interface for sequence taggers and provides a
+method ``tag_sequence`` for tagging a sentence.
+A sentence is represented as a list of tokens.
 
-The output of the ``NerTagger`` is in ``IOB`` notation.
+Class ``Tagger`` can be used directly for performing POS tagging.
+Two specializations are provided: ``NerTagger`, for Named Entity tagging and
+``SrlTagger`` for Semantic Role Labeling.
+
+The output of ``tag_sequence`` is normally a list of tuples, representing
+tokens with their associated tags. In the case of POS tagging, the tags are
+just the POS tags of each token; in case of ``NerTagger`` the tags are in
+``IOB`` notation for representing subsequences, while in the case of
+``SrlTagger`` the output is more complex.
 
 
 Standalone scripts
-~~~~~~~~~~~~~~~~~~
+------------------
 
-``deepnl`` also provides scripts for tagging text, training new models and testing them. They are copied to the `scripts-<python-version>` subdirectory of your Python installation, which can be included in the system PATH variable. You can call them from command line and give some text input.
-The scripts expect tokenized input, one token per line, with an empty
-line to separate sentences.
-When training, the token attributes are supplied in tsv format.
-Here is an example of POS tagging, using the model in file ``pos.dnn``:
+``deepnl`` provides scripts for tagging text, training new models and testing
+them. They are copied to the `scripts-<python-version>` subdirectory of your
+Python installation, which can be included in the system PATH variable. You
+can call them from command line and give some text input.
+
+The scripts expect tokenized input, one token per line, with an empty line to
+separate sentences.
+
+When training, the token attributes are supplied in TSV (tab separated values) format.
+Here is an example of POS tagging, using a previously trained model from file ``pos.dnn``:
 
 .. code-block:: bash
 
@@ -80,10 +96,25 @@ Here is an example of POS tagging, using the model in file ``pos.dnn``:
     dog NN  
     . .
 
+Word Embeddings
+===============
+
+The command ``dl-words.py`` allows creating word embeddings from a language
+model built from a plain text corpus.
+
+The command ``dl-words-pca.py`` allows creating word embeddings from a
+language model built from a plain text corpus, with the techique of Hellinger
+PCA.
+
+The command ``dl-sentiwords.py`` allows creating *sentiment specific word
+embeddings* from a corpus of annotated Tweets.
+
+
 Benchmarks
-~~~~~~~~~~
+==========
 
 The NER tagger replicates the performance of SENNA_ in the CoNLL 2003 benchmark.
+
 The CoNLL-2003 shared task data can be downloaded from
 http://www.cnts.ua.ac.be/conll2003/ner/.
 
@@ -147,7 +178,22 @@ The results I achieved are::
               PER: precision:  94.71%; recall:  94.06%; FB1:  94.38
 
 Credits
-~~~~~~~~~~
+=======
 
 Erick Fonseca developed ``nlpnet``, a similar library, available at:
 https://github.com/erickrf/nlpnet, which provided inspiration for ``deepnl``.
+
+References
+==========
+
+#. Ronan Collobert, J. Weston, L. Bottou, M. Karlen, K. Kavukcuoglu and P. Kuksa.
+   Natural Language Processing (Almost) from Scratch. *Journal of Machine
+   Learning Research*, 12:2493-2537, 2011.
+
+#. Rémi Lebret and Ronan  Collobert. 2014. Word Embeddings through Hellinger PCA. *EACL 2014*: 482.
+
+.. _numpy: http://www.numpy.org
+.. _Cython: http://cython.org
+.. _SENNA: http://ronan.collobert.com/senna/
+
+

@@ -64,4 +64,4 @@ cdef class PrefixExtractor(AffixExtractor):
     pass
 
 cdef class GazetteerExtractor(Extractor):
-    cdef type
+    cdef bool lowcase

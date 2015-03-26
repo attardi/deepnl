@@ -7,10 +7,10 @@
             "/usr/local/lib/python2.7/dist-packages/numpy/core/include/numpy/ufuncobject.h", 
             "/usr/local/lib/python2.7/dist-packages/numpy/core/include/numpy/arrayobject.h"
         ], 
+        "language": "c++", 
         "extra_compile_args": [
             "-fopenmp"
         ], 
-        "language": "c++", 
         "include_dirs": [
             "/usr/local/lib/python2.7/dist-packages/numpy/core/include", 
             "/usr/include/eigen3"
@@ -952,11 +952,11 @@ struct __pyx_obj_6deepnl_10extractors_PrefixExtractor {
  *     pass
  * 
  * cdef class GazetteerExtractor(Extractor):             # <<<<<<<<<<<<<<
- *     cdef type
+ *     cdef bool lowcase
  */
 struct __pyx_obj_6deepnl_10extractors_GazetteerExtractor {
   struct __pyx_obj_6deepnl_10extractors_Extractor __pyx_base;
-  PyObject *type;
+  PyBoolObject *lowcase;
 };
 
 
@@ -1236,7 +1236,7 @@ static struct __pyx_vtabstruct_6deepnl_10extractors_PrefixExtractor *__pyx_vtabp
  *     pass
  * 
  * cdef class GazetteerExtractor(Extractor):             # <<<<<<<<<<<<<<
- *     cdef type
+ *     cdef bool lowcase
  */
 
 struct __pyx_vtabstruct_6deepnl_10extractors_GazetteerExtractor {
@@ -4096,7 +4096,7 @@ static int __pyx_pf_6deepnl_7trainer_13TaggerTrainer___init__(struct __pyx_obj_6
  *         self.verbose = verbose
  * 
  *     def train(self, list sentences, list tags,             # <<<<<<<<<<<<<<
- *               int epochs, int report_frequency=1,
+ *               int epochs, int report_frequency=0,
  *               float desired_accuracy=0, threads=1):
  */
 
@@ -4185,7 +4185,7 @@ static PyObject *__pyx_pw_6deepnl_7trainer_13TaggerTrainer_3train(PyObject *__py
     if (values[3]) {
       __pyx_v_report_frequency = __Pyx_PyInt_As_int(values[3]); if (unlikely((__pyx_v_report_frequency == (int)-1) && PyErr_Occurred())) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 118; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
     } else {
-      __pyx_v_report_frequency = ((int)1);
+      __pyx_v_report_frequency = ((int)0);
     }
     if (values[4]) {
       __pyx_v_desired_accuracy = __pyx_PyFloat_AsFloat(values[4]); if (unlikely((__pyx_v_desired_accuracy == (float)-1) && PyErr_Occurred())) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 119; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
@@ -4788,7 +4788,7 @@ static PyObject *__pyx_pf_6deepnl_7trainer_13TaggerTrainer_2train(struct __pyx_o
  *         self.verbose = verbose
  * 
  *     def train(self, list sentences, list tags,             # <<<<<<<<<<<<<<
- *               int epochs, int report_frequency=1,
+ *               int epochs, int report_frequency=0,
  *               float desired_accuracy=0, threads=1):
  */
 

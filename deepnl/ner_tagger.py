@@ -8,7 +8,6 @@ NER tagger exploiting a deep neural network.
 import sys
 
 # local
-from network import Network
 from tagger import Tagger
 from reader import TaggerReader
 from corpus import *

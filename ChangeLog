@@ -1,0 +1,40 @@
+2015-03-26  Giuseppe Attardi  <attardi@di.unipi.it>
+
+	* deepnl/extractors.pyx (create): added lowcase option.
+
+2015-01-29  Giuseppe Attardi  <attardi@di.unipi.it>
+
+	* deepnl/trainer.pyx (MovingAverage): added.
+
+2015-01-27  Giuseppe Attardi  <attardi@di.unipi.it>
+
+	* bin/dl-sentiwords.py: added.
+
+2014-12-20  Giuseppe Attardi  <attardi@di.unipi.it>
+
+	* nlpnet/networkSent.pyx: network for sentiment-specific word
+	embeddings.
+
+2014-04-22  Giuseppe Attardi  <attardi@di.unipi.it>
+
+	* bin/nlpnet-train.py (saver): use random.seed() if you want to
+	ensure replicability.
+
+2014-04-19  Giuseppe Attardi  <attardi@di.unipi.it>
+
+	* bin/nlpnet-train.py (create_network): moved initialization of
+	transitions to Network.create_new().
+
+2014-04-17  Giuseppe Attardi  <attardi@di.unipi.it>
+
+	* bin/nlpnet-train.py (create_network): initialize transition
+	randomly rather than 0.
+
+2014-03-10  Giuseppe Attardi  <attardi@di.unipi.it>
+
+	* bin/nlpnet-tag.py (_print_tagged_ner): handle ner output.
+
+	* bin/nlpnet-train.py (create_reader): added case for ner.
+	(create_network): similarly
+	(train): first argument is text_reader, not reader
+

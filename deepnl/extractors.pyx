@@ -496,12 +496,13 @@ cdef class GazetteerExtractor(Extractor):
     padding = 0
     unknown = 1
 
-    def __init__(self, type, words=None, size=5):
+    def __init__(self, words=None, size=5, lowcase=True):
         """
         :param words: list of words to add to gazeetteer.
         :param size: vector dimension.
+        :param lowcase: whether to compare lowercase words.
         """
-        self.type = type
+        self.lowcase = lowcase
         specials = GazetteerExtractor.unknown + 1
         if words:
             # reserve entries for special words
@@ -512,12 +513,12 @@ cdef class GazetteerExtractor(Extractor):
         """
         :return: the list of codes for the given :param words:.
         """
-        return [self.dict.get(w, GazetteerExtractor.unknown) \
+        return [self.dict.get(w.lower() if self.lowcase else w, GazetteerExtractor.unknown) \
                 if w != WD.padding_left and w != WD.padding_right else GazetteerExtractor.padding \
                 for w in words]
 
     @classmethod
-    def create(cls, filename, size=5):
+    def create(cls, filename, size=5, lowcase=True):
         """
         Create extractors from gazeeteer file, consisting of lines:
           TYPE\tentity
@@ -533,6 +534,15 @@ cdef class GazetteerExtractor(Extractor):
                 if c not in classes:
                     classes[c] = set()
                 classes[c].add(words)
-        extractors = [cls(n, w, size) for n,w in classes.items()]
+        extractors = [cls(w, size, lowcase) for w in classes.values()]
         return extractors
 
+    def save(self, file):
+        pickle.dump(self.dict, file)
+        pickle.dump(self.table, file)
+        pickle.dump(self.lowcase, file)
+
+    def load(self, file):
+        self.dict = pickle.load(file)
+        self.table = pickle.load(file)
+        self.lowcase = pickle.load(file)

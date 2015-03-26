@@ -65,12 +65,8 @@ class WordDictionary(dict):
         else:
             # using ordered dict as an ordered set
             # (we need to keep the order and to eliminate duplicates)
-            if variant == 'polyglot':
-                words = wordlist
-            else:
-                words = [word.lower() for word in wordlist]
-            values = [None] * len(words)
-            words = OD(zip(words, values)).keys()
+            values = [None] * len(wordlist)
+            words = OD(zip(wordlist, values)).keys()
             
         # trim to the maximum size
         if size is None:
@@ -96,14 +92,6 @@ class WordDictionary(dict):
                 self[symbol] = len(self)
         
         self.check()
-    
-    @classmethod
-    def init_from_wordlist(cls, wordlist):
-        """
-        Initializes the WordDictionary instance with a list of words, independently from their 
-        frequencies. Every word in the list gets an entry.
-        """
-        return cls(None, wordlist=wordlist)
     
     def save(self, file):
         """

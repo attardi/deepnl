@@ -944,11 +944,11 @@ struct __pyx_obj_6deepnl_10extractors_PrefixExtractor {
  *     pass
  * 
  * cdef class GazetteerExtractor(Extractor):             # <<<<<<<<<<<<<<
- *     cdef type
+ *     cdef bool lowcase
  */
 struct __pyx_obj_6deepnl_10extractors_GazetteerExtractor {
   struct __pyx_obj_6deepnl_10extractors_Extractor __pyx_base;
-  PyObject *type;
+  PyBoolObject *lowcase;
 };
 
 
@@ -1187,7 +1187,7 @@ static struct __pyx_vtabstruct_6deepnl_10extractors_PrefixExtractor *__pyx_vtabp
  *     pass
  * 
  * cdef class GazetteerExtractor(Extractor):             # <<<<<<<<<<<<<<
- *     cdef type
+ *     cdef bool lowcase
  */
 
 struct __pyx_vtabstruct_6deepnl_10extractors_GazetteerExtractor {

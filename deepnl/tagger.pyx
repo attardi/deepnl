@@ -126,6 +126,10 @@ cdef class Tagger(object):
             self.converter.lookup(window, vars.input)
             vars.output = scores[i]
             nn.run(vars)
+            # DEBUG
+            # print 'input', vars.input[:4]
+            # print 'hidden', vars.hidden[:4]
+            # print 'output', vars.output[:4]
         
         return scores
 

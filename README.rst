@@ -9,9 +9,8 @@ The library currently provides tools for performing part-of-speech tagging,
 Named Entity tagging and Semantic Role Labeling.
 
 ``deepnl`` also provides code for creating *word embeddings* from text, using
-either the Language Model by Collobert et al. (2011), or using Hellinger PCA,
-as in (Lebret and Collobert 2014).
-
+either the Language Model approach by [Collobert11]_, or using Hellinger PCA,
+as in [Lebret14]_.
 
 Dependencies
 ------------
@@ -22,6 +21,19 @@ A C++ compiler is also needed for compiling the C++ extensions produced with
 Cython_.
 The generated ``.cpp`` files are already provided with ``deepnl``, but you
 will need Cython_ if you want to develop or odify the C++ extensions.
+
+Installation
+===========
+
+To compile the library, run::
+
+   $ python setup.py build
+
+You can run the scripts directly from the ``bin`` directory, or you can
+install them by calling::
+
+   $ sudo python setup.py install
+
 
 Basic usage
 ===========
@@ -60,10 +72,11 @@ just the POS tags of each token; in case of ``NerTagger`` the tags are in
 Standalone scripts
 ------------------
 
-``deepnl`` provides scripts for tagging text, training new models and testing
-them. They are copied to the `scripts-<python-version>` subdirectory of your
+``deepnl`` provides scripts for tagging text or train new models.
+They are copied to the `scripts-<python-version>` subdirectory of your
 Python installation, which can be included in the system PATH variable. You
-can call them from command line and give some text input.
+can invoke them from the command line: call them with option ``-h`` or
+``--help`` to obtain details on their usage.
 
 The scripts expect tokenized input, one token per line, with an empty line to
 separate sentences.
@@ -169,7 +182,6 @@ The benchmark can be run as:
 
 The results I achieved are::
 
-.. code-block:: bash
     processed 46435 tokens with 5648 phrases; found: 5640 phrases; correct: 5031.
     accuracy:  97.62%; precision:  89.20%; recall:  89.08%; FB1:  89.14
               LOC: precision:  93.30%; recall:  91.01%; FB1:  92.14
@@ -186,11 +198,11 @@ https://github.com/erickrf/nlpnet, which provided inspiration for ``deepnl``.
 References
 ==========
 
-#. Ronan Collobert, J. Weston, L. Bottou, M. Karlen, K. Kavukcuoglu and P. Kuksa.
+.. [Collobert11] Ronan Collobert, J. Weston, L. Bottou, M. Karlen, K. Kavukcuoglu and P. Kuksa.
    Natural Language Processing (Almost) from Scratch. *Journal of Machine
    Learning Research*, 12:2493-2537, 2011.
 
-#. Rémi Lebret and Ronan  Collobert. 2014. Word Embeddings through Hellinger PCA. *EACL 2014*: 482.
+.. [Lebret14]  Rémi Lebret and Ronan  Collobert. 2014. Word Embeddings through Hellinger PCA. *EACL 2014*: 482.
 
 .. _numpy: http://www.numpy.org
 .. _Cython: http://cython.org

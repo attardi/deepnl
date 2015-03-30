@@ -53,7 +53,7 @@ class NerTagger(Tagger):
         reader = NerReader()
         writer = ConllWriter()
         for sent in reader(file):
-            print writer.write(self.toIOB(self.tag_sentence(sent)))
+            print writer.write(self.toIOB(self.tag_sequence(sent)))
 
     def toIOB(self, sent):
         """

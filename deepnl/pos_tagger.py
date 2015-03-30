@@ -25,5 +25,5 @@ class PosTagger(Tagger):
         reader = PosReader(file)
         writer = ConllWriter()
         for sent in reader:
-            print writer.write(self.tag_sentence(sent))
+            print writer.write(self.tag_sequence(sent))
 

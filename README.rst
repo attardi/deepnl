@@ -3,7 +3,7 @@
 ************************************************************
 
 ``deepnl`` is a Python library for Natural Language Processing tasks based on
-neural networks.
+a Deep Learning neural network architecture.
 
 The library currently provides tools for performing part-of-speech tagging,
 Named Entity tagging and Semantic Role Labeling.
@@ -12,18 +12,25 @@ Named Entity tagging and Semantic Role Labeling.
 either the Language Model approach by [Collobert11]_, or using Hellinger PCA,
 as in [Lebret14]_.
 
+It can also create *sentiment specific word embeddings* from a corpus of
+annotated Tweets.
+
+
+Installation
+===========
+
 Dependencies
 ------------
 
 ``deepnl`` requires numpy_.
 
-A C++ compiler is also needed for compiling the C++ extensions produced with
-Cython_.
+A C++ compiler is also needed for compiling the C++ extensions it uses,
+produced with Cython_.
 The generated ``.cpp`` files are already provided with ``deepnl``, but you
-will need Cython_ if you want to develop or odify the C++ extensions.
+will need Cython_ if you want to develop or modify the C++ extensions.
 
-Installation
-===========
+Build
+-----
 
 To compile the library, run::
 
@@ -50,7 +57,7 @@ You can use ``deepnl`` as a library in Python code as follows, where
 
     >>> import deepnl
     >>> tagger = deepnl.Tagger.load(filename)
-    >>> sent = 'The quick brown fox jumped over the lazy dog.'
+    >>> sent = 'The quick brown fox jumped over the lazy dog .'
     >>> tagger.tag_sentence(sent.split(), return_tokens=True)
     [[(u'The', u'DT'), (u'quick', u'JJ'), (u'brown', u'JJ'), (u'fox', u'NN'), (u'jumped', u'VBD'), (u'over', u'IN'), (u'the', u'DT'), (u'lazy', u'JJ'), (u'dog', u'NN'), (u'.', '.')]]
 
@@ -72,11 +79,12 @@ just the POS tags of each token; in case of ``NerTagger`` the tags are in
 Standalone scripts
 ------------------
 
-``deepnl`` provides scripts for tagging text or train new models.
-They are copied to the `scripts-<python-version>` subdirectory of your
-Python installation, which can be included in the system PATH variable. You
-can invoke them from the command line: call them with option ``-h`` or
-``--help`` to obtain details on their usage.
+``deepnl`` provides scripts for tagging text or training new models.
+
+They are present in the `bin` subdirectory where you downloaded the code.
+If you did not install them, you can invoke them directly from there.
+
+Call them with option ``-h`` or ``--help`` to obtain details on their usage.
 
 The scripts expect tokenized input, one token per line, with an empty line to
 separate sentences.
@@ -98,25 +106,25 @@ Here is an example of POS tagging, using a previously trained model from file ``
     dog
     .
 
-    The DT  
-    quick JJ  
-    brown JJ  
-    fox NN  
-    jumped VBD  
-    over IN  
-    the DT  
-    lazy JJ  
-    dog NN  
+    The DT
+    quick JJ
+    brown JJ
+    fox NN
+    jumped VBD
+    over IN
+    the DT
+    lazy JJ
+    dog NN
     . .
 
 Word Embeddings
 ===============
 
 The command ``dl-words.py`` allows creating word embeddings from a language
-model built from a plain text corpus.
+model built from a plain text corpus, properly tokenized.
 
 The command ``dl-words-pca.py`` allows creating word embeddings from a
-language model built from a plain text corpus, with the techique of Hellinger
+language model built from a plain text corpus, with the technique of Hellinger
 PCA.
 
 The command ``dl-sentiwords.py`` allows creating *sentiment specific word

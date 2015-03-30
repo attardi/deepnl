@@ -100,6 +100,9 @@ class TaggerReader(Reader):
         # self.sentence_count = len(sentences) if sentences else 0
 
     def read(self, filename):
+        """
+        :return: an iterator on sentences.
+        """
         return ConllReader(filename)
 
     # def sent_count(self):
@@ -182,6 +185,7 @@ class TweetReader(Reader):
                     continue    # CHECKME: skip tweets with no polarity
                 self.sentences.append(tweet[TweetReader.text_field].split())
                 self.polarities.append(polarity)
+            return self.sentences
                     
     def acceptable(self, token):
         """Simple criteron to accept a token as part of a phrase, rejecting
@@ -200,11 +204,11 @@ class TweetReader(Reader):
         """
         
         # unigrams
-        ngrams = [[token for sent in self.sentences for token in sent]]
+        ngrams = [[token for sent in sentences for token in sent]]
         # multigrams
 	for n in xrange(2, self.ngrams + 1):
             ngrams.append([])
-	    for sent in self.sentences:
+	    for sent in sentences:
 	    	for i in xrange(len(sent) + 1 - n):
                     phrase = sent[i:i+n]
                     accept = True

@@ -55,6 +55,12 @@ cdef class Gradients(Parameters):
         self.hidden_bias.fill(0.0)
         self.input.fill(0.0)
 
+    def addSquare(self, Gradients grads):
+        self.output_weights += grads.output_weights * grads.output_weights
+        self.output_bias += grads.output_bias * grads.output_bias
+        self.hidden_weights += grads.hidden_weights * grads.hidden_weights
+        self.hidden_bias += grads.hidden_bias * grads.hidden_bias
+
 # ----------------------------------------------------------------------
 
 cdef class Network(Parameters):
@@ -77,17 +83,21 @@ cdef class Network(Parameters):
         #        compared to tanh().
 
         # creates the weight matrices
-        #high = 2.38 / np.sqrt(input_size) # [Bottou-88]
-        high = 2.45 / np.sqrt(input_size + hidden_size) # Al-Rfou
-        self.hidden_weights = np.random.uniform(-high, high, (hidden_size, input_size))
-        high = 2.38 / np.sqrt(hidden_size) # [Bottou-88]
-        #hidden_bias = np.random.uniform(-high, high, (hidden_size))
-        self.hidden_bias = np.zeros(hidden_size, dtype=float) # Al-Rfou
 
-        high = 2.45 / np.sqrt(hidden_size + output_size) # Al-Rfou
+        # set the seed for replicability
+        np.random.seed(42)      # DEBUG
+
+        high = 2.38 / np.sqrt(input_size) # [Bottou-88]
+        #high = 2.45 / np.sqrt(input_size + hidden_size) # Al-Rfou
+        self.hidden_weights = np.random.uniform(-high, high, (hidden_size, input_size))
+        self.hidden_bias = np.random.uniform(-high, high, (hidden_size))
+        #self.hidden_bias = np.zeros(hidden_size, dtype=float) # Al-Rfou
+
+        high = 2.38 / np.sqrt(hidden_size) # [Bottou-88]
+        #high = 2.45 / np.sqrt(hidden_size + output_size) # Al-Rfou
         self.output_weights = np.random.uniform(-high, high, (output_size, hidden_size))
-        #output_bias = np.random.uniform(-high, high, (1))
-        self.output_bias = np.zeros(output_size, dtype=float) # Al-Rfou
+        self.output_bias = np.random.uniform(-high, high, (output_size))
+        #self.output_bias = np.zeros(output_size, dtype=float) # Al-Rfou
 
         # saver fuction
         self.saver = lambda nn: None
@@ -156,14 +166,29 @@ cdef class Network(Parameters):
 
         return hinge_loss
 
-    cpdef update(self, Gradients grads, float learning_rate):
+    cpdef update(self, Gradients grads, float learning_rate,
+                 Gradients ada=None):
         """
-        Adjust the weights
+        Adjust the weights.
+        :param ada: cumulative square gradients for performing AdaGrad.
+        AdaGrad: G_t, where G(i,i)_t = G(i,i)_t-1 + grad(i)^2
+        * i.e. we cumulate the square of gradients in G for parameter p:
+        * G += g^2
+        * p -= LR * g / sqrt(G)
+
         """
-        self.output_weights += grads.output_weights * learning_rate
-        self.output_bias += grads.output_bias * learning_rate
-        self.hidden_weights += grads.hidden_weights * learning_rate
-        self.hidden_bias += grads.hidden_bias * learning_rate
+        if ada:
+            ada.addSquare(grads)
+            self.output_weights += learning_rate * grads.output_weights / np.sqrt(ada.output_weights)
+            self.output_bias += learning_rate * grads.output_bias / np.sqrt(ada.output_weights)
+            self.hidden_weights += learning_rate * grads.hidden_weights / np.sqrt(ada.self.hidden_weights)
+            self.hidden_bias += learning_rate * grads.hidden_bias / np.sqrt(ada.hidden_bias)
+        else:
+            # divide by the fan-in
+            self.output_weights += grads.output_weights * learning_rate / self.hidden_size
+            self.output_bias += grads.output_bias * learning_rate / self.hidden_size
+            self.hidden_weights += grads.hidden_weights * learning_rate / self.input_size
+            self.hidden_bias += grads.hidden_bias * learning_rate / self.input_size
 
     def save(self, file):
         """

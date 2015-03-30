@@ -35,7 +35,7 @@ cdef class ConvolutionalNetwork(Network):
     cdef np.ndarray hidden_gradients, hidden2_gradients
     cdef np.ndarray input_deltas
 
-    cdef np.ndarray[FLOAT_t,ndim=2] _tag_sentence_conv(self, np.ndarray[INT_t,ndim=2] sentence,
+    cdef np.ndarray[FLOAT_t,ndim=2] _tag_sequence_conv(self, np.ndarray[INT_t,ndim=2] sentence,
                       list tags=*,
                       np.ndarray predicates=*, list arguments=*, 
                       bool logprob=*, bool allow_repeats=*)

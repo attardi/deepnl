@@ -171,6 +171,7 @@ def main():
             vocab, tagset = reader.create_vocabulary(sentence_iter,
                                                      args.vocab_size,
                                                      args.minOccurr)
+            logger.info("Creating word embeddings")
             embeddings = Embeddings(args.embeddings_size, vocab=vocab,
                                     variant=args.variant)
 
@@ -178,17 +179,21 @@ def main():
         converter.add(embeddings)
 
         if args.caps:
+            logger.info("Creating capitalization features")
             converter.add(CapsExtractor(args.caps))
 
         if args.suffix:
+            logger.info("Creating suffix features")
             extractor = SuffixExtractor(args.suffix, args.suffixes, sentence_iter)
             converter.add(extractor)
 
         if args.prefix:
+            logger.info("Creating prefix features")
             extractor = PrefixExtractor(args.prefix, args.prefixes, sentence_iter)
             converter.add(extractor)
 
         if args.gazetteer:
+            logger.info("Creating gazetteer features")
             for extractor in GazetteerExtractor.create(args.gazetteer, args.gsize):
                 converter.add(extractor)
 
@@ -223,7 +228,7 @@ def main():
         reader = ConllReader()
         for sent in reader:
             sent = [x[0] for x in sent] # extract form
-            ConllWriter.write(tagger.tag_sentence(sent, return_tokens=True))
+            ConllWriter.write(tagger.tag_sequence(sent, return_tokens=True))
 
 
 # ----------------------------------------------------------------------

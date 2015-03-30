@@ -13,9 +13,11 @@ cdef class SequenceNetwork(Network):
     
     cdef public np.ndarray input_sent_values, hidden_sent_values, layer2_sent_values
 
+    # FIXME: clash with method in Network
     cdef _backpropagate(self, SeqGradients grads)
 
-    cdef _update(self, SeqGradients grads, float learning_rate)
+    # FIXME: clash with method in Network
+    cdef _update(self, SeqGradients grads, float learning_rate, SeqGradients ada=*)
 
     cpdef bool _calculate_gradients_sll(self, np.ndarray[INT_t,ndim=1] tags,
                                        SeqGradients grads,

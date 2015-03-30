@@ -39,6 +39,8 @@ cdef class Converter(Iterable):
     cpdef np.ndarray[FLOAT_t,ndim=1] lookup(self,
                                             np.ndarray[INT_t,ndim=2] sentence,
                                             np.ndarray out=*)
+    cpdef update(self, np.ndarray[INT_t,ndim=2] sentence,
+                 np.ndarray[FLOAT_t,ndim=1] grads)
 
 cdef class Extractor(object):
 

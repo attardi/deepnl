@@ -253,11 +253,11 @@ Output size: %d
         for sent, sent_preds, sent_tags in izip(sentences, predicates, tags):
             if arguments is not None:
                 sent_args = i_args.next()
-            self._tag_sentence_conv(sent, sent_preds, sent_tags, sent_args)
+            self._tag_sequence_conv(sent, sent_preds, sent_tags, sent_args)
 
             self.train_items += 1
     
-    def tag_sentence(self, np.ndarray sentence, np.ndarray predicates, 
+    def tag_sequence(self, np.ndarray sentence, np.ndarray predicates, 
                      list arguments=None, bool logprob=False,
                      bool allow_repeats=True):
         """
@@ -273,7 +273,7 @@ Output size: %d
             argument classes (only for separate argument classification).
         """
         self.only_classify = arguments is not None
-        return self._tag_sentence_conv(sentence, tags=None,
+        return self._tag_sequence_conv(sentence, tags=None,
                                   predicates=predicates, arguments=arguments, 
                                   logprob=logprob, allow_repeats=allow_repeats)
     
@@ -298,7 +298,7 @@ Output size: %d
     
     @cython.boundscheck(False)
     @cython.wraparound(False)
-    cdef np.ndarray[FLOAT_t,ndim=2] _tag_sentence_conv(self, np.ndarray[INT_t,ndim=2] sentence,
+    cdef np.ndarray[FLOAT_t,ndim=2] _tag_sequence_conv(self, np.ndarray[INT_t,ndim=2] sentence,
                       list tags=None,
                       np.ndarray predicates=None, list arguments=None, 
                       bool logprob=False, bool allow_repeats=True):

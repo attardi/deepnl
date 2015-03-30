@@ -1,3 +1,9 @@
+2015-03-29  Giuseppe Attardi  <attardi@di.unipi.it>
+
+	* deepnl/trainer.pyx (_train_epoch): invoke Converter.update().
+
+	* deepnl/extractors.pyx (Converter.update): added.
+
 2015-03-26  Giuseppe Attardi  <attardi@di.unipi.it>
 
 	* deepnl/extractors.pyx (create): added lowcase option.

@@ -195,23 +195,30 @@ cdef class TaggerTrainer(Trainer):
         np.random.shuffle(tags)
         
         cdef SeqGradients grads
+        # AdaGrad. Since sentence length varies, we accumulate into a single
+        # item all squared input gradients
+        cdef SeqGradients ada
+        #ada = SeqGradients(nn.input_size, nn.hidden_size, nn.output_size, 1)
+        ada = None
 
         # keep last 2% for validation
         cdef int validation = int((len(sentences) - 1) * 0.98) + 1 # at least 1
 
         cdef int i = 0
         for sent, sent_tags in izip(sentences, tags):
-            scores = self.tagger._tag_sentence(sent, True)
+            scores = self.tagger._tag_sequence(sent, True)
             grads = SeqGradients(nn.input_size, nn.hidden_size,
                                  nn.output_size, len(sent_tags))
             if nn._calculate_gradients_sll(sent_tags, grads, scores):
                 nn._backpropagate(grads)
-                nn._update(grads, self.learning_rate)
+                self.tagger.update(grads, self.learning_rate, sent, ada)
             else:
                 self.skips += 1
 
             self.train_items += len(sent)
             i += 1
+
+            # progress report
             if self.verbose:
                 if i%1000 == 0:
                     sys.stderr.write('+')
@@ -240,7 +247,7 @@ cdef class TaggerTrainer(Trainer):
         for i in xrange(idx, len(sentences)):
             sent = sentences[i]
             gold_tags = tags[i]
-            scores = self.tagger._tag_sentence(sent)
+            scores = self.tagger._tag_sequence(sent)
             answer = self.tagger.nn._viterbi(scores)
             for pred_tag, gold_tag in izip(answer, gold_tags):
                 if pred_tag == gold_tag:

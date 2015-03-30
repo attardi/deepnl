@@ -81,6 +81,7 @@ cdef class Converter(object):
         self.extractors = []
     
     cpdef int size(self):
+        #return sum(e.size() for e in self.extractors)
         cdef int s = 0
         for e in self.extractors:
             s += e.size()
@@ -140,12 +141,27 @@ cdef class Converter(object):
         if out is None:
             out = np.empty(self.size())
         cdef int start = 0, end
-        for token_features in sentence:
-            for feature, extractor in izip(token_features, self.extractors):
+        for token in sentence:
+            for feature, extractor in izip(token, self.extractors):
                 end = start + extractor.size()
                 np.copyto(out[start:end], extractor[feature])
                 start = end
         return out
+
+    cpdef update(self, np.ndarray[INT_t,ndim=2] sentence,
+                 np.ndarray[FLOAT_t,ndim=1] grads):
+        """
+        Update the features according to the given gradients.
+        :param sentence: Each row represents a token through its indices into
+            each feature table.
+        :param grads: vector of feature gradients.
+        """
+        cdef int start = 0, end
+        for token in sentence:
+            for feature, extractor in izip(token, self.extractors):
+                end = start + extractor.size()
+                extractor.table[feature] += grads[start:end] # __setitem__()
+                start = end
 
     def save(self, file):
         """
@@ -191,6 +207,12 @@ cdef class Extractor(object):
         Get the vector corresponding to the :param feature:
         """
         return self.table[feature]
+
+    def __setitem__(self, feature, value):
+        """
+        Set the vector corresponding to the :param feature:
+        """
+        self.table[feature] = value
 
     cpdef int size(self):
         """
@@ -290,7 +312,7 @@ cdef class Caps(object):                     # Caps(Enumeration)
     hascap = 2
     title  = 3
     nocaps = 4
-    num_values = 5
+    num_values = 5              # extractor values
 
 cdef class CapsExtractor(Extractor):
 
@@ -369,22 +391,24 @@ def capitalize(word, capitalization):
 cdef class AffixExtractor(Extractor):
     """Abstract class for prefix or suffix extractors."""
 
-    padding = 0
     other = 1                   # NOSUFFIX
+    padding = 0
+    specials = 2                # number of specials (other, padding)
 
     def __init__(self, size, filename=None, sentences=[]):
         """
         :param size: the dimension of the embeddings space
         """
-        specials = AffixExtractor.other + 1
+        specials = AffixExtractor.specials
         if filename:
             self.load_affixes(filename)
         else:
             wordlist = (w for sent in sentences for w in sent)
             affixes = self.build(wordlist)
-            self.dict = { x:i+specials for i,x in enumerate(affixes) }
-        # create vectors also for specials
-        self.table = embeddings.generate_vectors(len(self.dict) + specials, size)
+            # leave reserved values for specials
+            self.dict = { x: i+specials for i,x in enumerate(affixes) }
+        # create vectors for possible values
+        self.table = embeddings.generate_vectors(len(self.dict)+specials, size)
 
     def extract(self, words):
         """
@@ -394,16 +418,16 @@ cdef class AffixExtractor(Extractor):
 
     def load_affixes(self, filename):
         """
-        Parent function for loading prefixes and suffixes.
+        Load prefixes or suffixes from file :param filename:.
         """
         logger = logging.getLogger("Logger")
-        specials = AffixExtractor.other + 1
+        specials = AffixExtractor.specials
         try:
             with open(filename, 'rb') as f:
                 self.dict = {}
                 for line in f:
                     affix = unicode(line.strip(), 'utf-8')
-                    # reserve 0-1 for specials
+                    # leave reserved values for specials
                     self.dict[affix] = len(self.dict) + specials
         except IOError:
             logger.error("File %s doesn't exist." % filename)
@@ -493,8 +517,10 @@ cdef class PrefixExtractor(AffixExtractor):
 
 cdef class GazetteerExtractor(Extractor):
 
-    padding = 0
-    unknown = 1
+    absent = 0
+    present = 1
+    padding = 2
+    num_values = 3              # extractor values
 
     def __init__(self, words=None, size=5, lowcase=True):
         """
@@ -503,19 +529,33 @@ cdef class GazetteerExtractor(Extractor):
         :param lowcase: whether to compare lowercase words.
         """
         self.lowcase = lowcase
-        specials = GazetteerExtractor.unknown + 1
         if words:
-            # reserve entries for special words
-            self.dict = {x:i+specials for i,x in enumerate(words)}
-            self.table = embeddings.generate_vectors(len(self.dict)+specials, size)
+            self.dict = {x: GazetteerExtractor.present for x in words}
+            self.table = embeddings.generate_vectors(GazetteerExtractor.num_values, size)
 
     def extract(self, words):
         """
+        Check presence in dictionary possibly as multiword.
+        Set to 'present' items corresponding to words present in dictionary
         :return: the list of codes for the given :param words:.
         """
-        return [self.dict.get(w.lower() if self.lowcase else w, GazetteerExtractor.unknown) \
-                if w != WD.padding_left and w != WD.padding_right else GazetteerExtractor.padding \
-                for w in words]
+        res = [GazetteerExtractor.absent] * len(words)
+        for i, token in enumerate(words):
+            if token == WD.padding_left or token == WD.padding_right:
+                res[i] = GazetteerExtractor.padding
+                continue
+            entity = token.lower() if self.lowcase else token
+            if entity in self.dict:
+                res[i] = GazetteerExtractor.present
+            for j in range(i+1, len(words)):
+                if self.lowcase:
+                    entity += ' ' + words[j].lower()
+                else:
+                    entity += ' ' + words[j]
+                if entity in self.dict:
+                    for k in range(i, j+1):
+                        res[k] = GazetteerExtractor.present
+        return res
 
     @classmethod
     def create(cls, filename, size=5, lowcase=True):
@@ -530,7 +570,8 @@ cdef class GazetteerExtractor(Extractor):
             for line in file:
                 line = line.strip().decode('utf-8')
                 c, words = line.split(None, 1)
-                words = words.lower()
+                if lowcase:
+                    words = words.lower()
                 if c not in classes:
                     classes[c] = set()
                 classes[c].add(words)

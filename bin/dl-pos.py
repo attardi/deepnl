@@ -31,6 +31,7 @@ from deepnl.reader import PosReader, ConllReader
 from deepnl.network import Network
 from deepnl.trainer import TaggerTrainer
 from deepnl.tagger import Tagger
+from deepnl.embeddings import Plain # DEBUG
 
 # ----------------------------------------------------------------------
 # Auxiliary functions
@@ -164,9 +165,13 @@ def main():
         sentence_iter = reader.read(args.train)
 
         if args.vocab:
+            if not args.vectors:
+                logger.error("No --vectors specified")
+                return
             embeddings = Embeddings(args.embeddings_size, args.vocab,
                                     args.vectors, variant=args.variant)
             tagset = reader.create_tagset(sentence_iter)
+            tagset = Plain.read_vocabulary('wsj.nlpnet/pos-tags.txt') # DEBUG
         else:
             # build vocabulary and tag set
             vocab, tagset = reader.create_vocabulary(sentence_iter, args.vocab_size, args.minOccurr)
@@ -177,13 +182,16 @@ def main():
         converter.add(embeddings)
 
         if args.caps:
+            logger.info("Creating capitalization features...")
             converter.add(CapsExtractor(args.caps))
 
         if args.suffix:
+            logger.info("Creating suffix features...")
             extractor = SuffixExtractor(args.suffix, args.suffixes, sentence_iter)
             converter.add(extractor)
 
         if args.prefix:
+            logger.info("Creating prefix features...")
             extractor = PrefixExtractor(args.prefix, args.prefixes, sentence_iter)
             converter.add(extractor)
 
@@ -215,7 +223,7 @@ def main():
         reader = ConllReader()
         for sent in reader:
             sent = [x[0] for x in sent] # extract form
-            ConllWriter.write(tagger.tag_sentence(sent, return_tokens=True))
+            ConllWriter.write(tagger.tag_sequence(sent, return_tokens=True))
 
 # ----------------------------------------------------------------------
 

@@ -2,10 +2,11 @@
 # distutils: language = c++
 
 """
-Tagger exploiting a neural network.
+Sequence tagger exploiting a neural network.
 """
 
 # standard
+import sys                      # DEBUG
 import numpy as np
 import cPickle as pickle
 
@@ -17,7 +18,7 @@ from networkseq import SequenceNetwork
 
 cdef class Tagger(object):
     """
-    Abstract base class for sliding window taggers.
+    Abstract base class for sliding window sequence taggers.
     """
     
     # cdef dict tags_dict
@@ -37,13 +38,13 @@ cdef class Tagger(object):
         self.converter = converter
         self.tags_dict = tags_dict
         self.itd = sorted(tags_dict, key=tags_dict.get)
-        self.feature_tables = [e.table for e in converter.extractors]
+        #self.feature_tables = [e.table for e in converter.extractors]
 
         if nn:
             self.nn = nn        # dependency injection
         else:
             # sum the number of features in all tables 
-            input_size = sum(e.size() for e in converter.extractors)
+            input_size = converter.size()
             window_size = left_context + 1 + right_context
             input_size *= window_size
             self.nn = SequenceNetwork(input_size, hidden_size, output_size)
@@ -53,7 +54,7 @@ cdef class Tagger(object):
         self.pre_padding = np.array(left_context * [self.padding_left])
         self.post_padding = np.array(right_context * [self.padding_right])
 
-    def tag_sentence(self, list tokens, bool return_tokens=False):
+    def tag_sequence(self, list tokens, bool return_tokens=False):
         """
         Tags a given list of tokens. 
         
@@ -66,7 +67,7 @@ cdef class Tagger(object):
             :param return_tokens: is True.
         """
         cdef np.ndarray[INT_t,ndim=2] converted = self.converter.convert(tokens)
-        cdef np.ndarray[FLOAT_t,ndim=2] scores = self._tag_sentence(converted)
+        cdef np.ndarray[FLOAT_t,ndim=2] scores = self._tag_sequence(converted)
         # computes full score, combining ftheta and A (if SLL)
         answer = self.nn._viterbi(scores)
         tags = [self.itd[tag] for tag in answer]
@@ -76,7 +77,7 @@ cdef class Tagger(object):
         else:
             return tags
 
-    cpdef np.ndarray[FLOAT_t,ndim=2] _tag_sentence(self,
+    cpdef np.ndarray[FLOAT_t,ndim=2] _tag_sequence(self,
                                                    np.ndarray sentence,
                                                    bool train=False):
         """
@@ -114,6 +115,9 @@ cdef class Tagger(object):
         # container for network variables
         vars = network.Variables()
 
+        # print >> sys.stderr, padded_sentence   # DEBUG
+        # print >> sys.stderr, 'hweights', nn.hidden_weights
+        # print >> sys.stderr, 'hbias', nn.hidden_bias
         # run through all windows in the sentence
         for i in xrange(slen):
             window = padded_sentence[i: i+window_size]
@@ -127,49 +131,63 @@ cdef class Tagger(object):
             vars.output = scores[i]
             nn.run(vars)
             # DEBUG
-            # print 'input', vars.input[:4]
-            # print 'hidden', vars.hidden[:4]
-            # print 'output', vars.output[:4]
+            # if train:
+            #     print >> sys.stderr, 'input', vars.input
+            #     print >> sys.stderr, 'hidden', vars.hidden[:4], vars.hidden[-4:]
+            #     print >> sys.stderr, 'output', vars.output[:4], vars.output[-4:]
         
         return scores
 
-    cdef update(self, SeqGradients grads, float learning_rate,
-                np.ndarray[INT_t,ndim=2] sentence):
+    cpdef update(self, SeqGradients grads, float learning_rate,
+                 np.ndarray[INT_t,ndim=2] sentence, SeqGradients ada=None):
 
-        self.nn.update(grads, learning_rate)
-        """
-        Adjust the features indexed by the input window.
-        """
+        (<SequenceNetwork>self.nn)._update(grads, learning_rate, ada)
+        #
+        # Adjust the features indexed by the input window.
+        #
         # the deltas that will be applied to the feature tables
         # they are in the same sequence as the network receives them, i.e.
         # [token1-table1][token1-table2][token2-table1][token2-table2] (...)
         # e.g. num features = 50 (embeddings) + 5 (caps) + 5 (suffix) = 60
         # input_size = num features * window (e.g. 60 * 5).
-        cdef np.ndarray[FLOAT_t,ndim=2] input_deltas
+
+        cdef int window_size = len(self.pre_padding) + 1 + len(self.post_padding)
+        cdef int i
+        cdef int slen = len(sentence)
+
         # (len, input_size)
-        input_deltas = grads.input * learning_rate
+        cdef np.ndarray[FLOAT_t,ndim=2] input_deltas
+        if ada:
+            for i in xrange(slen):
+                ada.input[0] += np.square(grads.input[i: i+window_size])
+            input_deltas = learning_rate * grads.input / np.sqrt(ada.input[0])
+        else:
+            input_deltas = grads.input * learning_rate
         
         padded_sentence = np.concatenate((self.pre_padding,
                                           sentence,
                                           self.post_padding))
         
-        cdef np.ndarray[INT_t,ndim=1] features
-        cdef np.ndarray[FLOAT_t,ndim=2] table
-        cdef int start, end, i, t
-        cdef int window_size = self.left_context + 1 + self.right_context
+        for i in xrange(slen):
+            window = padded_sentence[i: i+window_size]
+            self.converter.update(window, input_deltas[i])
 
-        for i, deltas_i in enumerate(input_deltas):
-            # deltas_i are input_deltas for i-th window in sentence
-            # for each window (deltas_i: 300, features: 5)
-            # this tracks where the deltas for the next table begins
-            start = 0
-            for features in padded_sentence[i:i+window_size]:
-                # features for the i-th window
-                # select the columns for each feature_tables
-                for t, table in enumerate(self.feature_tables):
-                    end = start + table.shape[1]
-                    table[features[t]] += deltas_i[start:end]
-                    start = end
+        # cdef np.ndarray[INT_t,ndim=1] features
+        # cdef np.ndarray[FLOAT_t,ndim=2] table
+        # cdef int start, end, i, t
+
+        # for i, deltas_i in enumerate(input_deltas):
+        #     # deltas_i are input_deltas for i-th window in sentence
+        #     # for each window (deltas_i: 300, features: 5)
+        #     # this tracks where the deltas for the next table begins
+        #     start = 0
+        #     for features in padded_sentence[i:i+window_size]:
+        #         # features for the i-th window
+        #         # select the columns for each feature_tables
+        #         for t, table in enumerate(self.feature_tables):
+        #             end = start + table.shape[1]
+        #             table[features[t]] += deltas_i[start:end]
+        #             start = end
 
     def save(self, file):
         """

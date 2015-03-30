@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 # distutils: language = c++
-#cython: embedsignature=True
+# cython: embedsignature=True
 # cython: profile=True
 
 """
@@ -29,22 +29,20 @@ cdef class SeqGradients(Gradients):
     def __init__(self, int input_size, int hidden_size, int output_size,
                  int seq_len):
         super(SeqGradients, self).__init__(input_size, hidden_size, output_size)
-        self.input = np.zeros((seq_len, input_size))
-
-        # dC / dftheta
+        self.input = np.zeros((seq_len, input_size)) # overrides Gradients
         self.output = np.zeros((seq_len, output_size))
-        # dC / dA
         self.transitions = np.zeros((output_size + 1, output_size))
 
     def clear(self, int seq_len):
-        #super(SeqGradients, self).clear()
-        self.input = np.zeros((seq_len, self.input.shape[1]))
+        super(SeqGradients, self).clear()
+        self.input.fill(0.0)
+        self.output.fill(0.0)
+        self.transitions.fill(0.0)
 
-        # dC / dftheta
-        self.output = np.zeros((seq_len, self.output.shape[1]))
-        # dC / dA
-        self.transitions = np.fill(0)
-
+    def addSquare(self, Gradients grads):
+        super(SeqGradients, self).addSquare(grads)
+        #self.output += grads.output * grads.output # not needed
+        self.transitions += grads.transitions * grads.transitions
 
 # ----------------------------------------------------------------------
 
@@ -98,10 +96,13 @@ cdef class SequenceNetwork(Network):
                                        SeqGradients grads,
                                        np.ndarray[FLOAT_t,ndim=2] scores):
         """
-        Calculates the output and transition deltas for each token, using Sentence Level Likelihood.
+        Calculates the output and transition deltas for each token, using
+        Sentence Level Likelihood.
         The aim is to minimize the cost:
         C(theta,A) = logadd(scores for all possible paths) - score(correct path)
         
+        :param grads: the gradients to be computed, should be initialized to 0.
+        :param scores: the scores computed by the network for the whole sequence.
         :returns: True if normal gradient calculation was performed,
             False, if the error was too small and weights update should be
             skipped.
@@ -139,9 +140,6 @@ cdef class SequenceNetwork(Network):
         # things get nasty from here
         # refer to the papers to understand what exactly is going on
         
-        grads.output = np.zeros((len(tags), self.output_size))
-        grads.transitions = np.zeros_like(self.transitions, np.float)
-
         # compute the gradients for the last token
         # dC_logadd / ddelta_T(i) = e(delta_T(i))/Sum_k(e(delta_T(k)))
         # negative gradients
@@ -292,9 +290,9 @@ cdef class SequenceNetwork(Network):
         # dC / dtheta_l = df_l / dtheta_l dC / df_l		(19)
         # dC / df_l-1 = df_l / df_l-1 dC / df_l			(20)
 
-        """
-        Compute the gradients of the cost for each layer
-        """
+        #
+        # Compute the gradients of the cost for each layer
+        #
         # layer 4: output layer
         # dC / dW_4 = dC / df_4 f_3.T				(22)
         # (len, output_size).T (len, hidden_size) = (output_size, hidden_size)
@@ -333,15 +331,21 @@ cdef class SequenceNetwork(Network):
         # (len, hidden_size) (hidden_size, input_size) = (len, input_size)
         dCdf_2.dot(self.hidden_weights, grads.input)
 
-    cdef _update(self, SeqGradients grads, float learning_rate):
+    cdef _update(self, SeqGradients grads, float learning_rate,
+                 SeqGradients ada=None):
         """
-        Adjust the weights
+        Adjust the weights.
+        :param ada: cumulative square gradients for performing AdaGrad.
         """
-        super(SequenceNetwork, self).update(grads, learning_rate)
+        super(SequenceNetwork, self).update(grads, learning_rate, ada)
 
         # Adjusts the transition scores table with the calculated gradients.
         if self.transitions is not None:
-            self.transitions += grads.transitions * learning_rate
+            if ada:
+                ada.transitions += grads.transitions * grads.transitions
+                self.transitions += learning_rate * grads.transitions / np.sqrt(ada.transitions)
+            else:
+                self.transitions += grads.transitions * learning_rate / 10
 
     def save(self, file):
         """

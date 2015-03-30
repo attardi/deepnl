@@ -35,5 +35,5 @@ cdef class Network(Parameters):
 
     cdef float backpropagate(self, int y, Variables vars, Gradients grads)
 
-    cpdef update(self, Gradients grads, float learning_rate)
+    cpdef update(self, Gradients grads, float learning_rate, Gradients ada=*)
 

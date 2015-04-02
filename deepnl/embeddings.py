@@ -157,7 +157,7 @@ def generate_vectors(num_vectors, num_features, min_value=-0.1, max_value=0.1):
     :return: a 2-dim numpy array.
     """
     # set the seed for replicability
-    np.random.seed(42)          # DEBUG
+    #np.random.seed(42)          # DEBUG
 
     table = np.random.uniform(min_value, max_value, (num_vectors, num_features))
     logging.debug("Generated %d feature vectors with %d features each." %

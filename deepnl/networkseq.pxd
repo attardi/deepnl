@@ -11,7 +11,7 @@ cdef class SequenceNetwork(Network):
     # transitions
     cdef public np.ndarray transitions
     
-    cdef public np.ndarray input_sent_values, hidden_sent_values, layer2_sent_values
+    cdef public np.ndarray input_sequence, hidden_sequence
 
     # FIXME: clash with method in Network
     cdef _backpropagate(self, SeqGradients grads)

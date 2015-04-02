@@ -27,6 +27,7 @@ from deepnl.extractors import *
 from deepnl.tagger import Tagger
 from deepnl.ner_tagger import NerReader, NerTagger
 from deepnl.trainer import TaggerTrainer
+#from deepnl.embeddings import Plain # DEBUG
 
 # ----------------------------------------------------------------------
 # Auxiliary functions
@@ -49,7 +50,7 @@ def create_trainer(args, converter, tags_dict):
                                 args.window/2, args.window/2,
                                 args.hidden, tags_dict, args.verbose)
 
-    trainer.saver = saver(args.model, args.vectors)
+    trainer.saver = saver(args.model, args.output)
 
     logger.info("... with the following parameters:")
     logger.info(trainer.nn.description())
@@ -109,6 +110,8 @@ def main():
                         help='Number of threads (default 1)')
     parser.add_argument('-t', '--train', type=str, default=None,
                         help='File with annotated data for training.')
+    parser.add_argument('-o', '--output', type=str, default=None,
+                        help='File where to save embeddings')
 
     # Extractors:
     parser.add_argument('--caps', const=5, nargs='?', type=int, default=None,
@@ -166,6 +169,7 @@ def main():
             embeddings = Embeddings(args.embeddings_size, args.vocab,
                                     args.vectors, variant=args.variant)
             tagset = reader.create_tagset(sentence_iter)
+            #tagset = Plain.read_vocabulary('ner-tag-dict.txt') # DEBUG
         else:
             # build vocabulary and tag set
             vocab, tagset = reader.create_vocabulary(sentence_iter,
@@ -217,9 +221,7 @@ def main():
                       args.threads)
     
         logger.info("Saving trained model ...")
-    
-        with open(args.model, "wb") as file:
-            trainer.tagger.save(file) # just the tagger, not the whole trainer
+        trainer.saver(trainer)
         logger.info("... to %s" % args.model)
 
     else:

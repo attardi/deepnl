@@ -85,7 +85,7 @@ cdef class Network(Parameters):
         # creates the weight matrices
 
         # set the seed for replicability
-        np.random.seed(42)      # DEBUG
+        #np.random.seed(42)      # DEBUG
 
         high = 2.38 / np.sqrt(input_size) # [Bottou-88]
         #high = 2.45 / np.sqrt(input_size + hidden_size) # Al-Rfou

@@ -171,7 +171,7 @@ def main():
             embeddings = Embeddings(args.embeddings_size, args.vocab,
                                     args.vectors, variant=args.variant)
             tagset = reader.create_tagset(sentence_iter)
-            tagset = Plain.read_vocabulary('wsj.nlpnet/pos-tags.txt') # DEBUG
+            #tagset = Plain.read_vocabulary('wsj.nlpnet/pos-tags.txt') # DEBUG
         else:
             # build vocabulary and tag set
             vocab, tagset = reader.create_vocabulary(sentence_iter, args.vocab_size, args.minOccurr)
@@ -212,9 +212,7 @@ def main():
                       args.threads)
     
         logger.info("Saving trained model ...")
-    
-        with open(args.model, "wb") as file:
-            trainer.tagger.save(file) # just the tagger, not the whole trainer
+        saver(args.model, args.output)(trainer)
         logger.info("... to %s" % args.model)
 
     else:

@@ -163,7 +163,7 @@ cdef class TaggerTrainer(Trainer):
                 
             last_accuracy = self.accuracy
             last_error = self.nn.error
-            
+
     def _epoch_report(self, int num):
         """
         Reports the status of the network in the given training epoch,

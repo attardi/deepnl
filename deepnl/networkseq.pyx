@@ -51,7 +51,7 @@ cdef class SequenceNetwork(Network):
     # transitions
     #cdef public np.ndarray transitions
     
-    #cdef readonly np.ndarray input_sent_values, hidden_sent_values, layer2_sent_values
+    #cdef readonly np.ndarray input_sequence, hidden_sequence, layer2_sequence
     
     def __init__(self, int input_size, int hidden_size, int output_size):
         super(SequenceNetwork, self).__init__(input_size, hidden_size,
@@ -70,7 +70,14 @@ cdef class SequenceNetwork(Network):
         points (tokens).
         In the returned matrix, delta[i][j] means the sum of all scores 
         ending in token i with tag j (delta_i(j) in eq. 14 in the paper)
+        :return: :param scores: updated.
         """
+        # See section 3.4.2 of paper:
+        # R. Collobert, J. Weston, L. Bottou, M. Karlen, K. Kavukcuoglu and
+        # P. Kuksa.  Natural Language Processing (Almost) from Scratch.
+        # Journal of Machine Learning Research, 12:2493-2537, 2011.
+        # @see http://ronan.collobert.com/pub/matos/2012_deeplearning_springer.pdf
+
         # scores[t][k] = ftheta_k,t
         delta = scores
         # logadd for first token. the transition score of the starting tag must be used.
@@ -85,12 +92,13 @@ cdef class SequenceNetwork(Network):
         transitions = self.transitions[:-1] # A_i,k
         for token in xrange(1, len(delta)):
             # add and sum by columns
-            #logadd = np.log(np.sum(np.exp(delta[token - 1] + transitions), 1))
+            # newaxis allows adding vector to columns:
             logadd = logsumexp2d(delta[token - 1][:,np.newaxis] + transitions, 0)
+            #14 logadd = logsumexp2d(delta[token - 1] + transitions.T, 1)
             delta[token] += logadd
             
         return delta
-    
+
     @cython.boundscheck(False)
     cpdef bool _calculate_gradients_sll(self, np.ndarray[INT_t,ndim=1] tags,
                                        SeqGradients grads,
@@ -138,7 +146,6 @@ cdef class SequenceNetwork(Network):
             return False
         
         # things get nasty from here
-        # refer to the papers to understand what exactly is going on
         
         # compute the gradients for the last token
         # dC_logadd / ddelta_T(i) = e(delta_T(i))/Sum_k(e(delta_T(k)))
@@ -280,10 +287,13 @@ cdef class SequenceNetwork(Network):
     cdef _backpropagate(self, SeqGradients grads):
         """
         Backpropagate the gradients of the cost.
+        :param grads: where to store computed gradients.
         """
-        # f_1 = input_sent_values
-        # f_2 = M_1 f_1 + b_2 = layer2_sent_values
-        # f_3 = hardTanh(f_2) = hidden_sent_values
+        # See Appendix A of paper.
+
+        # f_1 = input_sequence
+        # f_2 = M_1 f_1 + b_2 = layer2_sequence
+        # f_3 = hardTanh(f_2) = hidden_sequence
         # f_4 = M_2 f_3 + b_4
 
         # For l = 4..1 do:
@@ -296,7 +306,7 @@ cdef class SequenceNetwork(Network):
         # layer 4: output layer
         # dC / dW_4 = dC / df_4 f_3.T				(22)
         # (len, output_size).T (len, hidden_size) = (output_size, hidden_size)
-        grads.output.T.dot(self.hidden_sent_values, grads.output_weights)
+        grads.output.T.dot(self.hidden_sequence, grads.output_weights)
 
         # dC / db_4 = dC / df_4					(22)
         # (output_size) += ((len(sentence), output_size))
@@ -313,19 +323,18 @@ cdef class SequenceNetwork(Network):
         # dC / df_2 = hardtanhd(f_2) * dC / df_3
         # (len, hidden_size) * (len, hidden_size) = (len, hidden_size)
         # FIXME: this goes quickly to 0.
-        dCdf_2 = hardtanhe2d(self.hidden_sent_values)
-        dCdf_2 *= dCdf_3
+        dCdf_2 = hardtanhe2d(self.hidden_sequence) * dCdf_3
 
         # df_2 / df_1 = M_1
 
         # layer 2: linear layer
         # dC / dW_2 = dC / df_2 f_1.T				(22)
         # (len, hidden_size).T (len, input_size) = (hidden_size, input_size)
-        dCdf_2.T.dot(self.input_sent_values, grads.hidden_weights)
+        dCdf_2.T.dot(self.input_sequence, grads.hidden_weights)
 
         # dC / db_1 = dC / df_2					(22)
         # sum by column contribution by each token
-        grads.hidden_bias = dCdf_2.sum(0)
+        dCdf_2.sum(0, out=grads.hidden_bias)
 
         # dC / df_1 = M_1.T dC / df_2
         # (len, hidden_size) (hidden_size, input_size) = (len, input_size)

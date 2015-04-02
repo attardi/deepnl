@@ -96,13 +96,13 @@ cdef class Tagger(object):
         
         if train:
             # we must keep the whole history
-            nn.input_sent_values = np.empty((slen, nn.input_size))
+            nn.input_sequence = np.empty((slen, nn.input_size))
             # hidden_values at each token in the correct path
-            nn.hidden_sent_values = np.empty((slen, nn.hidden_size))
+            nn.hidden_sequence = np.empty((slen, nn.hidden_size))
         else:
             # we can discard intermediate values
-            nn.input_sent_values = np.empty(nn.input_size)
-            nn.hidden_sent_values = np.empty(nn.hidden_size)
+            nn.input_sequence = np.empty(nn.input_size)
+            nn.hidden_sequence = np.empty(nn.hidden_size)
         
         # add padding to the sentence
         cdef np.ndarray[INT_t,ndim=2] padded_sentence = \
@@ -115,24 +115,24 @@ cdef class Tagger(object):
         # container for network variables
         vars = network.Variables()
 
-        # print >> sys.stderr, padded_sentence   # DEBUG
-        # print >> sys.stderr, 'hweights', nn.hidden_weights
-        # print >> sys.stderr, 'hbias', nn.hidden_bias
+        #print >> sys.stderr, padded_sentence   # DEBUG
+        #print >> sys.stderr, 'hweights', nn.hidden_weights[:4,:4] # DEBUG
+        #print >> sys.stderr, 'hbias', nn.hidden_bias[:4]          # DEBUG
         # run through all windows in the sentence
         for i in xrange(slen):
             window = padded_sentence[i: i+window_size]
             if train:
-                vars.input = nn.input_sent_values[i]
-                vars.hidden = nn.hidden_sent_values[i]
+                vars.input = nn.input_sequence[i]
+                vars.hidden = nn.hidden_sequence[i]
             else:
-                vars.input = nn.input_sent_values
-                vars.hidden = nn.hidden_sent_values
+                vars.input = nn.input_sequence
+                vars.hidden = nn.hidden_sequence
             self.converter.lookup(window, vars.input)
             vars.output = scores[i]
             nn.run(vars)
             # DEBUG
             # if train:
-            #     print >> sys.stderr, 'input', vars.input
+            #     print >> sys.stderr, 'input', vars.input[:4], vars.input[-4:]
             #     print >> sys.stderr, 'hidden', vars.hidden[:4], vars.hidden[-4:]
             #     print >> sys.stderr, 'output', vars.output[:4], vars.output[-4:]
         
@@ -141,6 +141,7 @@ cdef class Tagger(object):
     cpdef update(self, SeqGradients grads, float learning_rate,
                  np.ndarray[INT_t,ndim=2] sentence, SeqGradients ada=None):
 
+        # update network weights and transition weights.
         (<SequenceNetwork>self.nn)._update(grads, learning_rate, ada)
         #
         # Adjust the features indexed by the input window.

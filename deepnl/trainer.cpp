@@ -1083,9 +1083,8 @@ struct __pyx_obj_6deepnl_10networkseq_SeqGradients {
 struct __pyx_obj_6deepnl_10networkseq_SequenceNetwork {
   struct __pyx_obj_6deepnl_7network_Network __pyx_base;
   PyArrayObject *transitions;
-  PyArrayObject *input_sent_values;
-  PyArrayObject *hidden_sent_values;
-  PyArrayObject *layer2_sent_values;
+  PyArrayObject *input_sequence;
+  PyArrayObject *hidden_sequence;
 };
 
 

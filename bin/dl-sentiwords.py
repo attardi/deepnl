@@ -68,7 +68,7 @@ def saver(model_file, vectors_file):
 if __name__ == '__main__':
 
     # set the seed for replicability
-    #np.random.seed(42)
+    np.random.seed(42)
 
     defaults = {}
     

@@ -42,7 +42,7 @@ setup(
         nthreads=4),
     scripts = glob.glob("bin/*.py"),
     license = "MIT",
-    version = "1.2.1",
+    version = "1.2.2",
     author = "Giuseppe Attardi <attardi@di.unipi.it>",
     author_email = "attardi@di.unipi.it",
     url = "https://github.com/attardi/deepnl",

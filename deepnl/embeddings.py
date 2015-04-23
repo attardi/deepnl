@@ -115,6 +115,8 @@ class Word2Vect(object):
                 word = unicode(items[0], 'utf-8')
                 words.append(word)
                 vectors.append([float(x) for x in items[1:]])
+        # vectors for the special symbols, not present in words, will be
+        # created later
         return np.array(vectors), words
 
 # ----------------------------------------------------------------------
@@ -134,18 +136,9 @@ class Gensim(object):
         # sort to preserve order in matrix
         sorted_words = [unicode(word, 'utf-8')
                         for word in sorted(vocab, key=lambda x: vocab[x].index)]
+        # vectors for the special symbols, not present in words, will be
+        # created later
 
-        # create vectors for the special symbols
-        num_extra = 0
-        for x in (WordDictionary.rare,
-                  WordDictionary.padding_left,
-                  WordDictionary.padding_right):
-            if x not in vocab:
-                num_extra += 1
-                sorted_words.append(x)
-        extra_vectors = generate_vectors(num_extra_vectors, num_features)
-        matrix = np.concatenate((matrix, extra_vectors))
-    
         return matrix, sorted_words
 
 # ----------------------------------------------------------------------

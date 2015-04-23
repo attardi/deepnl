@@ -172,6 +172,10 @@ def main():
                                     args.vectors, variant=args.variant)
             tagset = reader.create_tagset(sentence_iter)
             #tagset = Plain.read_vocabulary('wsj.nlpnet/pos-tags.txt') # DEBUG
+        elif args.variant == 'word2vec':
+            embeddings = Embeddings(vectors=args.vectors,
+                                    variant=args.variant)
+            tagset = reader.create_tagset(sentence_iter)
         else:
             # build vocabulary and tag set
             vocab, tagset = reader.create_vocabulary(sentence_iter, args.vocab_size, args.minOccurr)
@@ -187,7 +191,9 @@ def main():
 
         if args.suffix:
             logger.info("Creating suffix features...")
-            extractor = SuffixExtractor(args.suffix, args.suffixes, sentence_iter)
+            # collect the forms
+            words = (tok[0] for sent in sentence_iter for tok in sent)
+            extractor = SuffixExtractor(args.suffix, args.suffixes, words)
             converter.add(extractor)
 
         if args.prefix:

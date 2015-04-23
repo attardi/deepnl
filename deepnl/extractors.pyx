@@ -254,6 +254,13 @@ cdef class Embeddings(Extractor):
                 self.table = self.load_vectors(vectors)
             else:
                 self.table = embeddings.generate_vectors(len(self.dict), size)
+        elif variant == 'word2vec':
+            # load both vocab and vectors from single file
+            self.table, wordlist = embeddings.Word2Vect.read_vectors(vectors)
+            self.dict = <dict>WD(None, wordlist=wordlist, variant=variant)
+            # add vectors for special symbols
+            extra = len(self.dict) - len(self.table)
+            self.table = np.concatenate((self.table, embeddings.generate_vectors(extra, self.table.shape[1])))
 
     def save(self, file):
         self.dict.save(file)
@@ -395,7 +402,7 @@ cdef class AffixExtractor(Extractor):
     padding = 0
     specials = 2                # number of specials (other, padding)
 
-    def __init__(self, size, filename=None, sentences=[]):
+    def __init__(self, size, filename=None, wordlist=[]):
         """
         :param size: the dimension of the embeddings space
         """
@@ -403,7 +410,6 @@ cdef class AffixExtractor(Extractor):
         if filename:
             self.load_affixes(filename)
         else:
-            wordlist = (w for sent in sentences for w in sent)
             affixes = self.build(wordlist)
             # leave reserved values for specials
             self.dict = { x: i+specials for i,x in enumerate(affixes) }
@@ -454,7 +460,7 @@ cdef class SuffixExtractor(AffixExtractor):
         suffix = word[-SuffixExtractor.max_length:].lower()
         return self.dict.get(suffix, AffixExtractor.other)
 
-    def build(wordlist, num=200, min_occurrences=3,
+    def build(self, wordlist, num=200, min_occurrences=3,
               size=SuffixExtractor.max_length):
         """
         Creates a list with the most common suffixes found in 

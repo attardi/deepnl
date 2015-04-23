@@ -198,8 +198,8 @@ cdef class TaggerTrainer(Trainer):
         # AdaGrad. Since sentence length varies, we accumulate into a single
         # item all squared input gradients
         cdef SeqGradients ada
-        #ada = SeqGradients(nn.input_size, nn.hidden_size, nn.output_size, 1)
-        ada = None
+        ada = SeqGradients(nn.input_size, nn.hidden_size, nn.output_size, 1)
+        #ada = None # DEBUG
 
         # keep last 2% for validation
         cdef int validation = int((len(sentences) - 1) * 0.98) + 1 # at least 1
@@ -232,6 +232,9 @@ cdef class TaggerTrainer(Trainer):
             sys.stderr.write('\n')
 
         self.accuracy = self._validate(sentences, tags, validation)
+        # DEBUG
+        # print >> sys.stderr, 'hw', nn.hidden_weights[:4,:4]
+        # print >> sys.stderr, 'ow', nn.output_weights[0:4,:4]
 
     @cython.boundscheck(False)
     cdef float _validate(self, list sentences, tags, int idx):

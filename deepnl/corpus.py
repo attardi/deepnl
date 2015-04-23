@@ -31,10 +31,10 @@ class ConllReader(object):
             else:
                 yield sent
                 sent = []
-        if self.filename:
-            file.close()
         if sent:                # just in case
             yield sent
+        if self.filename:
+            file.close()
 
     def count(self):
         """

@@ -47,24 +47,23 @@ class NerReader(TaggerReader):
 # ----------------------------------------------------------------------
 
 class NerTagger(Tagger):
-    """A NerTagger loads the model and performs NER tagging on text."""
+    """Performs NER tagging on sentences."""
     
-    def tag(self, file=sys.stdout):
-        reader = NerReader()
-        writer = ConllWriter()
-        for sent in reader(file):
-            print writer.write(self.toIOB(self.tag_sequence(sent)))
+    def tag(self, sent):
+        tags = self.toIOB(self.tag_sequence(sent))
+        return zip(sent, tags)
 
-    def toIOB(self, sent):
+    def toIOB(self, tags):
         """
         Convert back from IOBES to IOB notation.
-        tokens are lists [form, ..., tag]
         """
-        for token in sent:
-            tag = token[-1]
+        res = []
+        for tag in tags:
             if tag[0] == 'S':
-                token[-1] = 'B'+tag[1:]
+                res.append('B'+tag[1:])
             elif tag[0] == 'E':
-                token[-1] = 'I'+tag[1:]
-        return sent
+                res.append('I'+tag[1:])
+            else:
+                res.append(tag)
+        return res
 

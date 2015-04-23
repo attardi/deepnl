@@ -9,6 +9,7 @@ A neural network for NLP tagging tasks.
 
 # standard
 import logging
+import sys                      # DEBUG
 
 import numpy as np
 cimport numpy as np
@@ -18,6 +19,9 @@ cimport cython
 
 # local
 from math cimport *
+
+#  Epsilon value for numerical stability in AdaGrad's division
+cdef float adaEps = 1e-6
 
 # ----------------------------------------------------------------------
 
@@ -174,21 +178,25 @@ cdef class Network(Parameters):
         AdaGrad: G_t, where G(i,i)_t = G(i,i)_t-1 + grad(i)^2
         * i.e. we cumulate the square of gradients in G for parameter p:
         * G += g^2
-        * p -= LR * g / sqrt(G)
+        * p -= LR * g / sqrt(G + eps)
+
+        Consider using AdaDelta instead:
+        http://www.matthewzeiler.com/pubs/googleTR2012/googleTR2012.pdf
 
         """
         if ada:
             ada.addSquare(grads)
-            self.output_weights += learning_rate * grads.output_weights / np.sqrt(ada.output_weights)
-            self.output_bias += learning_rate * grads.output_bias / np.sqrt(ada.output_weights)
-            self.hidden_weights += learning_rate * grads.hidden_weights / np.sqrt(ada.self.hidden_weights)
-            self.hidden_bias += learning_rate * grads.hidden_bias / np.sqrt(ada.hidden_bias)
+            self.output_weights += learning_rate * grads.output_weights / np.sqrt(ada.output_weights + adaEps)
+            self.output_bias += learning_rate * grads.output_bias / np.sqrt(ada.output_bias + adaEps)
+            self.hidden_weights += learning_rate * grads.hidden_weights / np.sqrt(ada.hidden_weights + adaEps)
+            self.hidden_bias += learning_rate * grads.hidden_bias / np.sqrt(ada.hidden_bias + adaEps)
         else:
             # divide by the fan-in
-            self.output_weights += grads.output_weights * learning_rate / self.hidden_size
-            self.output_bias += grads.output_bias * learning_rate / self.hidden_size
-            self.hidden_weights += grads.hidden_weights * learning_rate / self.input_size
-            self.hidden_bias += grads.hidden_bias * learning_rate / self.input_size
+            self.output_weights += grads.output_weights * learning_rate / 100 # DEBUG / self.hidden_size
+            self.output_bias += grads.output_bias * learning_rate / 100 # DEBUG self.hidden_size
+            #print >> sys.stderr, 'uhw', learning_rate, self.hidden_weights[:2,:2], grads.hidden_weights[:2,:2] # DEBUG
+            self.hidden_weights += grads.hidden_weights * learning_rate / 100 # DEBUG self.input_size
+            self.hidden_bias += grads.hidden_bias * learning_rate / 100 # DEBUG self.input_size
 
     def save(self, file):
         """

@@ -53,6 +53,20 @@ cdef class Tagger(object):
         self.padding_right = converter.get_padding_right()
         self.pre_padding = np.array(left_context * [self.padding_left])
         self.post_padding = np.array(right_context * [self.padding_right])
+        """
+Traceback (most recent call last):
+  File "/project/piqasso/tools/deepnl/bin/dl-pos.py", line 243, in <module>
+    main()
+  File "/project/piqasso/tools/deepnl/bin/dl-pos.py", line 212, in main
+    trainer = create_trainer(args, converter, tags_dict)
+  File "/project/piqasso/tools/deepnl/bin/dl-pos.py", line 55, in create_trainer
+    args.hidden, tags_dict, args.verbose)
+  File "deepnl/trainer.pyx", line 109, in deepnl.trainer.TaggerTrainer.__init__ (deepnl/trainer.cpp:3999)
+  File "tagger.pyx", line 56, in deepnl.tagger.Tagger.__init__ (deepnl/tagger.cpp:2474)
+        """
+
+    def tag(self, sent):
+        return self.tag_sequence(sent, return_tokens=True)
 
     def tag_sequence(self, list tokens, bool return_tokens=False):
         """
@@ -132,9 +146,9 @@ cdef class Tagger(object):
             nn.run(vars)
             # DEBUG
             # if train:
-            #     print >> sys.stderr, 'input', vars.input[:4], vars.input[-4:]
-            #     print >> sys.stderr, 'hidden', vars.hidden[:4], vars.hidden[-4:]
-            #     print >> sys.stderr, 'output', vars.output[:4], vars.output[-4:]
+                # print >> sys.stderr, 'input', vars.input[:4], vars.input[-4:]
+                # print >> sys.stderr, 'hidden', vars.hidden[:4], vars.hidden[-4:]
+                # print >> sys.stderr, 'output', vars.output[:4], vars.output[-4:]
         
         return scores
 
@@ -159,8 +173,9 @@ cdef class Tagger(object):
         # (len, input_size)
         cdef np.ndarray[FLOAT_t,ndim=2] input_deltas
         if ada:
+            # since sentences have different length, we keep a single ada.input
             for i in xrange(slen):
-                ada.input[0] += np.square(grads.input[i: i+window_size])
+                ada.input[0] += np.square(grads.input[i])
             input_deltas = learning_rate * grads.input / np.sqrt(ada.input[0])
         else:
             input_deltas = grads.input * learning_rate

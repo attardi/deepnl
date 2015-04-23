@@ -27,7 +27,7 @@ from deepnl.extractors import *
 from deepnl.tagger import Tagger
 from deepnl.ner_tagger import NerReader, NerTagger
 from deepnl.trainer import TaggerTrainer
-#from deepnl.embeddings import Plain # DEBUG
+from deepnl.embeddings import Plain # DEBUG
 
 # ----------------------------------------------------------------------
 # Auxiliary functions
@@ -226,11 +226,11 @@ def main():
 
     else:
         with open(args.model) as file:
-            tagger = Tagger.load(file)
+            tagger = NerTagger.load(file)
         reader = ConllReader()
         for sent in reader:
             sent = [x[0] for x in sent] # extract form
-            ConllWriter.write(tagger.tag_sequence(sent, return_tokens=True))
+            ConllWriter.write(tagger.tag(sent))
 
 
 # ----------------------------------------------------------------------

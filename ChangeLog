@@ -1,3 +1,33 @@
+2015-04-24  Giuseppe Attardi  <attardi@di.unipi.it>
+
+	* deepnl/word_dictionary.py (WordDictionary.__init__): check for None,
+	since index might be 0.
+
+2015-04-23  Giuseppe Attardi  <attardi@di.unipi.it>
+
+	* deepnl/embeddings.py (Gensim.read_vectors): do not create weights for
+	special symbols here.
+
+	* deepnl/word_dictionary.py (WordDictionary.__init__): padding for
+	word2vect.
+
+	* deepnl/extractors.pyx (AffixExtractor.__init__): accept wordlist as
+	argument.
+
+2015-04-24  Giuseppe Attardi  <attardi@di.unipi.it>
+
+	* deepnl/extractors.pyx (Embeddings.__init__): add vectors for
+	special symbols.
+
+2015-04-23  Giuseppe Attardi  <attardi@di.unipi.it>
+
+	* deepnl/word_dictionary.py (WordDictionary.__contains__):
+	lowercase only for SENNA.
+	(WordDictionary.__getitem__): check is not None since idx might be
+	None.
+
+	* bin/dl-pos.py (main): pass word list to SuffixExtractor.
+
 2015-04-02  Giuseppe Attardi  <attardi@di.unipi.it>
 
 	* deepnl/networkseq.pyx: softmax by column requires axis=0.

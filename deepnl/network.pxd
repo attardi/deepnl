@@ -7,6 +7,8 @@ from extractors cimport *
 # ctypedef np.ndarray[INT_t, ndim=1] np.ndarray[INT_t,ndim=1]
 # ctypedef np.ndarray[INT_t, ndim=2] np.ndarray[INT_t,ndim=2]
 
+cdef float adaEps
+
 cdef class Variables(object):
     
     cdef public np.ndarray input, hidden, output

@@ -46,7 +46,11 @@ class WordDictionary(dict):
             WordDictionary.padding_left = '<PAD>'
             WordDictionary.padding_right = '<PAD>'
             WordDictionary.rare = '<UNK>'
-            
+        elif self.variant == 'word2vec':
+            WordDictionary.padding_left = '</s>'
+            WordDictionary.padding_right = '</s>'
+            WordDictionary.rare = '<UNK>'
+
         if wordlist is None:
             # work with the supplied iterable_sent. extract frequencies.
             
@@ -88,8 +92,8 @@ class WordDictionary(dict):
                            WordDictionary.padding_right)
         
         for symbol in special_symbols:
-            if not super(WordDictionary, self).get(symbol, False):
-                self[symbol] = len(self)
+            if super(WordDictionary, self).get(symbol) is None: # might be 0
+                 self[symbol] = len(self)
         
         self.check()
     
@@ -161,12 +165,12 @@ class WordDictionary(dict):
     
     def __contains__(self, key):
         """
-        Overrides the "in" operator. Case insensitive (except when variant is 'polyglot').
+        Overrides the "in" operator. Case insensitive when variant is 'senna'.
         """
         # deal with symbols in original case, e.g. PADDING, UNKNOWN. Attardi
         if super(WordDictionary, self).__contains__(key):
             return True
-        if self.variant != 'polyglot':
+        if self.variant == 'senna':
             # senna converts numbers to '0'
             if isNumber(key):
                 key = '0'
@@ -175,16 +179,8 @@ class WordDictionary(dict):
                 # replace all digits by '0'
                 re.sub('[0-9]', '0', key)
         return super(WordDictionary, self).__contains__(key)
-    
-    # We keep the case.
-    # def __setitem__(self, key, value):
-    #     """
-    #     Overrides the [] write operator. It converts every key to lower case
-    #     before assignment.
-    #     """
-    #     super(WordDictionary, self).__setitem__(key.lower(), value)
 
-    # Keep case: 'padding' and 'PADDING' must remain different. Attardi
+    # Keep case: 'padding' and 'PADDING' must remain different.
     def __getitem__(self, key):
         """
         Overrides the [] read operator. 
@@ -193,13 +189,13 @@ class WordDictionary(dict):
         1) when given a word without an entry, it returns the value for the
            UNKNOWN key.
         2) entries are converted, replacing digits with 0 and lower casing
-           before access (except when variant is 'polyglot').
+           before access (when variant is 'senna').
         """
         # deal with symbols in original case, e.g. PADDING, UNKNOWN. Attardi
         idx = super(WordDictionary, self).get(key)
-        if idx:
+        if idx is not None:     # might be 0
             return idx
-        if self.variant != 'polyglot':
+        if self.variant == 'senna':
             # senna converts numbers to '0'
             if isNumber(key):
                 key = '0'
@@ -230,8 +226,12 @@ class WordDictionary(dict):
             WordDictionary.padding_left = '<PAD>'
             WordDictionary.padding_right = '<PAD>'
             WordDictionary.rare = '<UNK>'
+        elif self.variant == 'word2vec':
+            WordDictionary.padding_left = '</s>'
+            WordDictionary.padding_right = '</s>'
+            WordDictionary.rare = '<UNK>'
 
-        # Keep case for special tokens. Attardi
+        # Keep case for special tokens.
         self.index_padding_left = super(WordDictionary, self).get(WordDictionary.padding_left)
         self.index_padding_right = super(WordDictionary, self).get(WordDictionary.padding_right)
         self.index_rare = super(WordDictionary, self).get(WordDictionary.rare)

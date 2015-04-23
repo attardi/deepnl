@@ -11,6 +11,7 @@ It uses a sliding window of items through the sequence.
 import numpy as np
 from itertools import izip
 import cPickle as pickle
+import sys # DEBUG
 
 # local
 from math cimport *
@@ -339,6 +340,9 @@ cdef class SequenceNetwork(Network):
         # dC / df_1 = M_1.T dC / df_2
         # (len, hidden_size) (hidden_size, input_size) = (len, input_size)
         dCdf_2.dot(self.hidden_weights, grads.input)
+        #print >> sys.stderr, 'hwg', grads.hidden_weights[:4,:4], grads.hidden_weights[-4:,-4:] # DEBUG
+        #print >> sys.stderr, 'hbg', grads.hidden_bias[:4], grads.hidden_bias[-4:] # DEBUG
+        #print >> sys.stderr, 'ig', grads.input[0,:4], grads.input[-1,-4:] # DEBUG
 
     cdef _update(self, SeqGradients grads, float learning_rate,
                  SeqGradients ada=None):
@@ -352,9 +356,9 @@ cdef class SequenceNetwork(Network):
         if self.transitions is not None:
             if ada:
                 ada.transitions += grads.transitions * grads.transitions
-                self.transitions += learning_rate * grads.transitions / np.sqrt(ada.transitions)
+                self.transitions += learning_rate * grads.transitions / np.sqrt(ada.transitions + adaEps)
             else:
-                self.transitions += grads.transitions * learning_rate / 10
+                self.transitions += grads.transitions * learning_rate # DEBUG / 10
 
     def save(self, file):
         """

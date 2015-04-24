@@ -166,10 +166,17 @@ def main():
         sentence_iter = reader.read(args.train)
 
         if args.vocab:
+            if not args.vectors:
+                logger.error("No --vectors specified")
+                return
             embeddings = Embeddings(args.embeddings_size, args.vocab,
                                     args.vectors, variant=args.variant)
             tagset = reader.create_tagset(sentence_iter)
             #tagset = Plain.read_vocabulary('ner-tag-dict.txt') # DEBUG
+        elif args.variant == 'word2vec':
+            embeddings = Embeddings(vectors=args.vectors,
+                                    variant=args.variant)
+            tagset = reader.create_tagset(sentence_iter)
         else:
             # build vocabulary and tag set
             vocab, tagset = reader.create_vocabulary(sentence_iter,
@@ -183,16 +190,18 @@ def main():
         converter.add(embeddings)
 
         if args.caps:
-            logger.info("Creating capitalization features")
+            logger.info("Creating capitalization features...")
             converter.add(CapsExtractor(args.caps))
 
         if args.suffix:
-            logger.info("Creating suffix features")
-            extractor = SuffixExtractor(args.suffix, args.suffixes, sentence_iter)
+            logger.info("Creating suffix features...")
+            # collect the forms
+            words = (tok[0] for sent in sentence_iter for tok in sent)
+            extractor = SuffixExtractor(args.suffix, args.suffixes, words)
             converter.add(extractor)
 
         if args.prefix:
-            logger.info("Creating prefix features")
+            logger.info("Creating prefix features...")
             extractor = PrefixExtractor(args.prefix, args.prefixes, sentence_iter)
             converter.add(extractor)
 

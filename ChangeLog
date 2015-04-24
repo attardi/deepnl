@@ -1,5 +1,7 @@
 2015-04-24  Giuseppe Attardi  <attardi@di.unipi.it>
 
+	* bin/dl-ner.py (main): pass tokens to SuffixExtractor()
+
 	* deepnl/word_dictionary.py (WordDictionary.__init__): check for None,
 	since index might be 0.
 

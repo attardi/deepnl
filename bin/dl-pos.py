@@ -178,7 +178,10 @@ def main():
             tagset = reader.create_tagset(sentence_iter)
         else:
             # build vocabulary and tag set
-            vocab, tagset = reader.create_vocabulary(sentence_iter, args.vocab_size, args.minOccurr)
+            vocab, tagset = reader.create_vocabulary(sentence_iter,
+                                                     args.vocab_size,
+                                                     args.minOccurr)
+            logger.info("Creating word embeddings")
             embeddings = Embeddings(args.embeddings_size, vocab=vocab,
                                     variant=args.variant)
 

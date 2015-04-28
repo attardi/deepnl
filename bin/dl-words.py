@@ -116,7 +116,7 @@ def main():
                         help='Load previously saved model')
     parser.add_argument('--threads', type=int, default=1,
                         help='Number of threads (default 1)')
-    parser.add_argument('--words', type=int,
+    parser.add_argument('--words', type=int, default=0,
                         help='Number of words in corpus')
     parser.add_argument('--variant', type=str, default=None,
                         help='Either "senna" (default), "polyglot", "word2vec" or "gensym".')
@@ -145,7 +145,7 @@ def main():
 
     logger.info("Read data")
     converter = Converter()
-    converter.add_extractor(embeddings)
+    converter.add(embeddings)
 
     trainer = create_trainer(args, converter)
     

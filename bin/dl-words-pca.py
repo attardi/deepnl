@@ -63,16 +63,16 @@ def main():
                         help='Size of ngrams (default 1)')
     parser.add_argument('--train', type=str, required=True,
                         help='File with text corpus for training.')
-    parser.add_argument('-o', '--output', type=str, default=None,
-                        help='File where to save embeddings')
+    parser.add_argument('-o', '--output', type=str,
+                        help='File where to save the model, for further training')
     parser.add_argument('--vocab', type=str, required=True,
                         help='Vocabulary file')
     parser.add_argument('--context-words', type=int, default=10000,
                         help='Number of context words (the first N from vocabulary)')
     parser.add_argument('--context-size', type=int, default=1,
                         help='Number of context words')
-    parser.add_argument('--vectors', type=str, default=None,
-                        help='Embeddings file, either read or created')
+    parser.add_argument('--vectors', type=str, required=True,
+                        help='Embeddings file, either read and updated or created')
     parser.add_argument('--threads', type=int, default=1,
                         help='Number of threads (default 1)')
     parser.add_argument('--variant', type=str, default=None,
@@ -108,6 +108,11 @@ def main():
     logger.info("Saving vectors ...")
     Plain.write_vectors(args.vectors, vectors)
     logger.info("... to %s" % args.vectors)
+
+    if args.output:
+        logger.info("Saving trained model ...")
+        trainer.save(args.output)
+        logger.info("... to %s" % args.output)
 
 # ----------------------------------------------------------------------
 

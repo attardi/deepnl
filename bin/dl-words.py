@@ -106,13 +106,13 @@ def main():
                         help='Size of ngrams (default 1)')
     parser.add_argument('--train', type=str, default=None,
                         help='File with text corpus for training.', required=True)
-    parser.add_argument('-o', '--output', type=str, default=None,
-                        help='File where to save embeddings')
+    parser.add_argument('-o', '--output', type=str,
+                        help='File where to save model, for further training')
     parser.add_argument('--vocab', type=str, required=True,
                         help='Vocabulary file')
-    parser.add_argument('--vectors', type=str, default=None,
-                        help='Embeddings file, either read or created')
-    parser.add_argument('--load', type=str, default=None,
+    parser.add_argument('--vectors', type=file, required=True,
+                        help='Embeddings file, either read and updated or created')
+    parser.add_argument('--load', type=str,
                         help='Load previously saved model')
     parser.add_argument('--threads', type=int, default=1,
                         help='Number of threads (default 1)')
@@ -162,12 +162,14 @@ def main():
     trainer.train(converted_sentences, args.iterations, report_intervals,
                   args.threads, epoch_pairs=args.words)
     
-    logger.info("Saving trained model ...")
-    
-    if args.vectors:
-        trainer.save_vectors(args.vectors)
-    trainer.save(args.output)
-    logger.info("... to %s" % args.output)
+    logger.info("Saving vectors ...")
+    trainer.save_vectors(args.vectors)
+    logger.info("... to %s" % args.vectors)
+
+    if args.output:
+        logger.info("Saving trained model ...")
+        trainer.save(args.output)
+        logger.info("... to %s" % args.output)
 
 # ----------------------------------------------------------------------
 

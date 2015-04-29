@@ -56,7 +56,7 @@ You can use ``deepnl`` as a library in Python code as follows, where
 .. code-block:: python
 
     >>> from deepnl.tagger import Tagger
-    >>> tagger = deepnl.Tagger.load(open(filename))
+    >>> tagger = Tagger.load(open(filename))
     >>> sent = 'The quick brown fox jumped over the lazy dog .'
     >>> tagger.tag_sequence(sent.split(), return_tokens=True)
     [[(u'The', u'DT'), (u'quick', u'JJ'), (u'brown', u'JJ'), (u'fox', u'NN'), (u'jumped', u'VBD'), (u'over', u'IN'), (u'the', u'DT'), (u'lazy', u'JJ'), (u'dog', u'NN'), (u'.', '.')]]

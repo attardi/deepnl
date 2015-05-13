@@ -22,7 +22,7 @@ Installation
 Dependencies
 ------------
 
-``deepnl`` requires numpy_.
+``deepnl`` requires numpy_ and Eigen_.
 
 A C++ compiler is also needed for compiling the C++ extensions it uses,
 produced with Cython_.
@@ -213,6 +213,7 @@ References
 .. [Lebret14]  Rémi Lebret and Ronan  Collobert. 2014. Word Embeddings through Hellinger PCA. *EACL 2014*: 482.
 
 .. _numpy: http://www.numpy.org
+.. _Eigen: http://eigen.tuxfamily.org/
 .. _Cython: http://cython.org
 .. _SENNA: http://ronan.collobert.com/senna/
 

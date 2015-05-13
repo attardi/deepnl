@@ -9,12 +9,13 @@ The library currently provides tools for performing part-of-speech tagging,
 Named Entity tagging and Semantic Role Labeling.
 
 ``deepnl`` also provides code for creating *word embeddings* from text, using
-either the Language Model approach by [Collobert11]_, or using Hellinger PCA,
+either the Language Model approach by [Collobert11]_, or Hellinger PCA,
 as in [Lebret14]_.
 
 It can also create *sentiment specific word embeddings* from a corpus of
 annotated Tweets.
 
+If you use ``deepnl``, please cite [Attardi]_ in your publications.
 
 Installation
 ===========
@@ -206,6 +207,10 @@ https://github.com/erickrf/nlpnet, which provided inspiration for ``deepnl``.
 References
 ==========
 
+.. [Attardi] Giuseppe Attardi. 2015. DeepNL: a Deep Learning NLP
+	     pipeline. Workshop on Vector Space Modeling for NLP, NAACL 2015,
+	     Denver, Colorado (June 5, 2015).
+
 .. [Collobert11] Ronan Collobert, J. Weston, L. Bottou, M. Karlen, K. Kavukcuoglu and P. Kuksa.
    Natural Language Processing (Almost) from Scratch. *Journal of Machine
    Learning Research*, 12:2493-2537, 2011.
@@ -216,5 +221,3 @@ References
 .. _Eigen: http://eigen.tuxfamily.org/
 .. _Cython: http://cython.org
 .. _SENNA: http://ronan.collobert.com/senna/
-
-

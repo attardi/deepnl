@@ -256,7 +256,7 @@ cdef class Embeddings(Extractor):
                 self.table = embeddings.generate_vectors(len(self.dict), size)
         elif variant == 'word2vec':
             # load both vocab and vectors from single file
-            self.table, wordlist = embeddings.Word2Vect.read_vectors(vectors)
+            self.table, wordlist = embeddings.Word2Vec.load(vectors)
             self.dict = <dict>WD(None, wordlist=wordlist, variant=variant)
             # add vectors for special symbols
             extra = len(self.dict) - len(self.table)
@@ -583,6 +583,48 @@ cdef class GazetteerExtractor(Extractor):
                 classes[c].add(words)
         extractors = [cls(w, size, lowcase) for w in classes.values()]
         return extractors
+
+    def save(self, file):
+        pickle.dump(self.dict, file)
+        pickle.dump(self.table, file)
+        pickle.dump(self.lowcase, file)
+
+    def load(self, file):
+        self.dict = pickle.load(file)
+        self.table = pickle.load(file)
+        self.lowcase = pickle.load(file)
+
+# ----------------------------------------------------------------------
+
+cdef class AttributeExtractor(Extractor):
+    """
+    Extract a token attribute as feature.
+    """
+
+    padding = 0
+
+    def __init__(self, idx, size=5):
+        """
+        :param idx: index of token attribute to use.
+        :[aram size: vector dimension.
+        """
+        self.idx = idx
+        self.table = embeddings.generate_vectors(AttributeExtractor.num_values, size)
+
+    def extract(self, words):
+        """
+        :return: the list of POS codes for the given :param words:.
+        """
+        res = [0] * len(words)
+        for i, token in enumerate(words):
+            if token == WD.padding_left or token == WD.padding_right:
+                res[i] = AttributeExtractor.padding
+                continue
+            attr = token[self.idx]
+            if attr not in self.dict:
+                self.dict[attr] = len(self.dict)
+            res[i] = self.dict[attr]
+        return res
 
     def save(self, file):
         pickle.dump(self.dict, file)

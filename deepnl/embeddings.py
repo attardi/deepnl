@@ -99,12 +99,12 @@ class Word2Embeddings(object):
 
 # ----------------------------------------------------------------------
 
-class Word2Vect(object):
+class Word2Vec(object):
 
     @classmethod
-    def read_vectors(cls, filename):
+    def load(cls, filename):
         """
-        Load the feature matrix used by word2evect.
+        Load words and vectors from a file in word2evec format.
         """
         words = []
         vectors = []
@@ -118,28 +118,6 @@ class Word2Vect(object):
         # vectors for the special symbols, not present in words, will be
         # created later
         return np.array(vectors), words
-
-# ----------------------------------------------------------------------
-
-class Gensim(object):
-
-    def read_vectors(cls, filename):
-        """
-        Load the feature matrix used by gensim.
-        """
-        import gensim
-        model = gensim.models.Word2Vec.load(filename)
-        matrix = model.syn0
-        vocab_size, num_features = matrix.shape
-
-        vocab = model.vocab
-        # sort to preserve order in matrix
-        sorted_words = [unicode(word, 'utf-8')
-                        for word in sorted(vocab, key=lambda x: vocab[x].index)]
-        # vectors for the special symbols, not present in words, will be
-        # created later
-
-        return matrix, sorted_words
 
 # ----------------------------------------------------------------------
 

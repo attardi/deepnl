@@ -6,9 +6,9 @@ Sequence tagger exploiting a neural network.
 """
 
 # standard
-import sys                      # DEBUG
 import numpy as np
 import cPickle as pickle
+#import sys                      # DEBUG
 
 # local
 import network
@@ -22,48 +22,26 @@ cdef class Tagger(object):
     """
     
     # cdef dict tags_dict
-    # cdef list itd
+    # cdef list tags
 
     def __init__(self, Converter converter, tags_dict,
-                 int left_context, int right_context,
-                 int hidden_size=0, int output_size=0, nn=None):
+                 int left_context, int right_context, nn):
         """
         :param converter: the Converter object that extracts features and
            converts them to weights.
         :param tags_dict: dictionary of tags.
         :param left_context: size of left context window.
         :param right_context: size of right context window.
-        :param nn: network to be used, instead of creating one.
+        :param nn: network to be used.
         """
         self.converter = converter
         self.tags_dict = tags_dict
-        self.itd = sorted(tags_dict, key=tags_dict.get)
-        #self.feature_tables = [e.table for e in converter.extractors]
-
-        if nn:
-            self.nn = nn        # dependency injection
-        else:
-            # sum the number of features in all tables 
-            input_size = converter.size()
-            window_size = left_context + 1 + right_context
-            input_size *= window_size
-            self.nn = SequenceNetwork(input_size, hidden_size, output_size)
-
-        self.padding_left = converter.get_padding_left()
-        self.padding_right = converter.get_padding_right()
-        self.pre_padding = np.array(left_context * [self.padding_left])
-        self.post_padding = np.array(right_context * [self.padding_right])
-        """
-Traceback (most recent call last):
-  File "/project/piqasso/tools/deepnl/bin/dl-pos.py", line 243, in <module>
-    main()
-  File "/project/piqasso/tools/deepnl/bin/dl-pos.py", line 212, in main
-    trainer = create_trainer(args, converter, tags_dict)
-  File "/project/piqasso/tools/deepnl/bin/dl-pos.py", line 55, in create_trainer
-    args.hidden, tags_dict, args.verbose)
-  File "deepnl/trainer.pyx", line 109, in deepnl.trainer.TaggerTrainer.__init__ (deepnl/trainer.cpp:3999)
-  File "tagger.pyx", line 56, in deepnl.tagger.Tagger.__init__ (deepnl/tagger.cpp:2474)
-        """
+        self.tags = sorted(tags_dict, key=tags_dict.get)
+        self.nn = nn        # dependency injection
+        cdef np.ndarray padding_left = converter.get_padding_left()
+        cdef np.ndarray padding_right = converter.get_padding_right()
+        self.pre_padding = np.array(left_context * [padding_left])
+        self.post_padding = np.array(right_context * [padding_right])
 
     def tag(self, sent):
         return self.tag_sequence(sent, return_tokens=True)
@@ -84,7 +62,7 @@ Traceback (most recent call last):
         cdef np.ndarray[FLOAT_t,ndim=2] scores = self._tag_sequence(converted)
         # computes full score, combining ftheta and A (if SLL)
         answer = self.nn._viterbi(scores)
-        tags = [self.itd[tag] for tag in answer]
+        tags = [self.tags[tag] for tag in answer]
 
         if return_tokens:
             return zip(tokens, tags)
@@ -151,59 +129,6 @@ Traceback (most recent call last):
                 # print >> sys.stderr, 'output', vars.output[:4], vars.output[-4:]
         
         return scores
-
-    cpdef update(self, SeqGradients grads, float learning_rate,
-                 np.ndarray[INT_t,ndim=2] sentence, SeqGradients ada=None):
-
-        # update network weights and transition weights.
-        (<SequenceNetwork>self.nn)._update(grads, learning_rate, ada)
-        #
-        # Adjust the features indexed by the input window.
-        #
-        # the deltas that will be applied to the feature tables
-        # they are in the same sequence as the network receives them, i.e.
-        # [token1-table1][token1-table2][token2-table1][token2-table2] (...)
-        # e.g. num features = 50 (embeddings) + 5 (caps) + 5 (suffix) = 60
-        # input_size = num features * window (e.g. 60 * 5).
-
-        cdef int window_size = len(self.pre_padding) + 1 + len(self.post_padding)
-        cdef int i
-        cdef int slen = len(sentence)
-
-        # (len, input_size)
-        cdef np.ndarray[FLOAT_t,ndim=2] input_deltas
-        if ada:
-            # since sentences have different length, we keep a single ada.input
-            for i in xrange(slen):
-                ada.input[0] += np.square(grads.input[i])
-            input_deltas = learning_rate * grads.input / np.sqrt(ada.input[0])
-        else:
-            input_deltas = grads.input * learning_rate
-        
-        padded_sentence = np.concatenate((self.pre_padding,
-                                          sentence,
-                                          self.post_padding))
-        
-        for i in xrange(slen):
-            window = padded_sentence[i: i+window_size]
-            self.converter.update(window, input_deltas[i])
-
-        # cdef np.ndarray[INT_t,ndim=1] features
-        # cdef np.ndarray[FLOAT_t,ndim=2] table
-        # cdef int start, end, i, t
-
-        # for i, deltas_i in enumerate(input_deltas):
-        #     # deltas_i are input_deltas for i-th window in sentence
-        #     # for each window (deltas_i: 300, features: 5)
-        #     # this tracks where the deltas for the next table begins
-        #     start = 0
-        #     for features in padded_sentence[i:i+window_size]:
-        #         # features for the i-th window
-        #         # select the columns for each feature_tables
-        #         for t, table in enumerate(self.feature_tables):
-        #             end = start + table.shape[1]
-        #             table[features[t]] += deltas_i[start:end]
-        #             start = end
 
     def save(self, file):
         """

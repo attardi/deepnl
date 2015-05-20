@@ -119,7 +119,7 @@ def main():
     parser.add_argument('--words', type=int, default=0,
                         help='Number of words in corpus')
     parser.add_argument('--variant', type=str, default=None,
-                        help='Either "senna" (default), "polyglot", "word2vec" or "gensym".')
+                        help='Either "senna" (default), "polyglot" or "word2vec".')
     parser.add_argument('-v', '--verbose', help='Verbose mode',
                         action='store_true')
 

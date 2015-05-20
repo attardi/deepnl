@@ -10,16 +10,23 @@ from extractors cimport *
 cdef float adaEps
 
 cdef class Variables(object):
+    """Visible and hidden variables.
+    Unique to thread"""
     
     cdef public np.ndarray input, hidden, output
 
 cdef class Parameters(object):
-    
-    cdef public np.ndarray output_weights, hidden_weights
-    cdef public np.ndarray output_bias, hidden_bias
+    """
+    Network parameters: weights and biases.
+    Shared by threads.
+    """
+
+    cdef public np.ndarray hidden_weights, hidden_bias
+    cdef public np.ndarray output_weights, output_bias
 
 cdef class Gradients(Parameters):
-    
+
+    # gradients for input variables
     cdef public np.ndarray input
 
 cdef class Network(Parameters):
@@ -33,9 +40,13 @@ cdef class Network(Parameters):
     # function to save periodically
     cdef public object saver
 
+    cdef variables(self, int slen=*)
+    cdef gradients(self, int slen=*)
+
     cpdef run(self, Variables vars)
 
     cdef float backpropagate(self, int y, Variables vars, Gradients grads)
 
-    cpdef update(self, Gradients grads, float learning_rate, Gradients ada=*)
+    cpdef update(self, Gradients grads, float learning_rate,
+                 Gradients ada=*)
 

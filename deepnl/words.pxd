@@ -29,12 +29,15 @@ cdef class LmTrainer(Trainer):
 
     cdef list feature_tables
 
-    cdef np.ndarray pre_tokens, post_tokens
-
     # data for statistics during training. 
     cdef int total_pairs
     
     cdef FLOAT_t error
+
+    cdef np.ndarray[INT_t,ndim=1] _extract_window(self,
+                                        np.ndarray[INT_t,ndim=2] window,
+                                        np.ndarray[INT_t,ndim=2] sentence,
+                                                  int position, int size=*)
 
     cdef _update_weights(self, worker, LmGradients grads, FLOAT_t remaining)
 
@@ -67,24 +70,18 @@ cdef class LmWorker(LmTrainer):
     # local storage
     cdef Variables vars_pos
     cdef Variables vars_neg
-    cdef np.ndarray grads_hidden_weights_pos
-    cdef np.ndarray grads_hidden_weights_neg
+    cdef LmGradients grads
     cdef np.ndarray example
 
     # pool of random numbers (used for efficiency)
     cdef public RandomPool random_pool
 
-    cdef WordsTrainer* wtrainer
+    cdef WordsTrainer* trainer
 
-    cdef _train_batch(self, sentences, LmGradients grads, FLOAT_t remaining)
-
-    cdef np.ndarray[INT_t,ndim=1] _extract_window(self,
-                                        np.ndarray[INT_t,ndim=2] window,
-                                        np.ndarray[INT_t,ndim=2] sentence,
-                                                  int position, int size=*)
+    cdef _train_batch(self, sentences, FLOAT_t remaining)
 
     cdef FLOAT_t _train_step(self, example, pos_token, neg_token,
-                           LmGradients grads, FLOAT_t remaining)
+                             FLOAT_t remaining)
 
     cdef FLOAT_t _train_pair(self, Variables vars_pos, Variables vars_neg,
                              LmGradients grads)

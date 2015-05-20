@@ -76,7 +76,7 @@ def main():
     parser.add_argument('--threads', type=int, default=1,
                         help='Number of threads (default 1)')
     parser.add_argument('--variant', type=str, default=None,
-                        help='Either "senna" (default), "polyglot", "word2vec" or "gensym".')
+                        help='Either "senna" (default), "polyglot" or "word2vec".')
     parser.add_argument('--covariance', action='store_true',
                         help='Use PCA algorithm on covariance matrix.')
     parser.add_argument('-v', '--verbose', action='store_true',

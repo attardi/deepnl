@@ -45,6 +45,7 @@ cdef class RandomPool(object):
     """
     An iterator returning random tokens.
     """
+    # FIXME: makes sense to generate random features besides word ID?
 
     def __init__(self, dims, int size=1000):
         self.dims = dims        # rows in each table
@@ -83,10 +84,20 @@ cdef class LmGradients(Gradients):
         super(LmGradients, self).__init__(input_size, hidden_size, output_size)
         # gradients for negative examples
         self.input_neg = np.zeros(input_size, dtype=np.double)
+        # temporary
+        self.hidden_weights_pos = np.empty((hidden_size, input_size))
+        self.hidden_weights_neg = np.empty((hidden_size, input_size))
 
     def clear(self):
         super(LmGradients, self).clear()
         self.input_neg.fill(0.0)
+
+# ----------------------------------------------------------------------
+
+cdef class LmNetwork(Network):
+
+    cdef gradients(self, int slen=0):
+        return LmGradients(self.input_size, self.hidden_size, self.output_size)
 
 # ----------------------------------------------------------------------
 
@@ -102,27 +113,26 @@ cdef class LmTrainer(Trainer):
     """
     
     # cdef list feature_tables
-
-    # cdef np.ndarray pre_tokens, post_tokens
-
     # # data for statistics during training. 
     # cdef int total_pairs
-    
     # cdef FLOAT_t error
 
     def __init__(self, Converter converter, FLOAT_t learning_rate,
                  int left_context, int right_context,
                  int hidden_size, int output_size=1, int ngrams=1):
 
+        # FIXME: shall the network be created by the caller?
+        # sum the number of features in all extractors' tables 
+        input_size = (left_context + 1 + right_context) * converter.size()
+        nn = LmNetwork(input_size, hidden_size, output_size)
         super(LmTrainer, self).__init__(converter, learning_rate,
-                                        left_context, right_context,
-                                        hidden_size, output_size)
+                                        left_context, right_context, nn)
         self.ngram_size = ngrams
         self.feature_tables = [e.table for e in converter.extractors]
 
         # these are padding tokens
-        self.pre_tokens = np.array(left_context * [converter.get_padding_left()])
-        self.post_tokens = np.array(right_context * [converter.get_padding_right()])
+        self.pre_padding = np.array(left_context * [converter.get_padding_left()])
+        self.post_padding = np.array(right_context * [converter.get_padding_right()])
 
     cdef _update_weights(self, worker, LmGradients grads, FLOAT_t remaining):
         """
@@ -207,7 +217,7 @@ cdef class LmTrainer(Trainer):
               int threads=1, int chunk_size=100, int epoch_pairs=0):
         """
         Trains the language model on the given sentences.
-        :param iterable_sent: an iterable over sentences that can be repeated.
+        :param sentences: an iterable over sentences that can be iterated repeatedly.
         :param epochs: number of iterations over the sentences.
         :param threads: number of worker threads to use.
         :param chunk_size: size of groups of sentences assigned to each thread.
@@ -252,11 +262,9 @@ cdef class LmTrainer(Trainer):
             cdef Network nn = self.nn
             # each worker thread has its own network, but they all share the
             # same converter tables (and hence feature_tables)
-            grads = LmGradients(nn.input_size, nn.hidden_size, 1)
             worker = LmWorker(self.converter, self.learning_rate,
                               self.left_context, self.right_context,
-                              dims, grads,
-                              nn.hidden_size, ngrams=self.ngram_size)
+                              dims, nn.hidden_size, ngrams=self.ngram_size)
 
             cdef INT_t total_pairs
             cdef FLOAT_t remaining, error
@@ -265,7 +273,7 @@ cdef class LmTrainer(Trainer):
                 while True:
                     job = jobs.get()
                     if job is None:  # data finished, exit
-                        del worker.wtrainer
+                        del worker.trainer
                         return
 
                     # FIXME: total_pairs should be the value when job was
@@ -273,13 +281,13 @@ cdef class LmTrainer(Trainer):
                     total_pairs = self.total_pairs
                     remaining = 1.0 - (total_pairs / max_pairs)
                     # this also updates the input weights in the master, outside lock
-                    job_pairs, error = worker._train_batch(job, grads, remaining)
+                    job_pairs, error = worker._train_batch(job, remaining)
 
                     reporting = False
                     with lock:
                     #if True:    # DEBUG
                         # update the weights in the master, copy them back to worker
-                        self._update_weights(worker, grads, remaining)
+                        self._update_weights(worker, worker.grads, remaining)
                         self.avg_error.add(error)
                         self.total_pairs += len(job)
                         now = time.time()
@@ -297,8 +305,6 @@ cdef class LmTrainer(Trainer):
                     # save language model.
                     if total_pairs and total_pairs % save_period == 0:
                         self.saver(self)
-                    # reset gradients
-                    grads.clear()
                     #jobs.task_done() # only needed if using jobs.join()
 
             except Exception, e:
@@ -326,6 +332,66 @@ cdef class LmTrainer(Trainer):
         for thread in workers:
             thread.join()
         #worker_train(0)           # DEBUG
+
+    @cython.boundscheck(False)
+    cdef np.ndarray[INT_t,ndim=1] _extract_window(self,
+                                                  np.ndarray[INT_t,ndim=2] window,
+                                                  np.ndarray[INT_t,ndim=2] sentence,
+                                                  int position, int size=1):
+        """
+        Extracts a window of tokens from the sentence, consisting of
+        left_context tokens before :param position:,
+        the ngram from :param position: to :param position+size:,
+        right_context tokens after :param position+size:.
+        This function takes care of adding padding as necessary.
+        :param window: where to store the window.
+	:param sentence: the sentence from which to extract the window.
+	:param position: the start position of the center ngram.
+        :param size: the size of ngram in the center of the window.
+	:return: the center window token/ngram.
+        """
+        cdef int num_padding
+        cdef np.ndarray padding
+        cdef int left_context = len(self.pre_padding)
+        cdef int right_context = len(self.post_padding)
+
+        if position < left_context:
+            num_padding = left_context - position
+            for i in xrange(num_padding):
+                np.copyto(window[i], self.pre_padding[-num_padding+i])
+        else:
+            num_padding = 0
+
+        for i in xrange(left_context - num_padding):
+            np.copyto(window[num_padding + i],
+                      sentence[position - left_context + num_padding + i])
+        if size == 1:
+            ngram = sentence[position]
+        else:
+            # get IDs of each token
+            ngramIDs = [sentence[i][0] for i in xrange(position, position + size)]
+            # get the embeddings extractor
+            extractor = self.converter.extractors[0]
+            ngram = np.array([extractor.lookup_ngram(ngramIDs)]) # single feature_table
+
+        window[left_context] = ngram
+
+        # number of tokens in the sentence after the position
+        tokens_after = len(sentence) - (position + size)
+        if tokens_after < right_context:
+            num_padding = right_context - tokens_after
+            for i in xrange(tokens_after):
+                np.copyto(window[left_context+1 + i],
+                          sentence[position + size + i])
+            # add padding
+            for i in xrange(num_padding):
+                np.copyto(window[left_context+1+tokens_after + i],
+                          self.post_padding[-i])
+        else:
+            for i in xrange(right_context):
+                np.copyto(window[left_context+1 + i],
+                          sentence[position + size +i])
+        return ngram
 
     def save(self, filename):
         """
@@ -381,40 +447,37 @@ cdef class LmWorker(LmTrainer):
     # cdef np.ndarray input_values_pos
     # cdef np.ndarray input_values_neg
     # cdef np.ndarray hidden_values_pos
-    # cdef np.ndarray grads_hidden_weights_pos
-    # cdef np.ndarray grads_hidden_weights_neg
+    # cdef LmGradients grads
 
     # # pool of random numbers (used for efficiency)
     # cdef public RandomPool random_pool
 
-    # cdef WordsTrainer* wtrainer
+    # cdef WordsTrainer* trainer
 
     def __init__(self, Converter converter, FLOAT_t learning_rate,
                  int left_context, int right_context,
-                 dims, LmGradients grads,
-                 int hidden_size, int output_size=1, int ngrams=1):
+                 dims, int hidden_size, int output_size=1, int ngrams=1):
 
         super(LmWorker, self).__init__(converter, learning_rate,
-                                     left_context, right_context,
-                                     hidden_size, output_size, ngrams)
+                                       left_context, right_context,
+                                       hidden_size, output_size, ngrams)
 
         # generate 1000 random indices at a time to save time
-        # (generating 1000 integers at once takes about ten times the time
+        # (generating 1000 integers at once takes about 10 times the time
         # for a single one)
         self.random_pool = RandomPool(dims)
 
         # local storage to avoid allocations:
         input_size = self.nn.input_size
-        self.grads_hidden_weights_pos = np.empty((hidden_size, input_size))
-        self.grads_hidden_weights_neg = np.empty((hidden_size, input_size))
+        self.grads = self.nn.gradients()
         self.vars_pos = Variables(input_size, hidden_size, output_size)
         self.vars_neg = Variables(input_size, hidden_size, output_size)
 
-        cdef INT_t window_size = self.left_context + 1 + self.right_context
+        cdef INT_t window_size = left_context + 1 + right_context
         self.example = np.empty((window_size, 1), dtype=np.int)
 
         # build Eigen trainer, sharing arrays with Python
-        self.wtrainer = new WordsTrainer(
+        self.trainer = new WordsTrainer(
             input_size, hidden_size, output_size,
             <FLOAT_t*>np.PyArray_DATA(self.nn.hidden_weights),
             <FLOAT_t*>np.PyArray_DATA(self.nn.hidden_bias),
@@ -423,12 +486,12 @@ cdef class LmWorker(LmTrainer):
             <FLOAT_t*>np.PyArray_DATA(self.vars_pos.input),
             <FLOAT_t*>np.PyArray_DATA(self.vars_neg.input),
             # grads
-            <FLOAT_t*>np.PyArray_DATA(grads.hidden_weights),
-            <FLOAT_t*>np.PyArray_DATA(grads.hidden_bias),
-            <FLOAT_t*>np.PyArray_DATA(grads.output_weights),
-            <FLOAT_t*>np.PyArray_DATA(grads.output_bias),
-            <FLOAT_t*>np.PyArray_DATA(grads.input),
-            <FLOAT_t*>np.PyArray_DATA(grads.input_neg),
+            <FLOAT_t*>np.PyArray_DATA(self.grads.hidden_weights),
+            <FLOAT_t*>np.PyArray_DATA(self.grads.hidden_bias),
+            <FLOAT_t*>np.PyArray_DATA(self.grads.output_weights),
+            <FLOAT_t*>np.PyArray_DATA(self.grads.output_bias),
+            <FLOAT_t*>np.PyArray_DATA(self.grads.input),
+            <FLOAT_t*>np.PyArray_DATA(self.grads.input_neg),
             <int*>np.PyArray_DATA(self.example),
             window_size,
             <FLOAT_t*>np.PyArray_DATA(self.feature_tables[0]),
@@ -436,16 +499,17 @@ cdef class LmWorker(LmTrainer):
             self.feature_tables[0].shape[1])
 
     @cython.boundscheck(False)
-    cdef _train_batch(self, sentences, LmGradients grads, FLOAT_t remaining):
+    cdef _train_batch(self, sentences, FLOAT_t remaining):
         """
         :param sentences: list of sentences on which to train
-        :param grads: accumulate gradients here
         :param remaining: percentage used for progressively decreasing learning rate.
         :return: the number of pairs generated and the average error
         """
         cdef int pos, pairs = 0
         cdef FLOAT_t error, batch_error = 0.0
         cdef np.ndarray[INT_t,ndim=1] pos_token, neg_token
+        self.grads.clear()
+        cdef int left_context = len(self.pre_padding)
 
         for sentence in sentences:
             for position in xrange(len(sentence)):
@@ -462,10 +526,10 @@ cdef class LmWorker(LmTrainer):
                         break
 
                 self.converter.lookup(self.example, self.vars_pos.input)
-                self.example[self.left_context] = neg_token
+                self.example[left_context] = neg_token
                 self.converter.lookup(self.example, self.vars_neg.input)
                 error = self._train_step(self.example,
-                                         pos_token, neg_token, grads,
+                                         pos_token, neg_token,
                                          remaining)
                 batch_error += error
                 pairs += 1
@@ -473,7 +537,7 @@ cdef class LmWorker(LmTrainer):
         return pairs, batch_error/pairs
    
     cdef FLOAT_t _train_step(self, example, pos_token, neg_token,
-                             LmGradients grads, FLOAT_t remaining):
+                             FLOAT_t remaining):
         """
         Perform a training step on a single pair of examples and update weight
         vectors.
@@ -484,10 +548,10 @@ cdef class LmWorker(LmTrainer):
         cdef INT_t pos_tok = pos_token[0]
         cdef INT_t neg_tok = neg_token[0]
         with nogil:
-            error = self.wtrainer.train_pair()
+            error = self.trainer.train_pair()
             if error > minError:
                 LR_0 = max(0.001, self.learning_rate * remaining)
-                self.wtrainer.update_embeddings(<FLOAT_t>LR_0,
+                self.trainer.update_embeddings(<FLOAT_t>LR_0,
                                                 pos_tok,
                                                 neg_tok)
         # Python version
@@ -504,64 +568,6 @@ cdef class LmWorker(LmTrainer):
         #     self._update_embeddings(grads.input, grads.input_neg, remaining,
         #                             example, pos_token, neg_token)
         return error
-
-    @cython.boundscheck(False)
-    cdef np.ndarray[INT_t,ndim=1] _extract_window(self,
-                                                  np.ndarray[INT_t,ndim=2] window,
-                                                  np.ndarray[INT_t,ndim=2] sentence,
-                                                  int position, int size=1):
-        """
-        Extracts a window of tokens from the sentence, consisting of
-        left_context tokens before :param position:,
-        the ngram from :param position: to :param position+size:,
-        right_context tokens after :param position+size:.
-        This function takes care of adding padding as necessary.
-        :param window: where to store the window.
-	:param sentence: the sentence from which to extract the window.
-	:param position: the start position of the center ngram.
-        :param size: the size of ngram in the center of the window.
-	:return: the center window token/ngram.
-        """
-        cdef int num_padding
-        cdef np.ndarray padding
-
-        if position < self.left_context:
-            num_padding = self.left_context - position
-            for i in xrange(num_padding):
-                np.copyto(window[i], self.pre_tokens[-num_padding+i])
-        else:
-            num_padding = 0
-
-        for i in xrange(self.left_context - num_padding):
-            np.copyto(window[num_padding + i],
-                      sentence[position - self.left_context + num_padding + i])
-        if size == 1:
-            ngram = sentence[position]
-        else:
-            # get IDs of each token
-            ngramIDs = [sentence[i][0] for i in xrange(position, position + size)]
-            # get the embeddings extractor
-            extractor = self.converter.extractors[0]
-            ngram = np.array([extractor.lookup_ngram(ngramIDs)]) # single feature_table
-
-        window[self.left_context] = ngram
-
-        # number of tokens in the sentence after the position
-        tokens_after = len(sentence) - (position + size)
-        if tokens_after < self.right_context:
-            num_padding = self.right_context - tokens_after
-            for i in xrange(tokens_after):
-                np.copyto(window[self.left_context+1 + i],
-                          sentence[position + size + i])
-            # add padding
-            for i in xrange(num_padding):
-                np.copyto(window[self.left_context+1+tokens_after + i],
-                          self.post_tokens[-i])
-        else:
-            for i in xrange(self.right_context):
-                np.copyto(window[self.left_context+1 + i],
-                          sentence[position + size +i])
-        return ngram
 
     @cython.boundscheck(False)
     cdef FLOAT_t _train_pair(self, Variables vars_pos, Variables vars_neg,
@@ -619,9 +625,9 @@ cdef class LmWorker(LmTrainer):
          
         # (hidden_size) x (input_size) = (hidden_size, input_size)
         # grads.hidden_weights = grads.hidden_bias x input_values
-        np.outer(vars_pos.hidden, vars_pos.input, self.grads_hidden_weights_pos)
-        np.outer(vars_neg.hidden, vars_neg.input, self.grads_hidden_weights_neg)
-        grads.hidden_weights += self.grads_hidden_weights_pos + self.grads_hidden_weights_neg
+        np.outer(vars_pos.hidden, vars_pos.input, self.grads.hidden_weights_pos)
+        np.outer(vars_neg.hidden, vars_neg.input, self.grads.hidden_weights_neg)
+        grads.hidden_weights += self.grads.hidden_weights_pos + self.grads.hidden_weights_neg
         # grads.hidden_bias = hidden_values * output_weights.dot(grads.output_bias)
         grads.hidden_bias += vars_pos.hidden + vars_neg.hidden
 

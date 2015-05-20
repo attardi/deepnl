@@ -123,7 +123,7 @@ class TaggerReader(Reader):
             for token, in sent:
                 c[token[0]] += 1
                 tags.add(token[-1])  # assumes that tag is last token field
-        common = c.most_common(size)
+        common = c.most_common(size) # common is a list of pairs
         words = [w for w, n in common if n >= min_occurrences]
         return words, tags
 
@@ -163,8 +163,7 @@ class TweetReader(Reader):
 
     def __init__(self, ngrams=1, variant=None):
         """
-	:param ngrams: the lenght of ngrams to consider
-        :param filename: the name of the file containing tweets. The file should have one tweet per line.
+	:param ngrams: the length of ngrams to consider
 	:param variant: whether to use native, or SENNA or Polyglot conventions
         """
         super(TweetReader, self).__init__()
@@ -174,18 +173,16 @@ class TweetReader(Reader):
         self.polarities = []
 
     def read(self, filename):
-        with open(filename, 'rb') as f:
-            for line in f:
-                tweet = unicode(line, 'utf-8').split('\t')
-                if tweet[TweetReader.polarity_field] == 'positive':
-                    polarity = 1
-                if tweet[TweetReader.polarity_field] == 'negative':
-                    polarity = -1
-                else:
-                    continue    # CHECKME: skip tweets with no polarity
-                self.sentences.append(tweet[TweetReader.text_field].split())
-                self.polarities.append(polarity)
-            return self.sentences
+        for tweet in TsvReader(filename):
+            if tweet[TweetReader.polarity_field] == 'positive':
+                polarity = 1
+            elif tweet[TweetReader.polarity_field] == 'negative':
+                polarity = -1
+            else:
+                polarity = 0
+            self.sentences.append(tweet[TweetReader.text_field].split())
+            self.polarities.append(polarity)
+        return self.sentences
                     
     def acceptable(self, token):
         """Simple criteron to accept a token as part of a phrase, rejecting
@@ -193,29 +190,48 @@ class TweetReader(Reader):
         """
         return len(token) > 2
 
-    def create_vocabulary(self, sentences, size=None, min_occurrences=3):
+    # discount to avoid phrases with very infrequent words
+    delta = 1
+
+    def create_vocabulary(self, tweets, size=None, min_occurrences=3, threshold=0.1):
         """
-        Generates a list of all ngrams from the given sentences.
+        Generates a list of all ngrams from the given tweets.
         
-        :param sentences: an iterable on sentences.
+        :param tweets: an iterable on tweets.
         :param size: Max number of tokens to be included in the dictionary.
         :param min_occurrences: Minimum number of times that a token must
             appear in the text in order to be included in the dictionary. 
+        :param threshold: minimum bigram score
+
         """
         
+        # Use PMI-like score for selecting collocations:
+        # score(x, y) = (count(x,y) - delta) / count(x)count(y)
+        # @see Mikolov et al. 2013. Efficient Estimation of Word Representations in Vector Space. In Proceedings of Workshop at ICLR, 2013
         # unigrams
-        ngrams = [[token for sent in sentences for token in sent]]
-        # multigrams
-	for n in xrange(2, self.ngrams + 1):
-            ngrams.append([])
-	    for sent in sentences:
-	    	for i in xrange(len(sent) + 1 - n):
-                    phrase = sent[i:i+n]
-                    accept = True
-                    for tok in phrase:
-                        if not acceptable(tok):
-                            accept = False
-                            break
-                    if accept:
-                        ngrams[-1].append(' '.join(phrase))
-        return ngrams
+        unigramCount = Counter(token for tweet in tweets for token in tweet)
+        ngrams = [u for u,c in unigramCount.iteritems() if c >= min_occurrences]
+        # bigrams
+        bigramCount = Counter()
+        trigramCount = Counter()
+        for tweet in tweets:
+            for a,b,c in zip(tweet[:-1], tweet[1:], tweet[2:]):
+                if unigramCount[a] >= min_occurrences and unigramCount[b] >= min_occurrences:
+                    bigramCount.update([(a, b)])
+                    if unigramCount[c] >= min_occurrences:
+                        trigramCount.update([(a, b, c)])
+        if len(tweet) > 1 and unigramCount[tweet[-2]] >= min_occurrences and unigramCount[tweet[-1]] >= min_occurrences:
+            bigramCount.update([(tweet[-2], tweet[-1])])
+        bigrams = []
+        for b, c in bigramCount.iteritems():
+            if (float(c) - TweetReader.delta) / (unigramCount[b[0]] * unigramCount[b[1]]) > threshold:
+                ngrams.append(b[0] + '_' + b[1])
+                bigrams.append(b)
+        trigrams = []
+        for b, c in trigramCount.iteritems():
+            if (float(c) - TweetReader.delta) / (unigramCount[b[0]] * unigramCount[b[1]]) > threshold/2 \
+                and (float(c) - TweetReader.delta) / (unigramCount[b[1]] * unigramCount[b[2]]) > threshold/2:
+                ngrams.append(b[0] + '_' + b[1] + '_' + b[2])
+                trigrams.append(b)
+        # FIXME: repeat for multigrams
+        return ngrams, bigrams, trigrams

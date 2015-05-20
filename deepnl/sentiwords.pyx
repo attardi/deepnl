@@ -26,13 +26,29 @@ cdef class SentGradients(Gradients):
         super(SentGradients, self).__init__(input_size, hidden_size, output_size)
         # gradients for positive hidden variables
         self.pos_hidden = np.zeros(hidden_size, dtype=float)
-        # gradients for nfative hidden variables
+        # gradients for negative hidden variables
         self.neg_hidden = np.zeros(hidden_size, dtype=float)
 
     def clear(self):
         super(SentGradients, self).clear()
         self.pos_hidden.fill(0.0)
         self.neg_hidden.fill(0.0)
+
+# ----------------------------------------------------------------------
+
+def itertrie(trie, sent, start, depth=0):
+    """iterate through all ngrams that occur in :param sent: starting at
+    position :param start:"""
+    tr = trie
+    for cur in xrange(start, len(sent)):
+        tok = sent[cur][0]
+        if tok in tr:         # part of ngram
+            tr = tr[tok]
+        else:
+            break
+    if cur > start+1:
+        yield cur-start    # ngram
+    return 1               # single token
 
 # ----------------------------------------------------------------------
 
@@ -53,6 +69,8 @@ cdef class SentimentTrainer(LmTrainer):
     cdef np.ndarray neg_hidden_adagrads
     cdef np.ndarray pos_hidden_adagrads
 
+    cdef RandomPool random_pool
+
     def __init__(self, converter, float learning_rate,
                  int left_context, int right_context,
                  int hidden_size, int ngrams, float alpha):
@@ -63,11 +81,11 @@ cdef class SentimentTrainer(LmTrainer):
         :param hidden_size: default 20
         :param alpha: default 0.5
         """
+        output_size = 2
         super(SentimentTrainer, self).__init__(converter, learning_rate,
                                                left_context, right_context,
-                                               hidden_size, 2)
+                                               hidden_size, output_size, ngrams)
 
-        self.ngrams = ngrams
         self.alpha = alpha
 
         # cumulative AdaGrad
@@ -83,35 +101,34 @@ cdef class SentimentTrainer(LmTrainer):
 	:param example: the positive example, i.e. a list of a list of token IDs
         :param grads: the computed gradients are accumulated here, except for 
 	:param size: size of ngram to generate for replacing window center
-        :param polarity: 1 for positive, -1 for negative sentences.
+        :param polarity: 1 for positive, -1 for negative sentences, 0 for neutral..
         """
         
         # a token is a list of feature IDs.
         # token[0] is the list with the WordDictionary index of the word,
-        cdef np.ndarray[INT_t,ndim=1] middle_token = example[self.nn.left_context]
+        cdef int left_context = len(self.pre_padding)
+        cdef np.ndarray[INT_t,ndim=1] middle_token = example[left_context]
         cdef np.ndarray[INT_t,ndim=1] variant
 
-        if size == 1:
-	   # ensure to generate a different word
-            while True:
-                variant = self.random_pool.next()
-                if variant[0] != middle_token[0]:
-                    break
-        else:
-            raise Exception("ngram size not implemented")
+        # ensure to generate a different word
+        while True:
+            variant = self.random_pool.next()
+            if variant[0] != middle_token[0]:
+                break
 
         cdef Network nn = self.nn
-        cdef np.ndarray[FLOAT_t,ndim=1] pos_input_values = nn.converter.lookup(example)
-        cdef np.ndarray[FLOAT_t,ndim=1] pos_score = nn.run(pos_input_values)
-        cdef np.ndarray[FLOAT_t,ndim=1] pos_hidden_values = nn.hidden_values
+        pos_vars = nn.variables()
+        self.converter.lookup(example, pos_vars.input)
+        nn.run(pos_vars)
 
+        neg_vars = nn.variables()
         cdef np.ndarray[INT_t,ndim=1] negative_token = np.array(variant, dtype=int)
-        example[nn.left_context] = negative_token
-        cdef np.ndarray[FLOAT_t,ndim=1] neg_input_values = nn.converter.lookup(example)
-        cdef np.ndarray[FLOAT_t,ndim=1] neg_score = nn.run(neg_input_values)
+        example[left_context] = negative_token
+        self.converter.lookup(example, neg_vars.input)
+        nn.run(neg_vars)
         
-        cdef float errorCW = max(0, 1 - pos_score[0] + neg_score[0])
-        cdef float errorUS = max(0, 1 - polarity * pos_score[1] + polarity * neg_score[1])
+        cdef float errorCW = max(0, 1 - pos_vars.output[0] + neg_vars.output[0])
+        cdef float errorUS = max(0, 1 - polarity * pos_vars.output[1] + polarity * neg_vars.output[1])
         cdef float error = self.alpha * errorCW + (1 - self.alpha) * errorUS
         self.error += error
         self.total_pairs += 1
@@ -145,26 +162,26 @@ cdef class SentimentTrainer(LmTrainer):
         # CHECKME: summing they cancel each other:
         grads.output_bias = grads_pos_score + grads_neg_score
         # (2) x (hidden_size) = (2, hidden_size)
-        grads.output_weights += np.outer(grads_pos_score, pos_hidden_values) + np.outer(grads_neg_score, nn.hidden_values)
+        grads.output_weights += np.outer(grads_pos_score, pos_vars.hidden) + np.outer(grads_neg_score, neg_vars.hidden)
 
         # Hidden layer
         # (2) x (2, hidden_size) = (hidden_size)
-        grads.pos_hidden = hardtanhe(pos_hidden_values) * grads_pos_score.dot(nn.output_weights)
-        grads.neg_hidden = hardtanhe(nn.hidden_values) * grads_neg_score.dot(nn.output_weights)
+        grads.pos_hidden = hardtanhe(pos_vars.hidden) * grads_pos_score.dot(nn.output_weights)
+        grads.neg_hidden = hardtanhe(neg_vars.hidden) * grads_neg_score.dot(nn.output_weights)
 
         # Input layer
         # (hidden_size) x (input_size) = (hidden_size, input_size)
-        cdef np.ndarray[FLOAT_t,ndim=2] grads_pos_hidden_weights = np.outer(grads.pos_hidden, pos_input_values)
-        cdef np.ndarray[FLOAT_t,ndim=2] grads_neg_hidden_weights = np.outer(grads.neg_hidden, neg_input_values)
+        cdef np.ndarray[FLOAT_t,ndim=2] grads_pos_hidden_weights = np.outer(grads.pos_hidden, pos_vars.input)
+        cdef np.ndarray[FLOAT_t,ndim=2] grads_neg_hidden_weights = np.outer(grads.neg_hidden, neg_vars.input)
         grads.hidden_weights = grads_pos_hidden_weights + grads_neg_hidden_weights
         grads.hidden_bias = grads.pos_hidden + grads.neg_hidden
 
         return error, variant
 
-    cdef update(self, Gradients grads, float remaining,
-                np.ndarray[INT_t,ndim=2] example,
-                np.ndarray[INT_t,ndim=1] middle_token,
-                np.ndarray[INT_t,ndim=1] negative_token):
+    cdef _update(self, Gradients grads, float remaining,
+                 np.ndarray[INT_t,ndim=2] example,
+                 np.ndarray[INT_t,ndim=1] middle_token,
+                 np.ndarray[INT_t,ndim=1] negative_token):
         """
         Update the weights along the gradients :param grads:
         """
@@ -173,6 +190,7 @@ cdef class SentimentTrainer(LmTrainer):
         cdef float LR_2 = max(0.001, self.learning_rate / self.nn.hidden_size * remaining)
 
         cdef Network nn = self.nn
+        cdef int left_context = len(self.pre_padding)
 
         nn.output_weights += LR_2 * grads.output_weights
         nn.output_bias += LR_2 * grads.output_bias
@@ -197,15 +215,16 @@ cdef class SentimentTrainer(LmTrainer):
              
         # this tracks where the deltas for the next table begins
         cdef int offset = 0
-        for i, token in enumerate(example):
-            for j, table in enumerate(nn.feature_tables): # just one table
+        for i, token in enumerate(example): 
+            for j, e in enumerate(self.converter.extractors): # just one table
+                table = e.table
                 # i-th token in the window
                 # j-th feature table (there is only one: j == 0)
                 embeddings_size = table.shape[1]
                 deltas_neg = deltas_neg_input[offset: offset + embeddings_size]
                 deltas_pos = deltas_pos_input[offset: offset + embeddings_size]
                     
-                if i == nn.left_context:
+                if i == left_context:
                     # this is the middle position.
                     # apply negative and positive deltas to different tokens
                     table[negative_token[j]] += deltas_neg
@@ -213,30 +232,40 @@ cdef class SentimentTrainer(LmTrainer):
                 else:
                     # this is not the middle position. both deltas apply.
                     table[token[j]] += deltas_neg + deltas_pos
-                
+                   
                 offset += embeddings_size
 
-    def train(self, Iterable sentences, int epochs, int report_freq,
-              list polarities, ngram_dict):
+    def train(self, Iterable sentences, list polarities, trie,
+              int epochs, int report_freq):
         """
         Trains the sentiment language model on the given sentences.
         :param sentences: an iterable on a list of token features for each sentence
         :param iterations: number of train iterations
         :param polarities: the polarity of each sentence, +-1.
-        :param ngram_dict: the dictionary of the ngrams on the corpus
+        :param trie: of ngrams
         """
         # generate 1000 random indices at a time to save time
         # (generating 1000 integers at once takes about ten times the time for a single one)
-        self.random_pool = RandomPool([x.shape[0] for x in self.nn.feature_tables])
+        # FIXME: nonsense to create random features besides ID
+        feature_tables = [e.table for e in self.converter.extractors]
+        self.random_pool = RandomPool([x.shape[0] for x in feature_tables])
         self.total_pairs = 0
 
         # how often to save model
-        cdef int save_period = 1000 * 1000
+        cdef int save_period = 1000 * 1000 # FIXME
 
-        cdef float all_cases = float(sum([len(sen) for sen in sentences]) * epochs * self.ngrams)
+        cdef float all_cases = float(sum([len(sen) for sen in sentences]) * epochs * self.ngram_size)
 
         cdef int epoch, epoch_examples, num, pos
         cdef float remaining
+
+        cdef int left_context = len(self.pre_padding)
+        cdef int right_context = len(self.post_padding)
+        cdef int window_size = left_context + 1 + right_context
+        # FIXME: might use self.example instead of window?
+        cdef np.ndarray window = np.empty((window_size, 1), dtype=np.int)
+        cdef np.ndarray token, neg_token
+        cdef int size = 1
 
         grads = SentGradients(self.nn.input_size, self.nn.hidden_size, self.nn.output_size)
 
@@ -249,45 +278,25 @@ cdef class SentimentTrainer(LmTrainer):
             remaining = 1.0 - (self.total_pairs / all_cases)
 
             for num, sentence in enumerate(sentences):
+                if polarities[num] == 0:
+                    # skip neutral sentences
+                    continue
                 for pos in xrange(len(sentence)):
-                
-                    # ngram size changes periodically
-                    if self.ngrams > 1 and  self.total_pairs:
-                        if self.total_pairs % 5 == 0:
-                            size = 2
-                        elif self.total_pairs % 17 == 0:
-                            size = 3
-                        else:
-                            size = 1
-                    else:
-                        size = 1
+                    # for any word or ngram
+                    for size in itertrie(trie, sentence, pos):
+                        # FIXME: avoid overlaps like 0-3, 1-2
+                        # extract a window of tokens around the given position
+                        token = self._extract_window(window, sentence, pos, size)
 
-                    # extract a window of tokens around the given position
-                    if size == 1:
-                        token = sentence[pos]
-                    else:
-                        # get IDs of each token
-                        ngrams = [sentence[i][0] for i in xrange(pos, pos + size)]
-                        # lookup ngram IDs to obtain words
-                        tokens = ngram_dict.get_words(ngrams)
-                        token = np.array([ngram_dict[' '.join(tokens)]]) # one feature_table
-
-                    window = self._extract_window(sentence, pos, token, size)
-
-                    error, neg_token = self._train_pair_s(window, grads, size, polarities[num])
-                    self.update(grads, remaining, window, token,
-                                neg_token)
-                    epoch_examples += 1
+                        error, neg_token = self._train_pair_s(window, grads, size, polarities[num])
+                        self.error += error
+                        self._update(grads, remaining, window, token, neg_token)
+                        epoch_examples += 1
 
                     if report_freq > 0 and \
                        (self.total_pairs and
                         self.total_pairs % report_freq == 0):
-                        self._progress_report(epoch_examples)
+                        self._progress_report(self.total_pairs, epoch_examples)
                         # periodically save language model
                         if save_period and self.total_pairs % save_period == 0:
                             self.saver(self)
-
-    # @classmethod
-    # def load_weights(cls, filename):
-    #     # inherit from base class, but instantiate derived cls
-    #     return LanguageModel.load_weights.__func__(cls, filename)

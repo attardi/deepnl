@@ -1,3 +1,51 @@
+2015-05-17  Giuseppe Attardi  <attardi@di.unipi.it>
+
+	* deepnl/reader.py (TweetReader.read): fixed bug causing skipping
+	positive tweets.
+	(TweetReader.read): keep also neutral tweets.
+
+2015-05-16  Giuseppe Attardi  <attardi@di.unipi.it>
+
+	* deepnl/words.pyx (LmWorker._extract_window): moved to LmTrainer
+	for sharing with SentimentTrainer.
+
+	* deepnl/trainer.pyx (Trainer.update): moved here from Tagger.
+
+	* deepnl/network.pyx (Network): modularized dealing with variables
+	and gradients. Each network type provides methods variables() and
+	gradients() to allocate the variables or gradients it uses.
+
+	* deepnl/math.pyx (hardtanh, hardtanhd): use nditer.
+
+	* deepnl/networkseq.pyx (_calculate_gradients_sll): dropped case
+	for null self.transitions.
+	avoid allocations by using out parameter or [:] assignment.
+
+	* deepnl/networkseq.pyx (update): dropped case for null
+	self.transitions.
+
+2015-05-14  Giuseppe Attardi  <attardi@di.unipi.it>
+
+	* deepnl/embeddings.py (Word2Vec.read_vectors): renamed load().
+
+	* deepnl/extractors.pyx (__init__): use Word2Vec.
+
+	* deepnl/embeddings.py: dropped Gensim class since Gensim dropped
+	support for its own file format.
+	(Word2Vect): renamed to Word2Vec.
+
+2015-05-10  Giuseppe Attardi  <attardi@di.unipi.it>
+
+	* deepnl/corpus.py (TsvReader): added.
+
+	* deepnl/math.pyx (hardtanh, hardtanhd): use np.nditer.
+	(tanhe): use slicing to avoid copying.
+
+2015-04-28  Giuseppe Attardi  <attardi@di.unipi.it>
+
+	* bin/dl-words.py (main): missing default to param words.
+	(main): converter.add().
+
 2015-04-24  Giuseppe Attardi  <attardi@di.unipi.it>
 
 	* bin/dl-ner.py (main): pass tokens to SuffixExtractor()

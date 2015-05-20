@@ -48,7 +48,7 @@ cdef class ConvertGenerator(Iterable):
         :param sentences: an iterable over sentences.
         :param cache: if this is True, caches converted sentences,
         avoiding repeated conversion. Useful if sentences is small enough to
-        stay in memory.
+        fit in memory.
         """
         self.converter = converter
         self.sentences = sentences
@@ -139,7 +139,7 @@ cdef class Converter(object):
             of eack token in :param sentence:
         """
         if out is None:
-            out = np.empty(self.size())
+            out = np.empty(self.size() * len(sentence))
         cdef int start = 0, end
         for token in sentence:
             for feature, extractor in izip(token, self.extractors):
@@ -262,6 +262,14 @@ cdef class Embeddings(Extractor):
             extra = len(self.dict) - len(self.table)
             self.table = np.concatenate((self.table, embeddings.generate_vectors(extra, self.table.shape[1])))
 
+    def merge(self, vocab):
+        """Extend the dictionary with words from :param vocab:"""
+        for word in vocab.iteritems():
+            self.dict.setdefault(word, len(self.dict))
+        # generate vectors for added words
+        extra = len(self.dict) - len(self.table)
+        self.table = np.concatenate((self.table, embeddings.generate_vectors(extra, self.table.shape[1])))
+
     def save(self, file):
         self.dict.save(file)
         pickle.dump(self.table, file)
@@ -298,6 +306,14 @@ cdef class Embeddings(Extractor):
         # lookup ngram IDs to obtain back words
         tokens = self.dict.get_words(ngramIDs)
         return self.dict[' '.join(tokens)]
+
+    def sentence(self, feats):
+        """
+        Get sentence back from features.
+        """
+        # lookup ngram IDs to obtain back words
+        tokens = self.dict.get_words([tok[0] for tok in feats])
+        return ' '.join(tokens)
 
 # ----------------------------------------------------------------------
 # Capitalization

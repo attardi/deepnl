@@ -16,8 +16,8 @@ cdef class Tagger(object):
     cdef public Converter converter
     #cdef list feature_tables
 
-    cdef dict tags_dict
-    cdef list itd
+    cdef dict tags_dict         # tag ids
+    cdef list tags              # list of tags
     cdef public nn # cython crashes with SequenceNetwork
 
     # padding stuff
@@ -28,5 +28,3 @@ cdef class Tagger(object):
                                                   np.ndarray sentence,
                                                   bool train=*)
 
-    cpdef update(self, SeqGradients grads, float learning_rate,
-                 np.ndarray[INT_t,ndim=2] sentence, SeqGradients ada=*)

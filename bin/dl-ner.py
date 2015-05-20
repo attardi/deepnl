@@ -76,7 +76,7 @@ def main():
 
     defaults = {}
     
-    parser = argparse.ArgumentParser(description="Learn word embeddings.")
+    parser = argparse.ArgumentParser(description="Train or use a Named Entity tagger.")
     
     parser.add_argument('-c', '--config', dest='config_file',
                         help='Specify config file', metavar='FILE')
@@ -140,7 +140,7 @@ def main():
     parser.add_argument('--load', type=str, default=None,
                         help='Load previously saved model')
     parser.add_argument('--variant', type=str, default=None,
-                        help='Either "senna" (default), "polyglot", "word2vec" or "gensym".')
+                        help='Either "senna" (default), "polyglot" or "word2vec".')
     parser.add_argument('-v', '--verbose', help='Verbose mode',
                         action='store_true')
 

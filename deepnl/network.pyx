@@ -37,6 +37,10 @@ cdef class Variables(object):
 # ----------------------------------------------------------------------
 
 cdef class Parameters(object):
+    """
+    Network parameters: weights and biases.
+    Parameters are shared among threads in ASGD.
+    """
     
     def __init__(self, int input_size, int hidden_size, int output_size):
         self.output_weights = np.zeros((output_size, hidden_size), dtype=float)
@@ -47,6 +51,9 @@ cdef class Parameters(object):
 # ----------------------------------------------------------------------
 
 cdef class Gradients(Parameters):
+    """
+    Gradients for all network Parameters, plus input gradients.
+    """
     
     def __init__(self, int input_size, int hidden_size, int output_size):
         super(Gradients, self).__init__(input_size, hidden_size, output_size)
@@ -118,9 +125,17 @@ cdef class Network(Parameters):
         
         return desc
     
+    cdef variables(self, int slen=0):
+        """Allocate variables."""
+        return Variables(self.input_size, self.hidden_size, self.output_size)
+
+    cdef gradients(self, int slen=0):
+        """Allocate variables."""
+        return Gradients(self.input_size, self.hidden_size, self.output_size)
+
     cpdef run(self, Variables vars):
         """
-        Runs the network on the given variables: input, hidden, output. 
+        Runs the network on the given variables: hidden and visible. 
         """
         # (hidden_size, input_size) . input_size = hidden_size
         self.hidden_weights.dot(vars.input, vars.hidden)
@@ -144,27 +159,37 @@ cdef class Network(Parameters):
 
         if hinge_loss == 0.0:
             return hinge_loss
+        # f_4 = W_2 f_3 + b_2
+        # dC / db_2 = dC / df_4
         np.copyto(grads.output_bias, vars.output)
         grads.output_bias[y] += 1.0 # negative gradient
-
-        # dC / dM_2 = dC / df_4 f_3
+        # dC / dW_2 = dC / df_4 f_3
         # output_size x hidden_size
         np.outer(grads.output_bias, vars.hidden, grads.output_weights)
+        # dC / df_3 = dC / df_4 * W_2				(23)
 
-        # dC / df_2 = hardtanhd(f_2) * dC / df_3
+        # f_3 = hardtanh(f_2)
+        # dC / df_2 = dC / df_3 * hardtanhd(f_2)
         hardtanhe(vars.hidden, vars.hidden)
 
+        # f_2 = W_1 f_1 + b_1
         # dC / db_1 = dC / df_2					(22)
-        # grads.hidden_bias = vars.hidden * self.output_weights.dot(grads.output_bias)
         # (output_size) * (output_size x hidden_size) = (hidden_size)
+        # grads.hidden_bias = vars.hidden * grads.output_bias.dot(self.output_weights)
+        # dC / df_3
         grads.output_bias.dot(self.output_weights, grads.hidden_bias)
+        #           * hardtanh(f_2) = dC / df_2
         grads.hidden_bias *= vars.hidden
 
-        # dC / dW_2 = dC / df_2 f_1.T				(22)
+        # dC / dW_1 = dC / df_2 * f_1
         # (hidden_size) x (input_size) = (hidden_size, input_size)
         np.outer(grads.hidden_bias, vars.input, grads.hidden_weights)
 
-        # dC / df_1 = M_1.T dC / df_2
+        # dC / df_1 = dC / df_2 * W_1				(23)
+
+        # Lookup layer
+        # f_1 = W_0 f_0
+        # dC / dW_0 = dC / df_1 * W_0
         # (hidden_size) * (hidden_size, input_size) = (input_size)
         grads.hidden_bias.dot(self.hidden_weights, grads.input)
 

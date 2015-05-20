@@ -134,7 +134,7 @@ def main():
     parser.add_argument('--load', type=str, default=None,
                         help='Load previously saved model')
     parser.add_argument('--variant', type=str, default=None,
-                        help='Either "senna" (default), "polyglot", "word2vec" or "gensym".')
+                        help='Either "senna" (default), "polyglot" or "word2vec".')
     parser.add_argument('-v', '--verbose', help='Verbose mode',
                         action='store_true')
 
@@ -195,13 +195,13 @@ def main():
             converter.add(extractor)
 
         # labels from all examples
-        label_dict = {c:i for i,c in enumerate(set(reader.polarities)})
+        labels = reader.polarities
+        labels_dict = {c:i for i,c in enumerate(set(labels))}
         examples = []
         for example in reader.sentences:
             examples.append(converter.convert([token[0] for token in example]))
-        labels = [label_dict[p] for p in reader.polarities]
 
-        trainer = create_trainer(args, converter, label_dict)
+        trainer = create_trainer(args, converter, labels_dict)
         logger.info("Starting training with %d examples" % len(examples))
 
         report_frequency = max(args.iterations / 200, 1)

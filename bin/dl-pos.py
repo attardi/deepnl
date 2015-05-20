@@ -54,7 +54,7 @@ def create_trainer(args, converter, tags_dict):
                                 args.window/2, args.window/2,
                                 args.hidden, tags_dict, args.verbose)
 
-    #trainer.saver = saver(args.model, args.output)
+    trainer.saver = saver(args.model, args.output)
 
     logger.info("... with the following parameters:")
     logger.info(trainer.nn.description())
@@ -140,7 +140,7 @@ def main():
     parser.add_argument('--load', type=str, default=None,
                         help='Load previously saved model')
     parser.add_argument('--variant', type=str, default=None,
-                        help='Either "senna" (default), "polyglot", "word2vec" or "gensym".')
+                        help='Either "senna" (default), "polyglot" or "word2vec".')
     parser.add_argument('-v', '--verbose', help='Verbose mode',
                         action='store_true')
 
@@ -221,7 +221,7 @@ def main():
                       args.threads)
     
         logger.info("Saving trained model ...")
-        saver(args.model, args.output)(trainer)
+        trainer.saver(trainer)
         logger.info("... to %s" % args.model)
 
     else:

@@ -20,6 +20,8 @@ from network cimport *
 # for decorations
 cimport cython
 
+cdef float eps = 0.01          # minimum error worth an update
+
 # ----------------------------------------------------------------------
 
 cdef class SeqGradients(Gradients):
@@ -64,7 +66,10 @@ cdef class SequenceNetwork(Network):
         # +1 is due for the initial transition
         self.transitions = np.random.uniform(-high, high, (output_size + 1, output_size))
 
-    
+    cdef gradients(self, int seqlen=1):
+        return SeqGradients(self.input_size, self.hidden_size,
+                            self.output_size, seqlen)
+
     def _calculate_delta(self, scores):
         """
         Calculates a matrix with the scores for all possible paths at all given
@@ -102,8 +107,8 @@ cdef class SequenceNetwork(Network):
 
     @cython.boundscheck(False)
     cpdef bool _calculate_gradients_sll(self, np.ndarray[INT_t,ndim=1] tags,
-                                       SeqGradients grads,
-                                       np.ndarray[FLOAT_t,ndim=2] scores):
+                                        SeqGradients grads,
+                                        np.ndarray[FLOAT_t,ndim=2] scores):
         """
         Calculates the output and transition deltas for each token, using
         Sentence Level Likelihood.
@@ -122,8 +127,7 @@ cdef class SequenceNetwork(Network):
         cdef int tag, last_tag = self.output_size
         cdef np.ndarray[FLOAT_t,ndim=1] nth_scores
         for tag, nth_scores in izip(tags, scores):
-            trans = 0 if self.transitions is None else self.transitions[last_tag, tag]
-            correct_path_score += trans + nth_scores[tag]
+            correct_path_score += self.transitions[last_tag, tag] + nth_scores[tag]
             last_tag = tag
         
         # delta[t] = delta_t in equation (14)
@@ -143,7 +147,7 @@ cdef class SequenceNetwork(Network):
         # error 0.69 -> 50% probability for right tag (minimal threshold)
         # error 0.22 -> 80%
         # error 0.1  -> 90%
-        if error <= 0.01:
+        if error <= eps:
             return False
         
         # things get nasty from here
@@ -153,57 +157,57 @@ cdef class SequenceNetwork(Network):
         # negative gradients
         grads.output[-1] = -softmax(delta[-1])
 
-        transitions_t = 0 if self.transitions is None else self.transitions[:-1].T
+        # (output_size, output_size)
+        cdef np.ndarray[FLOAT_t, ndim=2] transitions_t = self.transitions[:-1].T
         
         # delta[i][j]: sum of scores of all path that assign tag j to ith-token
 
         # now compute the gradients for the other tokens, from last to first
-        cdef np.ndarray[FLOAT_t,ndim=2] path_scores # (output_size, output_size)
+        cdef np.ndarray[FLOAT_t,ndim=2] path_scores = np.empty((self.output_size, self.output_size), np.float)
         for t in range(len(scores) - 2, -1, -1):
             
             # sum the scores for all paths ending with each tag i at token t
             # with the transitions from tag i to the next tag j
             # Obtained by transposing twice
             # [delta_t-1(i)+A_j,i]T
-            path_scores = (delta[t] + transitions_t).T
+            path_scores[:,:] = (delta[t] + transitions_t).T
 
             # normalize over all possible tag paths using a softmax,
             # along the columns.
             # softmax is the division of an exponential by the sum of all exponentials
             # (yields a probability)
             # e(delta_t-1(i)+A_i,j) / Sum_k e(delta_t-1(k)+A_k,j)
-            path_scores = softmax2d(path_scores)
+            softmax2d(path_scores, 0, path_scores)
 
             # multiply each value in the softmax by the gradient at the next tag
             # dC_logadd / ddelta_t(i) * path_scores
             # Attardi: negative since output[t + 1] already negative
             grad_times_softmax = grads.output[t + 1] * path_scores
             # dC / dA_i,j
-            grads.transitions[:-1, :] += grad_times_softmax
+            grads.transitions[:-1,:] += grad_times_softmax
             
             # sum all transition gradients by row to find the network gradients
             # Sum_j(dC_logadd / ddelta_t(j) * path_scores(j))
             # Attardi: negative since grad_times_softmax already negative
-            grads.output[t] = np.sum(grad_times_softmax, 1)
+            np.sum(grad_times_softmax, 1, out=grads.output[t])
 
         # find the gradients for the starting transition
         # there is only one possibility to come from, which is the sentence start
-        grads.transitions[-1] = grads.output[0]
+        grads.transitions[-1,:] = grads.output[0]
         
         # now, add +1 to the correct path
         last_tag = self.output_size
         for token, tag in enumerate(tags):
             grads.output[token][tag] += 1 # negative gradient
-            if self.transitions is not None:
-                grads.transitions[last_tag][tag] += 1 # negative gradient
+            grads.transitions[last_tag][tag] += 1 # negative gradient
             last_tag = tag
         
         return True
 
     @cython.boundscheck(False)
     cpdef bool _calculate_gradients_wll(self, np.ndarray[INT_t,ndim=1] tags,
-                                       SeqGradients grads,
-                                       np.ndarray[FLOAT_t,ndim=2] scores):
+                                        SeqGradients grads,
+                                        np.ndarray[FLOAT_t,ndim=2] scores):
         """
         Calculates the output for each token, using Word Level Likelihood.
         The aim is to minimize the word-level log-likelihood:
@@ -324,7 +328,7 @@ cdef class SequenceNetwork(Network):
         # dC / df_2 = hardtanhd(f_2) * dC / df_3
         # (len, hidden_size) * (len, hidden_size) = (len, hidden_size)
         # FIXME: this goes quickly to 0.
-        dCdf_2 = hardtanhe2d(self.hidden_sequence) * dCdf_3
+        dCdf_2 = hardtanhe2d(self.hidden_sequence, self.hidden_sequence) * dCdf_3
 
         # df_2 / df_1 = M_1
 
@@ -344,8 +348,8 @@ cdef class SequenceNetwork(Network):
         #print >> sys.stderr, 'hbg', grads.hidden_bias[:4], grads.hidden_bias[-4:] # DEBUG
         #print >> sys.stderr, 'ig', grads.input[0,:4], grads.input[-1,-4:] # DEBUG
 
-    cdef _update(self, SeqGradients grads, float learning_rate,
-                 SeqGradients ada=None):
+    cpdef update(self, Gradients grads, float learning_rate,
+                 Gradients ada=None):
         """
         Adjust the weights.
         :param ada: cumulative square gradients for performing AdaGrad.
@@ -353,12 +357,11 @@ cdef class SequenceNetwork(Network):
         super(SequenceNetwork, self).update(grads, learning_rate, ada)
 
         # Adjusts the transition scores table with the calculated gradients.
-        if self.transitions is not None:
-            if ada:
-                ada.transitions += grads.transitions * grads.transitions
-                self.transitions += learning_rate * grads.transitions / np.sqrt(ada.transitions + adaEps)
-            else:
-                self.transitions += grads.transitions * learning_rate # DEBUG / 10
+        if ada:
+            ada.transitions += grads.transitions * grads.transitions
+            self.transitions += learning_rate * grads.transitions / np.sqrt(ada.transitions + adaEps)
+        else:
+            self.transitions += grads.transitions * learning_rate
 
     def save(self, file):
         """

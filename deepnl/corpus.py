@@ -90,3 +90,25 @@ class SrlWriter(object):
                 line = '\t%s: %s' % (label, argument)
                 print line.encode('utf-8')
         print
+
+# ----------------------------------------------------------------------
+
+class TsvReader(object):
+    """
+    An iterator over examples read from a file in TSV format.
+    If the input is from a file, it can be iterated several times.
+    """
+    def __init__(self, filename=None):
+        self.filename = filename
+
+    def __iter__(self):
+        if self.filename:
+            file = codecs.open(self.filename, 'r', 'utf-8', errors='ignore')
+        else:
+            file = codecs.getreader('utf-8')(sys.stdin)
+        for line in file:
+            line = line.strip()
+            if line:
+                yield line.split('\t')
+        if self.filename:
+            file.close()

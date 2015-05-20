@@ -11,6 +11,7 @@ import logging
 import numpy as np
 import argparse
 from ConfigParser import ConfigParser
+from itertools import chain
 
 # allow executing from anywhere without installing the package
 import sys
@@ -108,17 +109,17 @@ if __name__ == '__main__':
                         help='File with text corpus for training.',
                         required=True)
     parser.add_argument('-o', '--output', type=str, default=None,
-                        help='File where to save embeddings')
-    parser.add_argument('--vocab', type=str, default=None,
+                        help='File where to save the model')
+    parser.add_argument('--vocab', type=str, required=True,
                         help='Vocabulary file, either read or created')
-    parser.add_argument('--vectors', type=str, default=None,
-                        help='Embeddings file, either read or created')
+    parser.add_argument('--vectors', type=str, required=True,
+                        help='Embeddings file, either read and updated or created')
     parser.add_argument('--load', type=str, default=None,
                         help='Load previously saved model')
     parser.add_argument('--threads', type=int, default=1,
                         help='Number of threads (default 1)')
     parser.add_argument('--variant', type=str, default=None,
-                        help='Either "senna" (default), "polyglot", "word2vec" or "gensym".')
+                        help='Either "senna" (default), "polyglot" or "word2vec".')
     parser.add_argument('-v', '--verbose', help='Verbose mode',
                         action='store_true')
 
@@ -137,19 +138,36 @@ if __name__ == '__main__':
 
     reader = TweetReader(args.ngrams)
     reader.read(args.train)
+    vocab, bigrams, trigrams = reader.create_vocabulary(reader.sentences,
+                                                        min_occurrences=2)
     loaded_vocab = False
-    if args.vocab and os.path.exists(args.vocab):
+    if os.path.exists(args.vocab):
         loaded_vocab = True
-        vocab = reader.load_vocabulary(args.vocab)
+        base_vocab = reader.load_vocabulary(args.vocab)
+        if os.path.exists(args.vectors):
+            embeddings = Embeddings(vectors=args.vectors, vocab=base_vocab,
+                                    variant=args.variant)
+        else:
+            embeddings = Embeddings(args.embeddings_size, vocab=base_vocab,
+                                    variant=args.variant)
+        embeddings.merge(vocab)
+    elif args.variant == 'word2vec' and os.path.exists(args.vectors):
+        embeddings = Embeddings(vectors=args.vectors,
+                                variant=args.variant)
+        embeddings.merge(vocab)
     else:
-        vocab = reader.create_vocabulary(reader.sentences)
-    tokens = []
-    for l in vocab: tokens.extend(l) # flatten ngrams dictionaries
-    embeddings = Embeddings(args.embeddings_size, vocab=tokens,
-                            variant=args.variant)
+        embeddings = Embeddings(args.embeddings_size, vocab=vocab,
+                                variant=args.variant)
+    # Assume bigrams are prefix of trigrams, or else we should put a terminator
+    # on trie
+    trie = {}
+    for b in chain(bigrams, trigrams):
+        tmp = trie
+        for w in b:
+            tmp = tmp.setdefault(embeddings.dict[w], {})
 
     converter = Converter()
-    converter.add_extractor(embeddings)
+    converter.add(embeddings)
 
     trainer = create_trainer(args, converter)
 
@@ -161,14 +179,14 @@ if __name__ == '__main__':
     # a generator expression (can be iterated several times)
     # It caches converted sentences, avoiding repeated conversions
     converted_sentences = converter.generator(reader.sentences, cache=True)
-    trainer.train(converted_sentences, args.iterations, report_intervals,
-                  reader.polarities, embeddings.dict)
+    trainer.train(converted_sentences, reader.polarities, trie,
+                  args.iterations, report_intervals)
     
-    logger.info("Saving trained model ...")
-    
-    if args.vocab and not loaded_vocab:
+    if not loaded_vocab:
+        logger.info("Saving vocabuary to %s" % args.vocab)
         embeddings.save_vocabulary(args.vocab)
-    if args.vectors:
-        embeddings.save_vectors(args.vectors)
-    trainer.save(args.output)
-    logger.info("... to %s" % args.output)
+    logger.info("Saving vectors to %s" % args.vectors)
+    embeddings.save_vectors(args.vectors)
+    if args.output:
+        logger.info("Saving trained model to %s" % args.output)
+        trainer.save(args.output)

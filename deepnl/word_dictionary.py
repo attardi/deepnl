@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
 import itertools
-from collections import Counter, OrderedDict as OD
+from collections import Counter, OrderedDict
 import cPickle as pickle
 
 import re
@@ -37,7 +37,8 @@ class WordDictionary(dict):
             have in order to be included.
         :param wordlist: Use this list of words to build the dictionary.
             Overrides iterable_sent if not None and ignores maximum size.
-        :param variant: either 'polyglot' or 'senna' conventions, i.e. keep upper case, use different padding tokens.
+        :param variant: either 'polyglot', 'word2vec', or 'senna' conventions,
+            i.e. keep case, use different padding tokens.
         """
         self.variant = variant
         if variant:
@@ -67,10 +68,8 @@ class WordDictionary(dict):
                 words = words[:size]
         
         else:
-            # using ordered dict as an ordered set
-            # (we need to keep the order and to eliminate duplicates)
-            values = [None] * len(wordlist)
-            words = OD(zip(wordlist, values)).keys()
+            # Keep the order and eliminate duplicates
+            words = list(OrderedDict.fromkeys(wordlist))
             
         # trim to the maximum size
         if size is None:
@@ -249,7 +248,7 @@ class WordDictionary(dict):
         e.g. numbers '11' and '22' are mapped to '00'
 
         """
-        words = [self.words[i] for i in indices]
+        words = [self.words[i] if i < len(self.words) else '<UNKN>' for i in indices]
         return words
     
     def get_indices(self, words):

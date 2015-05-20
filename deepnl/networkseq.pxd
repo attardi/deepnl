@@ -17,7 +17,7 @@ cdef class SequenceNetwork(Network):
     cdef _backpropagate(self, SeqGradients grads)
 
     # FIXME: clash with method in Network
-    cdef _update(self, SeqGradients grads, float learning_rate, SeqGradients ada=*)
+    #cdef update(self, SeqGradients grads, float learning_rate, SeqGradients ada=*)
 
     cpdef bool _calculate_gradients_sll(self, np.ndarray[INT_t,ndim=1] tags,
                                        SeqGradients grads,

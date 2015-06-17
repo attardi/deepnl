@@ -262,9 +262,9 @@ cdef class Embeddings(Extractor):
             extra = len(self.dict) - len(self.table)
             self.table = np.concatenate((self.table, embeddings.generate_vectors(extra, self.table.shape[1])))
 
-    def merge(self, vocab):
-        """Extend the dictionary with words from :param vocab:"""
-        for word in vocab.iteritems():
+    def merge(self, list vocab):
+        """Extend the dictionary with words from list :param vocab:"""
+        for word in vocab:
             self.dict.setdefault(word, len(self.dict))
         # generate vectors for added words
         extra = len(self.dict) - len(self.table)

@@ -218,7 +218,7 @@ Show knn of words typed on stdin."""
   parser.add_option("-g", "--group", metavar="FILE",
                     help="Show clusters from FILE")
   parser.add_option("-f", "--format", type="string", default="plain",
-                    help="Embedding sfile format: plain (default), word2vec")
+                    help="Embeddings file format: plain (default), word2vec")
   options, args = parser.parse_args()
   if len(args) == 0:
     parser.error("incorrect number of arguments")

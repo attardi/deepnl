@@ -104,7 +104,7 @@ class Word2Vec(object):
     @classmethod
     def load(cls, filename):
         """
-        Load words and vectors from a file in word2evec format.
+        Load words and vectors from a file in word2vec format.
         """
         words = []
         vectors = []

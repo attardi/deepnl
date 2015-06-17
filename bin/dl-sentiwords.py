@@ -105,9 +105,8 @@ if __name__ == '__main__':
                         help='Length of ngrams (default 2)')
     parser.add_argument('--alpha', type=float, default=0.5,
                         help='Relative weight of normal wrt sentiment score (default 0.5)')
-    parser.add_argument('--train', type=str, default=None,
-                        help='File with text corpus for training.',
-                        required=True)
+    parser.add_argument('train', type=str,
+                        help='File with text corpus for training.')
     parser.add_argument('-o', '--output', type=str, default=None,
                         help='File where to save the model')
     parser.add_argument('--vocab', type=str, required=True,

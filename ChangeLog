@@ -1,3 +1,23 @@
+2015-06-29  Giuseppe Attardi  <attardi@di.unipi.it>
+
+	* deepnl/extractors.pyx (save_vocabulary): preserve order by ID.
+
+	* deepnl/sentiwords.pyx (_train_pair_s): fixed computing
+	grads.output_weights.
+
+2015-06-28  Giuseppe Attardi  <attardi@di.unipi.it>
+
+	* deepnl/sentiwords.pyx (_update): fixed AdaGrad step.
+
+2015-06-25  Giuseppe Attardi  <attardi@di.unipi.it>
+
+	* deepnl/sentiwords.pyx (itertrie): yield unigram
+
+2015-06-24  Giuseppe Attardi  <attardi@di.unipi.it>
+
+	* deepnl/extractors.pyx (__init__): load vectors also when vocab
+	is supplied.
+
 2015-06-17  Giuseppe Attardi  <attardi@di.unipi.it>
 
 	* deepnl/extractors.pyx (merge): fixed iteration on vocab.

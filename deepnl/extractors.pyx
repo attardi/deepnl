@@ -242,12 +242,16 @@ cdef class Embeddings(Extractor):
         or from a list of words :param vocab:.
         :param size: vector space dimension.
         :param vocab_file: file containing the vocabulary
+        :param vocab: list of vocabulary words
         :param vectors: file containing the vectors
         :param variant: style of embeddgins (senna, polyglot, word2vect)
         """
         if vocab:
             self.dict = <dict>WD(None, wordlist=vocab, variant=variant)
-            self.table = embeddings.generate_vectors(len(self.dict), size)
+            if vectors and os.path.exists(vectors):
+                self.table = self.load_vectors(vectors)
+            else:
+                self.table = embeddings.generate_vectors(len(self.dict), size)
         elif vocab_file:
             self.dict = <dict>WD(None, wordlist=self.load_vocabulary(vocab_file), variant=variant)
             if vectors and os.path.exists(vectors):
@@ -265,7 +269,7 @@ cdef class Embeddings(Extractor):
     def merge(self, list vocab):
         """Extend the dictionary with words from list :param vocab:"""
         for word in vocab:
-            self.dict.setdefault(word, len(self.dict))
+            self.dict.setdefault(word, len(self.dict)) # add if not present
         # generate vectors for added words
         extra = len(self.dict) - len(self.table)
         self.table = np.concatenate((self.table, embeddings.generate_vectors(extra, self.table.shape[1])))
@@ -284,7 +288,11 @@ cdef class Embeddings(Extractor):
 
     def save_vocabulary(self, file):
         # FIXME: allow chosing variant
-        return embeddings.Plain.write_vocabulary(self.dict.keys(), file)
+        # order by ID
+        words = [''] * len(self.dict)
+        for k,v in self.dict.items():
+            words[v] = k
+        return embeddings.Plain.write_vocabulary(words, file)
 
     def load_vectors(self, file, variant=None):
         # FIXME: allow choosing variant

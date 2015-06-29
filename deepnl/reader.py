@@ -202,7 +202,8 @@ class TweetReader(Reader):
         :param min_occurrences: Minimum number of times that a token must
             appear in the text in order to be included in the dictionary. 
         :param threshold: minimum bigram score
-
+        :return: list of ngrams (joined by '_'), list of bigrams
+        and list of trigrams
         """
         
         # Use PMI-like score for selecting collocations:

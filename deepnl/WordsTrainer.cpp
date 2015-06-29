@@ -43,10 +43,11 @@ double WordsTrainer::train_pair()
 
 void WordsTrainer::update_embeddings(double LR_0, int token_pos, int token_neg)
 {
+  int middle = window_size/2;
   int start = 0;
   for (int i = 0; i < window_size; i++) {
     int end = start + table.cols();
-    if (i == window_size/2) {
+    if (i == middle) {
       // this is the middle position.
       // apply negative and positive deltas to different tokens
       table.row(token_pos) += LR_0 * grads.input_pos.segment(start, end);

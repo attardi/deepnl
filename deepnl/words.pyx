@@ -9,7 +9,7 @@ Train a Language model.
 
 # standard
 import numpy as np
-import logging
+import logging, sys
 import time
 import threading
 
@@ -84,9 +84,6 @@ cdef class LmGradients(Gradients):
         super(LmGradients, self).__init__(input_size, hidden_size, output_size)
         # gradients for negative examples
         self.input_neg = np.zeros(input_size, dtype=np.double)
-        # temporary
-        self.hidden_weights_pos = np.empty((hidden_size, input_size))
-        self.hidden_weights_neg = np.empty((hidden_size, input_size))
 
     def clear(self):
         super(LmGradients, self).clear()
@@ -120,7 +117,14 @@ cdef class LmTrainer(Trainer):
     def __init__(self, Converter converter, FLOAT_t learning_rate,
                  int left_context, int right_context,
                  int hidden_size, int output_size=1, int ngrams=1):
-
+        """
+        :param learning_rate: initial learning rate
+        :param left_cotext: left window size
+        :param right_cotext: right window size
+        :param hidden_size: number of hidden units
+        :param output_size: number of outputs
+        :param ngrams: size of ngrams to extract
+        """
         # FIXME: shall the network be created by the caller?
         # sum the number of features in all extractors' tables 
         input_size = (left_context + 1 + right_context) * converter.size()
@@ -255,7 +259,7 @@ cdef class LmTrainer(Trainer):
 
         dims = [table.shape[0] for table in self.feature_tables]
 
-        def worker_train(int i):
+        def train_worker(int i):
             """
             Train the model, lifting lists of sentences from the job queue.
             """
@@ -289,7 +293,7 @@ cdef class LmTrainer(Trainer):
                         # update the weights in the master, copy them back to worker
                         self._update_weights(worker, worker.grads, remaining)
                         self.avg_error.add(error)
-                        self.total_pairs += len(job)
+                        self.total_pairs += job_pairs
                         now = time.time()
                         if now > next_report[0]:
                             # wait at least 10 seconds between progress reports
@@ -300,7 +304,9 @@ cdef class LmTrainer(Trainer):
                             reporting = True
 
                     if reporting:
-                        self._progress_report(total_pairs + len(job), epoch_pairs)
+                        # guess the epoch, since threads might be working at different ones
+                        epoch = total_pairs / epoch_pairs + 1
+                        self._progress_report(epoch, total_pairs, len(job))
 
                     # save language model.
                     if total_pairs and total_pairs % save_period == 0:
@@ -313,7 +319,7 @@ cdef class LmTrainer(Trainer):
                 return
 
         # create and start the worker threads
-        workers = [threading.Thread(target=worker_train, args=[i]) for i in xrange(threads)]
+        workers = [threading.Thread(target=train_worker, args=[i]) for i in xrange(threads)]
         for thread in workers:
             thread.daemon = True  # let the process die when main thread is killed
             thread.start()
@@ -331,7 +337,7 @@ cdef class LmTrainer(Trainer):
         # terminate
         for thread in workers:
             thread.join()
-        #worker_train(0)           # DEBUG
+        #train_worker(0)           # DEBUG
 
     @cython.boundscheck(False)
     cdef np.ndarray[INT_t,ndim=1] _extract_window(self,
@@ -425,17 +431,14 @@ cdef class LmTrainer(Trainer):
 
         return trainer
     
-    def _progress_report(self, total_pairs, epoch_pairs):
+    def _progress_report(self, epoch, total_pairs, sent):
         """
         Reports progress in training of the network, including error and
         accuracy.
         """
-        # FIXME: should use moving average
-        cdef FLOAT_t error = self.error / self.total_pairs
-        epoch = total_pairs / epoch_pairs + 1
         # logging.__init__() invokes acquire lock.
-        print ("Epoch %d, examples: %d, avg. error: %.3f%%"
-                     % (epoch, total_pairs, self.avg_error.mean * 100))
+        print >> sys.stderr, ("Epoch %d, examples: %d, sent: %d, avg. error: %.3f"
+                     % (epoch, total_pairs, sent, self.avg_error.mean))
 
 
 cdef class LmWorker(LmTrainer):
@@ -551,9 +554,8 @@ cdef class LmWorker(LmTrainer):
             error = self.trainer.train_pair()
             if error > minError:
                 LR_0 = max(0.001, self.learning_rate * remaining)
-                self.trainer.update_embeddings(<FLOAT_t>LR_0,
-                                                pos_tok,
-                                                neg_tok)
+                # update immediately, making embeddings visible to other workers
+                self.trainer.update_embeddings(<FLOAT_t>LR_0, pos_tok, neg_tok)
         # Python version
         # cdef FLOAT_t error = self._train_pair(self.vars_pos,
         #                                       self.vars_neg, grads)
@@ -613,29 +615,29 @@ cdef class LmWorker(LmTrainer):
         grads.output_weights += vars_pos.hidden - vars_neg.hidden
 
         # hidden gradients
-
         # (hidden_size) * (1) x (1, hidden_size) = (hidden_size)
-        # grads_layer2_pos = hardtanhe(hidden_values_pos) * nn.output_weights[0]
-        hardtanhe(vars_pos.hidden, vars_pos.hidden)
-        vars_pos.hidden *= nn.output_weights[0]
 
-        # grads_layer2_neg = hardtanhe(nn.hidden_values) * (- nn.output_weights[0])
-        hardtanhe(vars_neg.hidden, vars_neg.hidden)
-        vars_neg.hidden *= - nn.output_weights[0]
+        grads_hidden_pos = vars_pos.hidden # reuse memory
+        hardtanhe(vars_pos.hidden, grads_hidden_pos)
+        grads_hidden_pos *= nn.output_weights[0]
+
+        grads_hidden_neg = vars_neg.hidden # reuse memory
+        hardtanhe(vars_neg.hidden, grads_hidden_neg)
+        grads_hidden_neg *= - nn.output_weights[0]
          
         # (hidden_size) x (input_size) = (hidden_size, input_size)
         # grads.hidden_weights = grads.hidden_bias x input_values
-        np.outer(vars_pos.hidden, vars_pos.input, self.grads.hidden_weights_pos)
-        np.outer(vars_neg.hidden, vars_neg.input, self.grads.hidden_weights_neg)
-        grads.hidden_weights += self.grads.hidden_weights_pos + self.grads.hidden_weights_neg
+        grads.hidden_weights += np.outer(grads_hidden_pos, vars_pos.input) +\
+                                np.outer(grads_hidden_neg, vars_neg.input)
+
         # grads.hidden_bias = hidden_values * output_weights.dot(grads.output_bias)
-        grads.hidden_bias += vars_pos.hidden + vars_neg.hidden
+        grads.hidden_bias += grads_hidden_pos + grads_hidden_neg
 
         # input gradients
         # These are not accumulated, since their update is immediate.
         # (hidden_size) x (hidden_size, input_size) = (input_size)
-        grads.input = vars_pos.hidden.dot(nn.hidden_weights)
-        grads.input_neg = vars_neg.hidden.dot(nn.hidden_weights)
+        grads.input = grads_hidden_pos.dot(nn.hidden_weights)
+        grads.input_neg = grads_hidden_neg.dot(nn.hidden_weights)
         
         return error
 

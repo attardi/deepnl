@@ -59,9 +59,10 @@ def saver(model_file, vectors_file):
     """Function for saving model periodically"""
     def save(trainer):
         # save embeddings also separately
-        if vector_file:
+        if vectors_file:
             trainer.save_vectors(vectors_file)
-        trainer.save(model_file)
+        if model_file:
+            trainer.save(model_file)
     return save
 
 # ----------------------------------------------------------------------
@@ -139,9 +140,8 @@ if __name__ == '__main__':
     reader.read(args.train)
     vocab, bigrams, trigrams = reader.create_vocabulary(reader.sentences,
                                                         min_occurrences=2)
-    loaded_vocab = False
     if os.path.exists(args.vocab):
-        loaded_vocab = True
+        # start with the given vocabulary
         base_vocab = reader.load_vocabulary(args.vocab)
         if os.path.exists(args.vectors):
             embeddings = Embeddings(vectors=args.vectors, vocab=base_vocab,
@@ -149,7 +149,10 @@ if __name__ == '__main__':
         else:
             embeddings = Embeddings(args.embeddings_size, vocab=base_vocab,
                                     variant=args.variant)
+        # add the ngrams from the corpus
         embeddings.merge(vocab)
+        logger.info("Overriding vocabulary in %s" % args.vocab)
+        embeddings.save_vocabulary(args.vocab)
     elif args.variant == 'word2vec' and os.path.exists(args.vectors):
         embeddings = Embeddings(vectors=args.vectors,
                                 variant=args.variant)
@@ -157,6 +160,7 @@ if __name__ == '__main__':
     else:
         embeddings = Embeddings(args.embeddings_size, vocab=vocab,
                                 variant=args.variant)
+
     # Assume bigrams are prefix of trigrams, or else we should put a terminator
     # on trie
     trie = {}
@@ -181,10 +185,7 @@ if __name__ == '__main__':
     trainer.train(converted_sentences, reader.polarities, trie,
                   args.iterations, report_intervals)
     
-    if not loaded_vocab:
-        logger.info("Saving vocabuary to %s" % args.vocab)
-        embeddings.save_vocabulary(args.vocab)
-    logger.info("Saving vectors to %s" % args.vectors)
+    logger.info("Overriding vectors to %s" % args.vectors)
     embeddings.save_vectors(args.vectors)
     if args.output:
         logger.info("Saving trained model to %s" % args.output)

@@ -22,7 +22,7 @@ Installation
 
 Download the code or clone the repository on your machine with:
 
-   $ git clone 
+   $ git clone https://github.com/attardi/deepnl.git
    
 Ensure that you have the dependencies mentioned below, then proceed to the build process described below.
 

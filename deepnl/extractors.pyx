@@ -15,7 +15,7 @@ import logging
 import numpy as np
 import os
 import re
-from collections import Counter, defaultdict
+from collections import Counter, OrderedDict
 import cPickle as pickle
 from itertools import izip
 import sys                      # modules
@@ -246,7 +246,14 @@ cdef class Embeddings(Extractor):
         :param vectors: file containing the vectors
         :param variant: style of embeddgins (senna, polyglot, word2vect)
         """
-        if vocab:
+        if variant == 'word2vec':
+            # load both vocab and vectors from single file
+            self.table, wordlist = embeddings.Word2Vec.load(vectors)
+            self.dict = <dict>WD(None, wordlist=wordlist, variant=variant)
+            # add vectors for special symbols
+            extra = len(self.dict) - len(self.table)
+            self.table = np.concatenate((self.table, embeddings.generate_vectors(extra, self.table.shape[1])))
+        elif vocab:
             self.dict = <dict>WD(None, wordlist=vocab, variant=variant)
             if vectors and os.path.exists(vectors):
                 self.table = self.load_vectors(vectors)
@@ -258,13 +265,6 @@ cdef class Embeddings(Extractor):
                 self.table = self.load_vectors(vectors)
             else:
                 self.table = embeddings.generate_vectors(len(self.dict), size)
-        elif variant == 'word2vec':
-            # load both vocab and vectors from single file
-            self.table, wordlist = embeddings.Word2Vec.load(vectors)
-            self.dict = <dict>WD(None, wordlist=wordlist, variant=variant)
-            # add vectors for special symbols
-            extra = len(self.dict) - len(self.table)
-            self.table = np.concatenate((self.table, embeddings.generate_vectors(extra, self.table.shape[1])))
 
     def merge(self, list vocab):
         """Extend the dictionary with words from list :param vocab:"""
@@ -290,16 +290,23 @@ cdef class Embeddings(Extractor):
         # FIXME: allow chosing variant
         # order by ID
         words = [''] * len(self.dict)
-        for k,v in self.dict.items():
+        for k,v in self.dict.iteritems():
             words[v] = k
-        return embeddings.Plain.write_vocabulary(words, file)
+        embeddings.Plain.write_vocabulary(words, file)
 
     def load_vectors(self, file, variant=None):
         # FIXME: allow choosing variant
         return embeddings.Plain.read_vectors(file)
 
-    def save_vectors(self, file):
-        return embeddings.Plain.write_vectors(file, self.table)
+    def dump(self, filename, variant=None):
+        if variant == 'word2vec':
+            # order by ID
+            words = [''] * len(self.dict)
+            for k,v in self.dict.iteritems():
+                words[v] = k
+            embeddings.Word2Vec.save(filename, words, self.table)
+        else:
+            embeddings.Plain.write_vectors(file, self.table)
 
     def extract(self, words):
         """
@@ -463,6 +470,18 @@ cdef class AffixExtractor(Extractor):
             logger.error("File %s doesn't exist." % filename)
             raise
 
+    def write(self, filename):
+        """
+        Write prefixes or suffixes to file :param filename:.
+        """
+        with open(filename, 'wb') as f:
+            # order by ID
+            affixes = [''] * len(self.dict)
+            for a, i in self.dict.iteritems():
+                affixes[i - self.specials] = a
+            for i in range(self.specials, len(self.dict)):
+                print >> f, affixes[i].encode('utf-8')
+
 # ----------------------------------------------------------------------
 
 cdef class SuffixExtractor(AffixExtractor):
@@ -595,7 +614,7 @@ cdef class GazetteerExtractor(Extractor):
         :param filename: file where to read list.
         :param size: size of vectors to generate.
         """
-        classes = {}
+        classes = OrderedDict() # preserve insertion order
         with open(filename) as file:
             for line in file:
                 line = line.strip().decode('utf-8')
@@ -605,7 +624,7 @@ cdef class GazetteerExtractor(Extractor):
                 if c not in classes:
                     classes[c] = set()
                 classes[c].add(words)
-        extractors = [cls(w, size, lowcase) for w in classes.values()]
+        extractors = [cls(ws, size, lowcase) for ws in classes.values()]
         return extractors
 
     def save(self, file):

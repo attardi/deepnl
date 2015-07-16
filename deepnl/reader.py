@@ -59,7 +59,7 @@ class TextReader(Reader):
         super(TextReader, self).__init__()
         self.variant = variant
 
-    def read(self, filename):
+    def read(self, filename=None):
         """
         :param filename: name of the file from where sentences are read.
             The file should have one sentence per line, with tokens
@@ -69,7 +69,9 @@ class TextReader(Reader):
         """
         class iterable(object):
             def __iter__(self):
-                if filename.endswith('.gz'):
+                if not filename:
+                    file = sys.stdin
+                elif filename.endswith('.gz'):
                     file = gzip.GzipFile(filename, 'rb')
                 else:
                     file = open(filename, 'rb')
@@ -95,9 +97,15 @@ class TaggerReader(Reader):
     # force class to be abstract
     #__metaclass__ = abc.ABCMeta
 
-    def __init__(self):
+    def __init__(self, formField=0, tagField=-1):
+        """
+        :param formField: the position of the form field in tokens
+        :param tagField: the position of the tag field in tokens
+        """
         super(TaggerReader, self).__init__()
         # self.sentence_count = len(sentences) if sentences else 0
+        self.formField = formField # field containing form
+        self.tagField = tagField # field containing tag
 
     def read(self, filename):
         """
@@ -120,9 +128,9 @@ class TaggerReader(Reader):
         c = Counter()
         tags = set()
         for sent in sentences:
-            for token, in sent:
-                c[token[0]] += 1
-                tags.add(token[-1])  # assumes that tag is last token field
+            for token in sent:
+                c[token[self.formField]] += 1
+                tags.add(token[self.tagField])
         common = c.most_common(size) # common is a list of pairs
         words = [w for w, n in common if n >= min_occurrences]
         return words, tags
@@ -135,7 +143,7 @@ class TaggerReader(Reader):
         tags = set()
         for sent in sentences:
             for token in sent:
-                tags.add(token[-1])  # assumes that tag is last token field
+                tags.add(token[self.tagField])
         return tags
     
 # ----------------------------------------------------------------------

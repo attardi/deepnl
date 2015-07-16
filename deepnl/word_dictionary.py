@@ -125,10 +125,10 @@ class WordDictionary(dict):
         
         :param iterable_sent: an iterable list of lists of tokens.
         """
-        if self.variant == 'polyglot':
-            return Counter(t for sent in iterable_sent for t in sent)
-        else:
+        if self.variant == 'senna':
             return Counter(t.lower() for sent in iterable_sent for t in sent)
+        else:
+            return Counter(t for sent in iterable_sent for t in sent)
     
     def update_tokens(self, tokens, size=None, minimum_occurrences=1, freqs=None):
         """

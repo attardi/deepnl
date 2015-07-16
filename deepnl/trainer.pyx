@@ -118,8 +118,8 @@ cdef class Trainer(object):
                 or self.accuracy >= desired_accuracy > 0 \
                 or (self.accuracy < last_accuracy and self.nn.error > last_error):
                 self._epoch_report(i + 1)
-                if self.accuracy >= desired_accuracy > 0 \
-                        or (self.nn.error > last_error and self.accuracy < last_accuracy):
+                if self.accuracy >= desired_accuracy > 0:
+                        #or (self.nn.error > last_error and self.accuracy < last_accuracy): # early stop DEBUG
                     break
                 
             last_accuracy = self.accuracy
@@ -303,9 +303,7 @@ cdef class TaggerTrainer(Trainer):
         cdef SeqGradients grads
         # AdaGrad. Since sentence length varies, we accumulate into a single
         # item all squared input gradients
-        cdef SeqGradients ada
-        ada = nn.gradients(1)
-        #ada = None # DEBUG
+        cdef SeqGradients ada = nn.gradients(1)
 
         # keep last 2% for validation
         cdef int validation = int((len(sentences) - 1) * 0.98) + 1 # at least 1

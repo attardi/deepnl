@@ -1,3 +1,31 @@
+2015-07-16  Giuseppe Attardi  <attardi@di.unipi.it>
+
+	* bin/dl-ner.py (main): create affixes and gazetteer if not supplied.
+	Create additional vocabulary from corpus.
+	Added parameter --vocab-size to specify size of created vocabulary.
+	Insert libdir to the front of sys.path, to give it precedence over
+	installed library.
+
+	* deepnl/extractors.pyx (AffixExtractorwrite): added.
+
+2015-07-15  Giuseppe Attardi  <attardi@di.unipi.it>
+
+	* deepnl/reader.py (TaggerReader.__init__): added formField, tagField
+
+	* deepnl/ner_tagger.py (ToIOBES.__iter__): added tagField
+
+2015-07-14  giuseppe attardi  <attardi@di.unipi.it>
+
+	* deepnl/embeddings.py (Word2Vec.save): added.
+
+2015-07-14  Giuseppe Attardi  <attardi@di.unipi.it>
+
+	* deepnl/extractors.pyx (create): preserve insertion order.
+
+	* bin/dl-ner.py (main): extend provided vocabulary from words in
+	corpus.
+	(main): create the gazetteers from the training corpus.
+
 2015-06-29  Giuseppe Attardi  <attardi@di.unipi.it>
 
 	* deepnl/extractors.pyx (save_vocabulary): preserve order by ID.

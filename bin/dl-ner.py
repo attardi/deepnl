@@ -267,27 +267,14 @@ def main():
                 converter.add(extractor)
         elif args.gazetteer:
             logger.info("Creating gazetteer")
-            # strip B-/I-
-            classes = sorted([tag[2:] or tag for tag in tagset])
-            # gazetteers must be kept in the same order as tags
-            gazs = OrderedDict()
-            for tag in classes:
-                if tag != 'O':
-                    gazs[tag] = Counter() # we might want to keep the most frequent
-            for sent in sentence_iter:
-                for tok in sent:
-                    tag = tok[reader.tagField] # last field
-                    if tag != 'O':
-                        tag = tag[2:] # strip B-/I-
-                        form = tok[reader.formField].lower() # lowercase
-                        gazs[tag][form] += 1 # FORM
-            for tag, counter in gazs.items():
-                converter.add(GazetteerExtractor(counter.keys(), args.gsize))
+            tries = GazetteerExtractor.build(sentence_iter, reader.formField, reader.tagField)
+            for tag, trie in tries.items():
+                converter.add(GazetteerExtractor(trie, args.gsize))
             logger.info("Saving gazetter list to: %s", args.gazetteer)
             with open(args.gazetteer, 'wb') as file:
-                for tag, counter in gazs.iteritems():
-                    for w in counter.keys():
-                        print >> file, '\t'.join((tag, w)).encode('UTF-8')
+                for tag, trie in tries.iteritems():
+                    for ngram in trie:
+                        print >> file, ('%s\t%s' % (tag, ' '.join(ngram))).encode('UTF-8')
 
         # if args.pos:
         #     converter.add(POS(arg.pos))

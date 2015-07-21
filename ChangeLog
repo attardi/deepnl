@@ -1,3 +1,14 @@
+2015-07-17  Giuseppe Attardi  <attardi@di.unipi.it>
+
+	* bin/dl-ner.py (main): use GazetteerExtractor.build()
+
+	* deepnl/extractors.pyx (build): build gazetteers with ngrams from
+	sentences.
+
+2015-07-16  Giuseppe Attardi  <attardi@di.unipi.it>
+
+	* deepnl/extractors.pyx (build): optionally put suffixes in lower case.
+
 2015-07-16  Giuseppe Attardi  <attardi@di.unipi.it>
 
 	* bin/dl-ner.py (main): create affixes and gazetteer if not supplied.

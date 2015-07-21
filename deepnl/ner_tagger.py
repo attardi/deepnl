@@ -15,7 +15,13 @@ from corpus import *
 # ----------------------------------------------------------------------
 
 class ToIOBES(object):
-    """Convert from IOB to IOBES notation."""
+    """Convert from IOB to IOBES notation:
+    Begin
+    Inside
+    Outside
+    Single
+    End
+    """
 
     def __init__(self, iterable, tagField):
         self.iterable = iterable

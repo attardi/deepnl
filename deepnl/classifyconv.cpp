@@ -886,16 +886,17 @@ struct __pyx_obj_6deepnl_10extractors_CapsExtractor {
  *     pass
  * 
  * cdef class AffixExtractor(Extractor):             # <<<<<<<<<<<<<<
- *     pass
+ *     cdef bool lowcase
  * 
  */
 struct __pyx_obj_6deepnl_10extractors_AffixExtractor {
   struct __pyx_obj_6deepnl_10extractors_Extractor __pyx_base;
+  PyBoolObject *lowcase;
 };
 
 
 /* "extractors.pxd":62
- *     pass
+ *     cdef bool lowcase
  * 
  * cdef class SuffixExtractor(AffixExtractor):             # <<<<<<<<<<<<<<
  *     pass
@@ -923,10 +924,12 @@ struct __pyx_obj_6deepnl_10extractors_PrefixExtractor {
  * 
  * cdef class GazetteerExtractor(Extractor):             # <<<<<<<<<<<<<<
  *     cdef bool lowcase
+ *     cdef bool noaccents
  */
 struct __pyx_obj_6deepnl_10extractors_GazetteerExtractor {
   struct __pyx_obj_6deepnl_10extractors_Extractor __pyx_base;
   PyBoolObject *lowcase;
+  PyBoolObject *noaccents;
 };
 
 
@@ -1071,7 +1074,7 @@ static struct __pyx_vtabstruct_6deepnl_10extractors_CapsExtractor *__pyx_vtabptr
  *     pass
  * 
  * cdef class AffixExtractor(Extractor):             # <<<<<<<<<<<<<<
- *     pass
+ *     cdef bool lowcase
  * 
  */
 
@@ -1082,7 +1085,7 @@ static struct __pyx_vtabstruct_6deepnl_10extractors_AffixExtractor *__pyx_vtabpt
 
 
 /* "extractors.pxd":62
- *     pass
+ *     cdef bool lowcase
  * 
  * cdef class SuffixExtractor(AffixExtractor):             # <<<<<<<<<<<<<<
  *     pass
@@ -1114,6 +1117,7 @@ static struct __pyx_vtabstruct_6deepnl_10extractors_PrefixExtractor *__pyx_vtabp
  * 
  * cdef class GazetteerExtractor(Extractor):             # <<<<<<<<<<<<<<
  *     cdef bool lowcase
+ *     cdef bool noaccents
  */
 
 struct __pyx_vtabstruct_6deepnl_10extractors_GazetteerExtractor {

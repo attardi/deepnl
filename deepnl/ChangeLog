@@ -1,3 +1,7 @@
+2015-07-20  Giuseppe Attardi  <attardi@di.unipi.it>
+
+	* extractors.pyx (extract): use trie of ngrams for gazetteers.
+
 2015-01-08  Giuseppe Attardi  <attardi@di.unipi.it>
 
 	* reader.py (TextReader.read): removed any logger commands:

@@ -70,6 +70,10 @@
 
 	* deepnl/utils.py (Trie): for storing and searching ngrams.
 
+2015-07-20  Giuseppe Attardi  <attardi@di.unipi.it>
+
+	* deepnl/extractors.pyx (extract): use trie of ngrams for gazetteers.
+
 2015-07-17  Giuseppe Attardi  <attardi@di.unipi.it>
 
 	* bin/dl-ner.py (main): use GazetteerExtractor.build()
@@ -100,14 +104,6 @@
 2015-07-14  giuseppe attardi  <attardi@di.unipi.it>
 
 	* deepnl/embeddings.py (Word2Vec.save): added.
-
-2015-07-14  Giuseppe Attardi  <attardi@di.unipi.it>
-
-	* deepnl/extractors.pyx (create): preserve insertion order.
-
-	* bin/dl-ner.py (main): extend provided vocabulary from words in
-	corpus.
-	(main): create the gazetteers from the training corpus.
 
 2015-07-14  Giuseppe Attardi  <attardi@di.unipi.it>
 
@@ -245,10 +241,120 @@
 
 	* bin/dl-sentiwords.py: added.
 
+2015-01-08  Giuseppe Attardi  <attardi@di.unipi.it>
+
+	* deepnl/reader.py (TextReader.read): removed any logger commands:
+	logging should be done by callers.
+
+2015-01-04  Giuseppe Attardi  <attardi@di.unipi.it>
+
+	* deepnl/extractors.py (Extractor): feature are now extracted by Extractor
+	objects, each one dealing with one kind of features, e.g. embeddings,
+	pos, caps, etc.
+	Each one is responsible for saving and loading its own data to a
+	single model file.
+
+2015-01-03  Giuseppe Attardi  <attardi@di.unipi.it>
+
+	* deepnl/srl/srl_reader.py (read_conll): split fields at \t.
+	(SRLReader._codify_sentences): use SentencexsConverter instead of
+	TokenConverter.
+
+	* deepnl/attributes.py (TokenConverter): renamed SentenceConverter since
+	it needs to operate at the sentence level, e.g. the NER converter
+	needs to lookup ngrams in the gazetteers.
+
+	* deepnl/reader.py (Reader.create_converter): return converter rather
+	than assign it to self.
+
+	* deepnl/taggers.py (load_data): pass  parameter path instead of using
+	property sys.paths.
+
+	* deepnl/network.pyx: method load_features() does the job previously done
+	in load_data() in taggers.py.
+	(load_from_file): renamed to load_weights.
+
+	* deepnl/corpus.py: reader/writer for various corpus formats.
+
+2014-12-30  Giuseppe Attardi  <attardi@di.unipi.it>
+
+	* deepnl/networklm.pyx: split half_window into left_context and
+	right_context since they might not be necessarily the same.
+
+	* deepnl/srl/srl_reader.py: moved here relevant parts from nlpnet/read_data.py
+	* nlpnet/read_data.py: removed.
+
+2014-12-26  Giuseppe Attardi  <attardi@di.unipi.it>
+
+	* deepnl/word_dictionary.py (WordDictionary): make senna the default variant
+	(WordDictionary): just use a single padding for both left and right
+
+2014-12-23  Giuseppe Attardi  <attardi@di.unipi.it>
+
+	* metadata.py (Metadata.save_to_file): use file names from config.py
+
+	* config.py: added sslm portion.
+	Use consistent naming convenion of prefix task nae rather than postfix.
+
+	* deepnl/reader.py (TextReader.codify_sentences): convert_sentences -> convert
+
+	* deepnl/network.pyx (hardtanhe): derivative of hardtanh in terms of its
+	output.
+
+	* deepnl/networklm.pyx (_train_pair): use hardtanhe instead of hardtanhd.
+
+2014-12-22  Giuseppe Attardi  <attardi@di.unipi.it>
+
+	* deepnl/networklm.pyx (_new_random_pool): generate a simple list, not a
+	list of singletons.
+
 2014-12-20  Giuseppe Attardi  <attardi@di.unipi.it>
 
 	* nlpnet/networkSent.pyx: network for sentiment-specific word
 	embeddings.
+
+2014-05-06  Giuseppe Attardi  <attardi@di.unipi.it>
+
+	* deepnl/utils.py (generate_feature_vectors): use random.uniform.
+
+	* deepnl/network.pyx (_viterbi): fixed bug.
+
+2014-05-05  Giuseppe Attardi  <attardi@di.unipi.it>
+
+	* deepnl/network.pyx (_calculate_gradients_sll): use softmax(delta[-1]).
+
+	* deepnl/ner/ner_reader.py (noGazetteer): for cases where there is on
+	entry for a class in the gazetteer dictionary.
+
+2014-05-03  Giuseppe Attardi  <attardi@di.unipi.it>
+
+	* deepnl/network.pyx (softmax): added softmax function, for computing
+	softmax directly, without resorting to logsumexp.
+
+2014-05-02  Giuseppe Attardi  <attardi@di.unipi.it>
+
+	* deepnl/network.pyx (_calculate_delta): avoid transpose by using
+            logadd = logsumexp(delta[token - 1][:,np.newaxis] + transitions, 0)
+	instead of
+            logadd = logsumexp(delta[token - 1] + transitions_T, 1)
+
+2014-04-23  Giuseppe Attardi  <attardi@di.unipi.it>
+
+	* deepnl/networkconv.pyx (_convolution_lookup): use lookup().
+
+	* deepnl/networklm.pyx (_train_pair): use lookup().
+
+	* deepnl/network.pyx (lookup): added, so that run() method can get the
+	input directly and we need not to store the input in the network.
+
+	* deepnl/networkconv.pyx (_tag_sentence): use logsumexp to avoid numeric
+	instability.
+
+	* deepnl/networklm.pyx: class LanguageModel derived from Network so that
+	it inherits attributes and methods, including run().
+
+	* deepnl/arguments.py (get_args): set default to 0.01 for --lf and -lt.
+	(get_args): made option --gold required.
 
 2014-04-22  Giuseppe Attardi  <attardi@di.unipi.it>
 

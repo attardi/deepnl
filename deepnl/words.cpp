@@ -6023,12 +6023,12 @@ static PyObject *__pyx_pf_6deepnl_5words_9LmTrainer_5train_train_worker(PyObject
               __Pyx_XDECREF(__pyx_t_17); __pyx_t_17 = 0;
               goto __pyx_L29_try_end;
               __pyx_L22_error:;
-              __Pyx_XDECREF(__pyx_t_18); __pyx_t_18 = 0;
               __Pyx_XDECREF(__pyx_t_1); __pyx_t_1 = 0;
               __Pyx_XDECREF(__pyx_t_2); __pyx_t_2 = 0;
               __Pyx_XDECREF(__pyx_t_5); __pyx_t_5 = 0;
               __Pyx_XDECREF(__pyx_t_3); __pyx_t_3 = 0;
               __Pyx_XDECREF(__pyx_t_4); __pyx_t_4 = 0;
+              __Pyx_XDECREF(__pyx_t_18); __pyx_t_18 = 0;
               /*except:*/ {
                 __Pyx_AddTraceback("deepnl.words.LmTrainer.train.train_worker", __pyx_clineno, __pyx_lineno, __pyx_filename);
                 if (__Pyx_GetException(&__pyx_t_4, &__pyx_t_3, &__pyx_t_5) < 0) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 268; __pyx_clineno = __LINE__; goto __pyx_L24_except_error;}
@@ -6260,7 +6260,6 @@ static PyObject *__pyx_pf_6deepnl_5words_9LmTrainer_5train_train_worker(PyObject
     __Pyx_XDECREF(__pyx_t_8); __pyx_t_8 = 0;
     goto __pyx_L10_try_end;
     __pyx_L3_error:;
-    __Pyx_XDECREF(__pyx_t_18); __pyx_t_18 = 0;
     __Pyx_XDECREF(__pyx_t_21); __pyx_t_21 = 0;
     __Pyx_XDECREF(__pyx_t_4); __pyx_t_4 = 0;
     __Pyx_XDECREF(__pyx_t_2); __pyx_t_2 = 0;
@@ -6268,6 +6267,7 @@ static PyObject *__pyx_pf_6deepnl_5words_9LmTrainer_5train_train_worker(PyObject
     __Pyx_XDECREF(__pyx_t_1); __pyx_t_1 = 0;
     __Pyx_XDECREF(__pyx_t_3); __pyx_t_3 = 0;
     __Pyx_XDECREF(__pyx_t_5); __pyx_t_5 = 0;
+    __Pyx_XDECREF(__pyx_t_18); __pyx_t_18 = 0;
 
     /* "deepnl/words.pyx":293
  *                     #jobs.task_done() # only needed if using jobs.join()

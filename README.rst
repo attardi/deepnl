@@ -20,6 +20,12 @@ If you use ``deepnl``, please cite [Attardi]_ in your publications.
 Installation
 ===========
 
+Download the code or clone the repository on your machine with:
+
+   $ git clone https://github.com/attardi/deepnl.git
+   
+Ensure that you have the dependencies mentioned below, then proceed to the build process described below.
+
 Dependencies
 ------------
 
@@ -36,6 +42,8 @@ Build
 To compile the library, run::
 
    $ python setup.py build
+
+This will invoce the C++ compiler to compile the code on your platform.
 
 You can run the scripts directly from the ``bin`` directory, or you can
 install them by calling::
@@ -197,6 +205,18 @@ The results I achieved are::
              MISC: precision:  78.24%; recall:  77.35%; FB1:  77.79
               ORG: precision:  84.59%; recall:  87.24%; FB1:  85.89
               PER: precision:  94.71%; recall:  94.06%; FB1:  94.38
+
+Writing Extensions
+==================
+
+You can modify or extend the code just by adding them to the directory ``deepnl``.
+To compile the extension, use the same build process, but you will also need to have _Cython installed.
+The compiler will issue warnings about NumPy of the type:
+
+   /usr/local/lib/python2.7/dist-packages/numpy/core/include/numpy/npy_1_7_deprecated_api.h:15:2: warning: #warning "Using deprecated NumPy API, disable it by " "#defining NPY_NO_DEPRECATED_API NPY_1_7_API_VERSION" [-Wcpp]
+ #warning "Using deprecated NumPy API, disable it by "
+
+Simply disregard them, since currently there is no way to fix them, until the maintainers of Cython will decide to upgrade it to use the latest API.
 
 Credits
 =======

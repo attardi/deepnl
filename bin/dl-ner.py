@@ -18,7 +18,8 @@ import os
 import distutils.util
 builddir = os.path.dirname(os.path.realpath(__file__)) + '/../build/lib.'
 libdir = builddir + distutils.util.get_platform() + '-' + '.'.join(map(str, sys.version_info[:2]))
-sys.path.append(libdir)
+#sys.path.append(libdir)      # DEBUG
+sys.path.insert(0, libdir)      # DEBUG
 
 # local
 from deepnl.reader import ConllReader

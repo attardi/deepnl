@@ -7,6 +7,7 @@ Load word embeddings from different representations.
 import os
 import numpy as np
 import logging
+from itertools import izip
 
 # local
 from word_dictionary import WordDictionary
@@ -118,6 +119,17 @@ class Word2Vec(object):
         # vectors for the special symbols, not present in words, will be
         # created later
         return np.array(vectors), words
+
+    @classmethod
+    def save(cls, filename, words, vectors):
+        """
+        Save words and vectors to a file in word2vec format.
+        :param vectors: is a Numpy array
+        """
+        with open(filename, 'wb') as f:
+            print >> f, len(words), vectors.shape[1]
+            for word, vector in izip(words, vectors):
+                print >> f, word.encode('UTF-8'), ' '.join('%f' % w for w in vector)
 
 # ----------------------------------------------------------------------
 

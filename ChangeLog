@@ -1,3 +1,122 @@
+2015-08-16  Giuseppe Attardi  <attardi@di.unipi.it>
+
+	* deepnl/network.pxd ((l1_decay, l2_decay, momentum, adaRo,
+	adaEps): training parameters declared as globals.
+
+	* deepnl/trainer.pyx (Trainer.__init__): grouped optional parameters in
+	single options dictionary.
+	Network must be passed as argument, hence scripts dl-ner.py,
+	dl-pos.py etc. have been modified to create it and then pass it,
+	as well as to group options into dictionary.
+
+	* bin/dl-ner.py (main): added argument vocab-size.
+
+	* bin/dl-conv.py (main): grouped parser arguments.
+
+	* bin/dl-ner.py (main): grouped parser arguments.
+
+2015-08-15  Giuseppe Attardi  <attardi@di.unipi.it>
+
+	* deepnl/network.pxd (Network): moved error to class Trainer.
+
+2015-08-14  Giuseppe Attardi  <attardi@di.unipi.it>
+
+	* deepnl/math.pyx: started moving to using Memoryviews.
+
+	* deepnl/words.pyx (LmTrainer.update): call  nn.p.update().
+
+	* deepnl/trainer.pyx (Trainer.update): use AdaGrad.
+
+	* deepnl/network.pyx (Parameters.copy): added.
+
+2015-08-13  Giuseppe Attardi  <attardi@di.unipi.it>
+
+	* deepnl/networkconv.pyx: revised.
+
+	* deepnl/network.pyx (Network.run): renamed to forward.
+	* deepnl/networkconv.pyx (ConvolutionalNetwork.run): renamed to forward.
+
+	* deepnl/networkconv.pyx: use multiclass hinge function.
+
+2015-08-10  Giuseppe Attardi  <attardi@di.unipi.it>
+
+	* deepnl/networkconv.pyx (ConvParameters): similar to Parameters.
+
+	* deepnl/networkconv.pyx (ConvolutionaleNetwor): use ConvParameters field.
+
+	* deepnl/networkseq.pyx (SeqParameters): added.
+
+	* deepnl/networkseq.pyx (SeqquenceNetwor): use SeqParameters field.
+
+	* deepnl/network.pyx (Parameters): Parameters turned into a field
+	of Network.
+	Added methods save, load and update.
+
+	* deepnl/network.pyx (Network.update): moved to Parameters.
+
+	* bin/dl-sentiwords.py: save vocabulary also whe using word2vec.
+
+2015-08-09  Giuseppe Attardi  <attardi@di.unipi.it>
+
+	* deepnl/reader.py (TweetReader.read): drop empty tweets.
+
+2015-08-06  Giuseppe Attardi  <attardi@di.unipi.it>
+
+	* deepnl/networkconv.pyx: completed.
+
+2015-07-22  Giuseppe Attardi  <attardi@di.unipi.it>
+
+	* deepnl/extractors.pyx (GazetteerExtractor): use Trie for ngrams.
+
+	* deepnl/utils.py (Trie): for storing and searching ngrams.
+
+2015-07-17  Giuseppe Attardi  <attardi@di.unipi.it>
+
+	* bin/dl-ner.py (main): use GazetteerExtractor.build()
+
+	* deepnl/extractors.pyx (build): build gazetteers with ngrams from
+	sentences.
+
+2015-07-16  Giuseppe Attardi  <attardi@di.unipi.it>
+
+	* deepnl/extractors.pyx (build): optionally put suffixes in lower case.
+
+2015-07-16  Giuseppe Attardi  <attardi@di.unipi.it>
+
+	* bin/dl-ner.py (main): create affixes and gazetteer if not supplied.
+	Create additional vocabulary from corpus.
+	Added parameter --vocab-size to specify size of created vocabulary.
+	Insert libdir to the front of sys.path, to give it precedence over
+	installed library.
+
+	* deepnl/extractors.pyx (AffixExtractorwrite): added.
+
+2015-07-15  Giuseppe Attardi  <attardi@di.unipi.it>
+
+	* deepnl/reader.py (TaggerReader.__init__): added formField, tagField
+
+	* deepnl/ner_tagger.py (ToIOBES.__iter__): added tagField
+
+2015-07-14  giuseppe attardi  <attardi@di.unipi.it>
+
+	* deepnl/embeddings.py (Word2Vec.save): added.
+
+2015-07-14  Giuseppe Attardi  <attardi@di.unipi.it>
+
+	* deepnl/extractors.pyx (create): preserve insertion order.
+
+	* bin/dl-ner.py (main): extend provided vocabulary from words in
+	corpus.
+	(main): create the gazetteers from the training corpus.
+
+2015-07-14  Giuseppe Attardi  <attardi@di.unipi.it>
+
+	* deepnl/extractors.pyx (create): preserve insertion order.
+
+	* bin/dl-ner.py (main): extend provided vocabulary from words in
+	corpus.
+	(main): create the gazetteers from the training corpus.
+
 2015-06-29  Giuseppe Attardi  <attardi@di.unipi.it>
 
 	* deepnl/extractors.pyx (save_vocabulary): preserve order by ID.

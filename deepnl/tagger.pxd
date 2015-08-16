@@ -16,7 +16,7 @@ cdef class Tagger(object):
     cdef public Converter converter
     #cdef list feature_tables
 
-    cdef dict tags_dict         # tag ids
+    cdef dict tag_index         # tag ids
     cdef list tags              # list of tags
     cdef public nn # cython crashes with SequenceNetwork
 

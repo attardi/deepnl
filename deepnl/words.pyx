@@ -114,9 +114,7 @@ cdef class LmTrainer(Trainer):
     # cdef int total_pairs
     # cdef FLOAT_t error
 
-    def __init__(self, Converter converter, FLOAT_t learning_rate,
-                 int left_context, int right_context,
-                 int hidden_size, int output_size=1, int ngrams=1):
+    def __init__(self, nn, Converter converter, dict options):
         """
         :param learning_rate: initial learning rate
         :param left_cotext: left window size
@@ -125,18 +123,8 @@ cdef class LmTrainer(Trainer):
         :param output_size: number of outputs
         :param ngrams: size of ngrams to extract
         """
-        # FIXME: shall the network be created by the caller?
-        # sum the number of features in all extractors' tables 
-        input_size = (left_context + 1 + right_context) * converter.size()
-        nn = LmNetwork(input_size, hidden_size, output_size)
-        super(LmTrainer, self).__init__(converter, learning_rate,
-                                        left_context, right_context, nn)
-        self.ngram_size = ngrams
+        super(LmTrainer, self).__init__(nn, converter, options)
         self.feature_tables = [e.table for e in converter.extractors]
-
-        # these are padding tokens
-        self.pre_padding = np.array(left_context * [converter.get_padding_left()])
-        self.post_padding = np.array(right_context * [converter.get_padding_right()])
 
     cdef _update_weights(self, worker, LmGradients grads, FLOAT_t remaining):
         """
@@ -147,24 +135,13 @@ cdef class LmTrainer(Trainer):
         """
         cdef Network nn = self.nn
 
-        # update LR by fan-in
-        # decrease linearly by remaining
-        cdef FLOAT_t LR_1 = max(0.001, self.learning_rate / nn.input_size * remaining)
-        cdef FLOAT_t LR_2 = max(0.001, self.learning_rate / nn.hidden_size * remaining)
+        # decrease linearly by remaining percentage
+        cdef FLOAT_t LR = max(0.001, self.learning_rate * remaining)
 
-        # output weights
-        nn.output_weights += LR_2 * grads.output_weights 
-        nn.output_bias += LR_2 * grads.output_bias
-
-        # hidden weights
-        nn.hidden_weights += LR_1 * grads.hidden_weights
-        nn.hidden_bias += LR_1 * grads.hidden_bias
+        nn.p.update(grads, LR)
 
         # copy new weights to worker
-        np.copyto(worker.nn.output_weights, nn.output_weights)
-        np.copyto(worker.nn.output_bias, nn.output_bias)
-        np.copyto(worker.nn.hidden_weights, nn.hidden_weights)
-        np.copyto(worker.nn.hidden_bias, nn.hidden_bias)
+        worker.nn.p.copy(nn.p)
 
     cdef _update_embeddings(self,
                             np.ndarray[FLOAT_t,ndim=1] grads_input_pos,
@@ -584,8 +561,8 @@ cdef class LmWorker(LmTrainer):
         
         cdef Network nn = self.nn
 
-        nn.run(vars_pos)
-        nn.run(vars_neg)
+        nn.forward(vars_pos)
+        nn.forward(vars_neg)
         
         # hinge loss
         cdef FLOAT_t score_pos = vars_pos.output[0]

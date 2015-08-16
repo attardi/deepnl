@@ -15,21 +15,28 @@ from corpus import *
 # ----------------------------------------------------------------------
 
 class ToIOBES(object):
-    """Convert from IOB to IOBES notation."""
+    """Convert from IOB to IOBES notation:
+    Begin
+    Inside
+    Outside
+    Single
+    End
+    """
 
-    def __init__(self, iterable):
+    def __init__(self, iterable, tagField):
         self.iterable = iterable
+        self.tagField = tagField
 
     def __iter__(self):
         # tokens are lists [form, ..., tag]
         for sent in self.iterable:
             l = len(sent)
             for i, tok in enumerate(sent):
-                if  i+1 == l or sent[i+1][-1][0] != 'I':
-                    if tok[-1][0] == 'B':
-                        tok[-1] = 'S'+tok[-1][1:]
-                    elif tok[-1][0] == 'I':
-                        tok[-1] = 'E'+tok[-1][1:]
+                if  i+1 == l or sent[i+1][self.tagField][0] != 'I':
+                    if tok[self.tagField][0] == 'B':
+                        tok[self.tagField] = 'S'+tok[self.tagField][1:]
+                    elif tok[self.tagField][0] == 'I':
+                        tok[self.tagField] = 'E'+tok[self.tagField][1:]
             yield sent
 
 class NerReader(TaggerReader):
@@ -42,7 +49,7 @@ class NerReader(TaggerReader):
         """
         :param filename: the name of a file in CoNLL TSV format.
         """
-        return ToIOBES(ConllReader(filename))
+        return ToIOBES(ConllReader(filename), self.tagField)
 
 # ----------------------------------------------------------------------
 

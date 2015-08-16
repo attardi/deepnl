@@ -20,7 +20,63 @@ from network cimport *
 # for decorations
 cimport cython
 
-cdef float eps = 0.01          # minimum error worth an update
+# ----------------------------------------------------------------------
+
+cdef class SeqParameters(Parameters):
+
+    # transitions
+    #cdef public np.ndarray transitions
+    
+    def __init__(self, int input_size, int hidden_size, int output_size):
+        super(SeqParameters, self).__init__(input_size, hidden_size, output_size)
+        self.transitions = np.zeros((output_size + 1, output_size))
+
+    def initialize(self, int input_size, int hidden_size, int output_size):
+        super(SeqParameters, self).initialize(input_size, hidden_size, output_size)
+        # A_i_j score for jumping from tag i to j
+        # A_0_i = transitions[-1]
+        high = 1.0
+        # +1 is due for the initial transition
+        self.transitions = np.random.uniform(-high, high, (output_size + 1, output_size))
+
+    cpdef update(self, Gradients grads, float learning_rate,
+                     Gradients ada=None):
+        """
+        Adjust the weights.
+        :param ada: cumulative square gradients for performing AdaGrad.
+        """
+        super(SeqParameters, self).update(grads, learning_rate, ada)
+
+        # Adjusts the transition scores table with the calculated gradients.
+        if ada:
+            global adaEps
+            ada.transitions += grads.transitions * grads.transitions
+            self.transitions += learning_rate * grads.transitions / np.sqrt(ada.transitions + adaEps)
+        else:
+            self.transitions += grads.transitions * learning_rate
+
+    def save(self, file):
+        """
+        Saves the parameters to a file.
+        It will save the weights, biases, sizes and transitions.
+        """
+        pickle.dump([self.hidden_weights, self.hidden_bias,
+                     self.output_weights, self.output_bias,
+                     self.transitions], file)
+
+    @classmethod
+    def load(cls, file):
+        """
+        Loads the parameters from a file.
+        It will load weights, biases.
+        """
+        p = cls.__new__(cls)
+
+        data = pickle.load(file)
+        p.hidden_weights, p.hidden_bias, p.output_weights, p.output_bias, \
+            p.transitions = data
+
+        return p
 
 # ----------------------------------------------------------------------
 
@@ -31,12 +87,15 @@ cdef class SeqGradients(Gradients):
 
     def __init__(self, int input_size, int hidden_size, int output_size,
                  int seq_len):
+        """
+        :param seq_len: sequence length.
+        """
         super(SeqGradients, self).__init__(input_size, hidden_size, output_size)
         self.input = np.zeros((seq_len, input_size)) # overrides Gradients
         self.output = np.zeros((seq_len, output_size))
         self.transitions = np.zeros((output_size + 1, output_size))
 
-    def clear(self, int seq_len):
+    def clear(self):
         super(SeqGradients, self).clear()
         self.input.fill(0.0)
         self.output.fill(0.0)
@@ -51,38 +110,31 @@ cdef class SeqGradients(Gradients):
 
 cdef class SequenceNetwork(Network):
         
-    # transitions
-    #cdef public np.ndarray transitions
-    
-    #cdef readonly np.ndarray input_sequence, hidden_sequence, layer2_sequence
+    #cdef readonly np.ndarray input_sequence, hidden_sequence
     
     def __init__(self, int input_size, int hidden_size, int output_size):
         super(SequenceNetwork, self).__init__(input_size, hidden_size,
                                               output_size)
-
-        # A_i_j score for jumping from tag i to j
-        # A_0_i = transitions[-1]
-        high = 1.0
-        # +1 is due for the initial transition
-        self.transitions = np.random.uniform(-high, high, (output_size + 1, output_size))
+        self.p = SeqParameters(input_size, hidden_size, output_size)
+        self.p.initialize(input_size, hidden_size, output_size)
 
     cdef gradients(self, int seqlen=1):
         return SeqGradients(self.input_size, self.hidden_size,
                             self.output_size, seqlen)
 
-    def _calculate_delta(self, scores):
+    cdef np.ndarray[FLOAT_t,ndim=2] _calculate_delta(self, scores):
         """
         Calculates a matrix with the scores for all possible paths at all given
         points (tokens).
         In the returned matrix, delta[i][j] means the sum of all scores 
         ending in token i with tag j (delta_i(j) in eq. 14 in the paper)
-        :return: :param scores: updated.
+        :return: updated :param scores:.
         """
         # See section 3.4.2 of paper:
         # R. Collobert, J. Weston, L. Bottou, M. Karlen, K. Kavukcuoglu and
         # P. Kuksa.  Natural Language Processing (Almost) from Scratch.
         # Journal of Machine Learning Research, 12:2493-2537, 2011.
-        # @see http://ronan.collobert.com/pub/matos/2012_deeplearning_springer.pdf
+        # @see http://www.jmlr.org/papers/volume12/collobert11a/collobert11a.pdf
 
         # scores[t][k] = ftheta_k,t
         delta = scores
@@ -106,7 +158,7 @@ cdef class SequenceNetwork(Network):
         return delta
 
     @cython.boundscheck(False)
-    cpdef bool _calculate_gradients_sll(self, np.ndarray[INT_t,ndim=1] tags,
+    cdef float _calculate_gradients_sll(self, np.ndarray[INT_t,ndim=1] tags,
                                         SeqGradients grads,
                                         np.ndarray[FLOAT_t,ndim=2] scores):
         """
@@ -139,23 +191,18 @@ cdef class SequenceNetwork(Network):
         # C(ftheta,A) = logadd_j(s(x, j, theta, A)) - score(correct path)
         #error = np.log(np.sum(np.exp(delta[-1]))) - correct_path_score
         error = logsumexp(delta[-1]) - correct_path_score
-        self.error += error
-        
         # if the error is too low, don't bother training (saves time and avoids
         # overfitting). An error of 0.01 means a log-prob of -0.01 for the right
-        # tag, i.e., more than 99% probability
-        # error 0.69 -> 50% probability for right tag (minimal threshold)
-        # error 0.22 -> 80%
-        # error 0.1  -> 90%
-        if error <= eps:
-            return False
+        if error < self.skipErr:
+            return error
         
         # things get nasty from here
         
         # compute the gradients for the last token
         # dC_logadd / ddelta_T(i) = e(delta_T(i))/Sum_k(e(delta_T(k)))
+        softmax(delta[-1], grads.output[-1])
         # negative gradients
-        grads.output[-1] = -softmax(delta[-1])
+        np.negative(grads.output[-1], grads.output[-1])
 
         # (output_size, output_size)
         cdef np.ndarray[FLOAT_t, ndim=2] transitions_t = self.transitions[:-1].T
@@ -202,10 +249,10 @@ cdef class SequenceNetwork(Network):
             grads.transitions[last_tag][tag] += 1 # negative gradient
             last_tag = tag
         
-        return True
+        return error
 
     @cython.boundscheck(False)
-    cpdef bool _calculate_gradients_wll(self, np.ndarray[INT_t,ndim=1] tags,
+    cdef float _calculate_gradients_wll(self, np.ndarray[INT_t,ndim=1] tags,
                                         SeqGradients grads,
                                         np.ndarray[FLOAT_t,ndim=2] scores):
         """
@@ -236,11 +283,7 @@ cdef class SequenceNetwork(Network):
         # C(ftheta) = logadd_j(ftheta_j) - score(correct path)
         #error = np.log(np.sum(np.exp(scores))) - correct_path_score
         error = logsumexp(scores) - correct_path_score
-        # approximate
-        #error = np.max(scores) - correct_path_score
-        self.error += error
-
-        return True
+        return error
 
     @cython.boundscheck(False)
     cpdef np.ndarray[INT_t,ndim=1] _viterbi(self,
@@ -288,6 +331,12 @@ cdef class SequenceNetwork(Network):
         
         answer[0] = previous_tag
         return answer
+
+    cdef float backpropagateSeq(self, sent_tags, scores, SeqGradients grads):
+        cdef float err =  self._calculate_gradients_sll(sent_tags, grads, scores)
+        if err > self.skipErr:
+            self._backpropagate(grads)
+        return err
 
     cdef _backpropagate(self, SeqGradients grads):
         """
@@ -348,31 +397,6 @@ cdef class SequenceNetwork(Network):
         #print >> sys.stderr, 'hbg', grads.hidden_bias[:4], grads.hidden_bias[-4:] # DEBUG
         #print >> sys.stderr, 'ig', grads.input[0,:4], grads.input[-1,-4:] # DEBUG
 
-    cpdef update(self, Gradients grads, float learning_rate,
-                 Gradients ada=None):
-        """
-        Adjust the weights.
-        :param ada: cumulative square gradients for performing AdaGrad.
-        """
-        super(SequenceNetwork, self).update(grads, learning_rate, ada)
-
-        # Adjusts the transition scores table with the calculated gradients.
-        if ada:
-            ada.transitions += grads.transitions * grads.transitions
-            self.transitions += learning_rate * grads.transitions / np.sqrt(ada.transitions + adaEps)
-        else:
-            self.transitions += grads.transitions * learning_rate
-
-    def save(self, file):
-        """
-        Saves the neural network to a file.
-        It will save the weights, biases, sizes and transitions.
-        """
-        pickle.dump([self.input_size, self.hidden_size, self.output_size,
-                     self.hidden_weights, self.hidden_bias,
-                     self.output_weights, self.output_bias,
-                     self.transitions], file)
-
     @classmethod
     def load(cls, file):
         """
@@ -381,10 +405,9 @@ cdef class SequenceNetwork(Network):
         distance tables, as well as all converters' data.
         """
         nn = cls.__new__(cls)
-
-        data = np.load(file)
-        nn.input_size, nn.hidden_size, nn.output_size, nn.hidden_weights, \
-            nn.hidden_bias, nn.output_weights, nn.output_bias, \
-            nn.transitions = data
+        nn.p = SeqParameters.load(file)
+        nn.input_size = nn.p.hidden_weights.shape[1]
+        nn.hidden_size = nn.p.hidden_weights.shape[0]
+        nn.output_size = nn.p.output_weights.shape[0]
 
         return nn

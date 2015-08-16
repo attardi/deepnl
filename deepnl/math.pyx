@@ -10,7 +10,7 @@ import numpy as np
 # ----------------------------------------------------------------------
 # Math functions
 
-cdef softmax(np.ndarray[FLOAT_t,ndim=1] a, np.ndarray out=None):
+cdef float[:] softmax(float[:] a, float[:] out=None):
     """Compute the ratio of exp(a) to the sum of exponentials.
 
     Parameters
@@ -27,12 +27,11 @@ cdef softmax(np.ndarray[FLOAT_t,ndim=1] a, np.ndarray out=None):
     """
     if out is None:
         out = np.empty_like(a)
-    a_max = a.max()
-    np.exp(a - a_max, out)
+    np.exp(a - a.max(), out)
     out /= np.sum(out)
     return out
 
-cdef softmax2d(np.ndarray[FLOAT_t,ndim=2] a, int axis=0, np.ndarray out=None):
+cdef float[:,:] softmax2d(float[:,:] a, int axis=0, float[:,:] out=None):
     """Compute the ratio of exp(a) to the sum of exponentials along the axis.
 
     Parameters
@@ -51,8 +50,7 @@ cdef softmax2d(np.ndarray[FLOAT_t,ndim=2] a, int axis=0, np.ndarray out=None):
     """
     if out is None:
         out = np.empty_like(a)
-    a_max = a.max(axis)
-    np.exp(a - a_max, out)
+    np.exp(a - a.max(axis), out)
     out /= np.sum(out, axis)
     return out
 

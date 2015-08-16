@@ -45,9 +45,17 @@ def create_trainer(args, converter):
         trainer.learning_rate = args.learning_rate
     else:
         logger.info('Creating new network...')
-        trainer = LmTrainer(converter, args.learning_rate,
-                            args.window/2, args.window/2,
-                            args.hidden, ngrams=args.ngrams)
+        # sum the number of features in all extractors' tables 
+        input_size = converter.size() * args.windows
+        nn = LmNetwork(input_size, args.hidden, 1)
+        options = {
+            'learning_rate': args.learning_rate,
+            'verbose': args.verbose,
+            'left_context': args.window/2,
+            'right_context': args.window/2,
+            'ngram_size': args.ngrams
+        }
+        trainer = LmTrainer(nn, converter, options)
 
     trainer.saver = saver(args.output, args.vectors)
 

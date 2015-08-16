@@ -1,5 +1,8 @@
 
-from distutils.core import setup, Extension
+try:
+    from setuptools import setup, Extension
+except ImportError:
+    from distutils.core import setup, Extension
 from Cython.Build import cythonize
 
 import numpy as np
@@ -34,21 +37,43 @@ extensions = [
 
 setup(
     name = "deepnl",
+
     description = "Deep Learning for NLP tasks",
+    author = "Giuseppe Attardi <attardi@di.unipi.it>",
+    author_email = "attardi@di.unipi.it",
+    url = "https://github.com/attardi/deepnl",
+
+    license = "GNU GPL",
+    version = "1.3.1",
+
+    platforms = "any",
+
+    keywords = " Deep learning "
+        " Neural network "
+        " Natural language processing ",
+
+    requires = ["numpy (>= 1.8)"],
+
     packages = ["deepnl"],
+
     ext_modules = cythonize(
         extensions,
         language="c++",
         nthreads=4),
     scripts = glob.glob("bin/*.py"),
-    license = "MIT",
-    version = "1.2.2",
-    author = "Giuseppe Attardi <attardi@di.unipi.it>",
-    author_email = "attardi@di.unipi.it",
-    url = "https://github.com/attardi/deepnl",
+
     classifiers = [
-        "Topic :: Text Processing :: Linguistic"
+        "Development Status :: 3 - Alpha",
+        "Environment :: Console",
+        "Intended Audience :: Science/Research",
+        "License :: OSI Approved :: GNU General Public License",
+        "Operating System :: OS Independent",
+        "Programming Language :: Python :: 2.6",
+        "Programming Language :: Python :: 2.7",
+        "Topic :: Scientific/Engineering :: Artificial Intelligence",
+        "Topic :: Scientific/Engineering :: Information Analysis",
+        "Topic :: Text Processing :: Linguistic",
     ],
-    requires = ["numpy (>= 1.8)"],
+
     long_description = readme()
 )

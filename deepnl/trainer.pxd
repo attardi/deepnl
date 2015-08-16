@@ -18,18 +18,33 @@ cdef class MovingAverage(object):
 
 cdef class Trainer(object):
 
-    cdef readonly Network nn
+    # public to enable loading
+    cdef public Network nn
     # feature extractor
     cdef public Converter converter
-    cdef np.ndarray pre_padding, post_padding
-    # size of ngrams
-    cdef int ngram_size
-    cdef public float learning_rate
+    cdef public np.ndarray pre_padding, post_padding
     cdef public object saver
-    cdef int train_items, skips
-    cdef float accuracy
+    cdef int total_items, epoch_items, epoch_hits, skips
+    # data for statistics
+    cdef float error, accuracy
     cdef readonly MovingAverage avg_error
+
+    # options
     cdef public bool verbose
+
+    # size of ngrams
+    cdef public int ngram_size
+
+    # training parameters
+    cdef public float learning_rate
+    # turned into globals since can't be static variables
+    # cdef public float l1_decay
+    # cdef public float l2_decay
+    # cdef public float momentum
+    # cdef public float ro # used in AdaDelta
+    # cdef public float eps # used in AdaGrad
+
+    cdef public float skipErr
 
     cdef float _validate(self, list sentences, labels, int idx)
 

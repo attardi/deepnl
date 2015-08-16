@@ -32,8 +32,6 @@ cdef class LmTrainer(Trainer):
     # data for statistics during training. 
     cdef int total_pairs
     
-    cdef FLOAT_t error
-
     cdef np.ndarray[INT_t,ndim=1] _extract_window(self,
                                         np.ndarray[INT_t,ndim=2] window,
                                         np.ndarray[INT_t,ndim=2] sentence,

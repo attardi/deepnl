@@ -57,7 +57,7 @@ cdef class CapsExtractor(Extractor):
     pass
 
 cdef class AffixExtractor(Extractor):
-    pass
+    cdef bool lowcase
 
 cdef class SuffixExtractor(AffixExtractor):
     pass
@@ -67,3 +67,4 @@ cdef class PrefixExtractor(AffixExtractor):
 
 cdef class GazetteerExtractor(Extractor):
     cdef bool lowcase
+    cdef bool noaccents

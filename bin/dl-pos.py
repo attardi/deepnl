@@ -26,11 +26,10 @@ sys.path.append(libdir)
 
 # local
 from deepnl.corpus import ConllWriter
-from deepnl.extractors import *
 from deepnl.reader import PosReader, ConllReader
-from deepnl.network import Network
-from deepnl.trainer import TaggerTrainer
+from deepnl.extractors import *
 from deepnl.tagger import Tagger
+from deepnl.trainer import TaggerTrainer
 from deepnl.embeddings import Plain # DEBUG
 
 # ----------------------------------------------------------------------
@@ -39,6 +38,7 @@ from deepnl.embeddings import Plain # DEBUG
 def create_trainer(args, converter, tags_dict):
     """
     Creates or loads a neural network according to the specified args.
+    :param tags_dict: dict of tags.
     """
 
     logger = logging.getLogger("Logger")
@@ -46,15 +46,23 @@ def create_trainer(args, converter, tags_dict):
     if args.load:
         logger.info("Loading provided network...")
         trainer = TaggerTrainer.load(args.load)
+        # change learning rate
         trainer.learning_rate = args.learning_rate
         trainer.threads = args.threads
     else:
         logger.info('Creating new network...')
-        trainer = TaggerTrainer(converter, args.learning_rate,
-                                args.window/2, args.window/2,
-                                args.hidden, tags_dict, args.verbose)
+        # sum the number of features in all tables 
+        input_size = converter.size() * args.window
+        nn = SequenceNetwork(input_size, args.hidden, len(tag_index))
+        options = {
+            'learning_rate': args.learning_rate,
+            'verbose': args.verbose,
+            'left_context': args.window/2,
+            'right_context': args.window/2
+        }
+        trainer = TaggerTrainer(nn, converter, tag_index, options)
 
-    trainer.saver = saver(args.model, args.output)
+    trainer.saver = saver(args.model, args.vectors)
 
     logger.info("... with the following parameters:")
     logger.info(trainer.nn.description())
@@ -66,7 +74,7 @@ def saver(model_file, vectors_file):
     def save(trainer):
         # save embeddings also separately
         if vectors_file:
-            trainer.converter.extractors[0].save_vectors(vectors_file)
+            trainer.save_vectors(vectors_file)
         with open(model_file, 'wb') as file:
             trainer.tagger.save(file)
     return save
@@ -80,12 +88,12 @@ def main():
 
     defaults = {}
     
-    parser = argparse.ArgumentParser(description="Learn word embeddings.")
+    parser = argparse.ArgumentParser(description="POS tagger using word embeddings.")
     
     parser.add_argument('-c', '--config', dest='config_file',
                         help='Specify config file', metavar='FILE')
 
-    #args, remaining_argv = parser.parse_known_args()
+    # args, remaining_argv = parser.parse_known_args()
 
     # if args.config_file:
     #     config = ConfigParser.SafeConfigParser()
@@ -114,7 +122,7 @@ def main():
                         help='Number of threads (default 1)')
     parser.add_argument('-t', '--train', type=str, default=None,
                         help='File with annotated data for training.')
-    parser.add_argument('-o', '--output', type=str, default=None,
+    parser.add_argument('--vectors', type=str, default=None,
                         help='File where to save embeddings')
 
     # Extractors:
@@ -205,14 +213,14 @@ def main():
             converter.add(extractor)
 
         # obtain the tags for each sentence
-        tags_dict = { t:i for i,t in enumerate(tagset) }
+        tag_index = { t:i for i,t in enumerate(tagset) }
         sentences = []
         tags = []
         for sent in sentence_iter:
             sentences.append(converter.convert([token[0] for token in sent]))
-            tags.append(np.array([tags_dict[token[-1]] for token in sent]))
+            tags.append(np.array([tag_index[token[-1]] for token in sent]))
     
-        trainer = create_trainer(args, converter, tags_dict)
+        trainer = create_trainer(args, converter, tag_index)
         logger.info("Starting training with %d sentences" % len(sentences))
 
         report_frequency = max(args.iterations / 200, 1)

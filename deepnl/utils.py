@@ -245,3 +245,79 @@ def grouper(iterable, n):
         if not chunk:
             return
         yield chunk
+
+# ----------------------------------------------------------------------
+# diacritic
+
+import unicodedata
+def strip_accents(s):
+    return ''.join(c for c in unicodedata.normalize('NFD', s)
+                   if unicodedata.category(c) != 'Mn')
+
+# ----------------------------------------------------------------------
+
+class Trie(dict):
+    """Simple trie of ngrams, that keeps counts of their frequencies.
+    """
+
+    def __init__(self):
+        self.freq = 0           # count the occurrences of ngrams ending here
+    
+    def __len__(self):
+        count = 0
+        for trie in super(Trie, self).itervalues():
+            if trie.freq:     # terminal node
+                count += 1
+            count += trie.__len__()
+        return count
+
+    def __repr__(self):
+        return '<Trie %d, %s>' % (self.freq, super(Trie, self).__repr__())
+
+    def add(self, ngram, lowcase=True, noaccents=True):
+        """Insert the ngram :param ngram: into the trie."""
+        curr = self
+        for tok in ngram:
+            if lowcase:
+                tok = tok.lower()
+            if noaccents:
+                tok = strip_accents(tok)
+            curr = curr.setdefault(tok, Trie())
+        curr.freq += 1
+
+    def prune(self, occurr):
+        """prune ngrams that occurr less than :param occurr:"""
+        for key, curr in self.items():
+            if len(curr) == 0:  # final ngram
+                if curr.freq < occurr:            
+                    del self[key]
+            else:
+                curr.prune(occurr)
+                # prune dead branch
+                if len(curr) == 0:
+                    del self[key]
+
+    def iter(self, sent, start=0, lowcase=True, noaccents=True):
+        """iterate through all ngrams that occur in :param sent: starting at
+        position :param start:"""
+        trie = self
+        for cur in xrange(start, len(sent)):
+            tok = sent[cur]
+            if lowcase:
+                tok = tok.lower()
+            if noaccents:
+                tok = strip_accents(tok)
+            if tok in trie:         # part of ngram
+                trie = trie[tok]
+                if trie.freq:
+                    yield cur+1 # ngram end
+            else:
+                break
+
+    def __iter__(self):
+        """Iterate through the ngrams stored in the trie"""
+        for key, trie in self.iteritems():
+            if trie.freq:     # terminal node
+                yield [key]
+            for rest in trie:
+                yield [key] + rest

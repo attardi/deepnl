@@ -41,12 +41,22 @@ def create_trainer(args, converter):
     if args.load:
         logger.info("Loading provided network...")
         trainer = SentimentTrainer.load(args.load)
+        # change learning rate
         trainer.learning_rate = args.learning_rate
     else:
         logger.info('Creating new network...')
-        trainer = SentimentTrainer(converter, args.learning_rate,
-                                   args.window/2, args.window/2,
-                                   args.hidden, args.ngrams, args.alpha)
+        # sum the number of features in all extractors' tables 
+        input_size = converter.size() * args.windows
+        nn = Network(input_size, args.hidden, 2)
+        options = {
+            'learning_rate': args.learning_rate,
+            'verbose': args.verbose,
+            'left_context': args.window/2,
+            'right_context': args.window/2,
+            'ngram_size': args.ngrams,
+            'alpha': args.alpha
+        }
+        trainer = SentimentTrainer(nn, converter, options)
 
     trainer.saver = saver(args.output, args.vectors)
 
@@ -90,7 +100,7 @@ if __name__ == '__main__':
 
     parser.add_argument('-w', '--window', type=int, default=5,
                         help='Size of the word window (default 5)',
-                             dest='window')
+                        dest='window')
     parser.add_argument('-s', '--embeddings-size', type=int, default=50,
                         help='Number of features per word (default 50)',
                         dest='embeddings_size')
@@ -111,7 +121,7 @@ if __name__ == '__main__':
     parser.add_argument('-o', '--output', type=str, default=None,
                         help='File where to save the model')
     parser.add_argument('--vocab', type=str, required=True,
-                        help='Vocabulary file, either read or created')
+                        help='Vocabulary file, either read and updated or created')
     parser.add_argument('--vectors', type=str, required=True,
                         help='Embeddings file, either read and updated or created')
     parser.add_argument('--load', type=str, default=None,
@@ -144,9 +154,11 @@ if __name__ == '__main__':
         # start with the given vocabulary
         base_vocab = reader.load_vocabulary(args.vocab)
         if os.path.exists(args.vectors):
+            # load embeddings
             embeddings = Embeddings(vectors=args.vectors, vocab=base_vocab,
                                     variant=args.variant)
         else:
+            # create embeddings
             embeddings = Embeddings(args.embeddings_size, vocab=base_vocab,
                                     variant=args.variant)
         # add the ngrams from the corpus
@@ -154,12 +166,15 @@ if __name__ == '__main__':
         logger.info("Overriding vocabulary in %s" % args.vocab)
         embeddings.save_vocabulary(args.vocab)
     elif args.variant == 'word2vec' and os.path.exists(args.vectors):
-        embeddings = Embeddings(vectors=args.vectors,
-                                variant=args.variant)
+        embeddings = Embeddings(vectors=args.vectors, variant=args.variant)
         embeddings.merge(vocab)
+        logger.info("Saving vocabulary in %s" % args.vocab)
+        embeddings.save_vocabulary(args.vocab)
     else:
         embeddings = Embeddings(args.embeddings_size, vocab=vocab,
                                 variant=args.variant)
+        logger.info("Saving vocabulary in %s" % args.vocab)
+        embeddings.save_vocabulary(args.vocab)
 
     # Assume bigrams are prefix of trigrams, or else we should put a terminator
     # on trie

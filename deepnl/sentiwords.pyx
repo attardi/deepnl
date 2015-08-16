@@ -15,7 +15,6 @@ cimport cython
 from math cimport *
 from words cimport *
 from extractors cimport Iterable
-from network cimport adaEps
 
 # ----------------------------------------------------------------------
 
@@ -78,23 +77,19 @@ cdef class SentimentTrainer(LmTrainer):
 
     cdef RandomPool random_pool
 
-    def __init__(self, converter, float learning_rate,
-                 int left_context, int right_context,
-                 int hidden_size, int ngrams, float alpha):
+    def __init__(self, nn, converter, options):
         """
         Initializes a new neural network initialized for training.
+        :param options: provides
         :param left_context: defaut 1
         :param right_context: defaut 1
         :param hidden_size: default 20
         :param ngrams: size of ngrams to extract
         :param alpha: default 0.5
         """
-        output_size = 2
-        super(SentimentTrainer, self).__init__(converter, learning_rate,
-                                               left_context, right_context,
-                                               hidden_size, output_size, ngrams)
+        super(SentimentTrainer, self).__init__(nn, converter, options)
 
-        self.alpha = alpha
+        self.alpha = options.get('alpha', 0.5)
 
         # cumulative AdaGrad
         self.input_adagrads_neg = np.zeros(self.nn.input_size, dtype=float)
@@ -126,10 +121,11 @@ cdef class SentimentTrainer(LmTrainer):
                 break
 
         cdef Network nn = self.nn
+        cdef Parameters p = nn.p
         # FIXME: avoid allocation
         vars_pos = nn.variables()
         self.converter.lookup(example, vars_pos.input)
-        nn.run(vars_pos)
+        nn.forward(vars_pos)
 
         vars_neg = nn.variables()
         cdef np.ndarray[INT_t,ndim=1] negative_token = np.array(variant, dtype=int)
@@ -139,7 +135,7 @@ cdef class SentimentTrainer(LmTrainer):
         self.converter.lookup(example, vars_neg.input)
         #print >> sys.stderr, 'neg', self.converter.extractors[0].sentence(example).encode('utf-8') # DEBUG
         #print >> sys.stderr, vars_neg.input[128:132] # DEBUG
-        nn.run(vars_neg)
+        nn.forward(vars_neg)
         
         cdef float errorCW = max(0, 1 - vars_pos.output[0] + vars_neg.output[0])
         cdef float errorUS = max(0, 1 - polarity * vars_pos.output[1] + polarity * vars_neg.output[1])
@@ -184,8 +180,8 @@ cdef class SentimentTrainer(LmTrainer):
 
         # Hidden layer
         # (hidden_size) = (2) * (2, hidden_size)
-        grads.hidden_pos = hardtanhe(vars_pos.hidden) * grads_pos_score.dot(nn.output_weights)
-        grads.hidden_neg = hardtanhe(vars_neg.hidden) * grads_neg_score.dot(nn.output_weights)
+        grads.hidden_pos = hardtanhe(vars_pos.hidden) * grads_pos_score.dot(p.output_weights)
+        grads.hidden_neg = hardtanhe(vars_neg.hidden) * grads_neg_score.dot(p.output_weights)
 
         # Input layer
         # (hidden_size) x (input_size) = (hidden_size, input_size)
@@ -211,23 +207,25 @@ cdef class SentimentTrainer(LmTrainer):
         cdef float LR_2 = max(0.001, self.learning_rate / self.nn.hidden_size * remaining)
 
         cdef Network nn = self.nn
+        cdef Parameters p = nn.p
         cdef int left_context = len(self.pre_padding)
 
-        nn.output_weights += LR_2 * grads.output_weights
-        nn.output_bias += LR_2 * grads.output_bias
+        p.output_weights += LR_2 * grads.output_weights
+        p.output_bias += LR_2 * grads.output_bias
         
-        nn.hidden_weights += LR_1 * grads.hidden_weights
-        nn.hidden_bias += LR_1 * grads.hidden_bias
+        p.hidden_weights += LR_1 * grads.hidden_weights
+        p.hidden_bias += LR_1 * grads.hidden_bias
         
         cdef np.ndarray[FLOAT_t,ndim=1] grads_input_neg, grads_input_pos
 
         # input gradients
 	# (hidden_size) x (hidden_size, input_size) = (input_size)
-        # grads.hidden_pos.dot(nn.hidden_weights, grads.input)
-        # grads.hidden_neg.dot(nn.hidden_weights, grads.input_neg)
+        # grads.hidden_pos.dot(p.hidden_weights, grads.input)
+        # grads.hidden_neg.dot(p.hidden_weights, grads.input_neg)
         # AdaGrad: cumulate the square of gradients in G for parameter p:
         # G += g^2
         # p -= LR * g / sqrt(G + eps)
+        global adaEps
         self.input_adagrads_pos += np.power(grads.input, 2)
         self.input_adagrads_neg += np.power(grads.input_neg, 2)
         grads_input_pos = LR_0 * grads.input / np.sqrt(self.input_adagrads_pos + adaEps)
@@ -286,7 +284,7 @@ cdef class SentimentTrainer(LmTrainer):
 
         cdef float all_cases = float(sum([len(sen) for sen in sentences]) * epochs * self.ngram_size)
 
-        cdef int epoch, epoch_examples, num, pos
+        cdef int epoch, num, pos
         cdef float remaining
 
         cdef int left_context = len(self.pre_padding)
@@ -301,6 +299,8 @@ cdef class SentimentTrainer(LmTrainer):
 
         for epoch in xrange(epochs):
             self.error = 0.0
+            self.epoch_items = 0
+            self.epoch_hits = 0
             self.skips = 0
             epoch_pairs = 0
             # update LR by fan-in

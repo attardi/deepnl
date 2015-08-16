@@ -15,7 +15,7 @@ import logging
 import numpy as np
 import os
 import re
-from collections import Counter, defaultdict
+from collections import Counter, OrderedDict
 import cPickle as pickle
 from itertools import izip
 import sys                      # modules
@@ -23,7 +23,7 @@ import sys                      # modules
 # local
 from word_dictionary import WordDictionary as WD
 import embeddings
-
+from utils import Trie, strip_accents
 
 # ----------------------------------------------------------------------
 
@@ -246,7 +246,14 @@ cdef class Embeddings(Extractor):
         :param vectors: file containing the vectors
         :param variant: style of embeddgins (senna, polyglot, word2vect)
         """
-        if vocab:
+        if variant == 'word2vec':
+            # load both vocab and vectors from single file
+            self.table, wordlist = embeddings.Word2Vec.load(vectors)
+            self.dict = <dict>WD(None, wordlist=wordlist, variant=variant)
+            # add vectors for special symbols
+            extra = len(self.dict) - len(self.table)
+            self.table = np.concatenate((self.table, embeddings.generate_vectors(extra, self.table.shape[1])))
+        elif vocab:
             self.dict = <dict>WD(None, wordlist=vocab, variant=variant)
             if vectors and os.path.exists(vectors):
                 self.table = self.load_vectors(vectors)
@@ -258,13 +265,6 @@ cdef class Embeddings(Extractor):
                 self.table = self.load_vectors(vectors)
             else:
                 self.table = embeddings.generate_vectors(len(self.dict), size)
-        elif variant == 'word2vec':
-            # load both vocab and vectors from single file
-            self.table, wordlist = embeddings.Word2Vec.load(vectors)
-            self.dict = <dict>WD(None, wordlist=wordlist, variant=variant)
-            # add vectors for special symbols
-            extra = len(self.dict) - len(self.table)
-            self.table = np.concatenate((self.table, embeddings.generate_vectors(extra, self.table.shape[1])))
 
     def merge(self, list vocab):
         """Extend the dictionary with words from list :param vocab:"""
@@ -290,9 +290,9 @@ cdef class Embeddings(Extractor):
         # FIXME: allow chosing variant
         # order by ID
         words = [''] * len(self.dict)
-        for k,v in self.dict.items():
+        for k,v in self.dict.iteritems():
             words[v] = k
-        return embeddings.Plain.write_vocabulary(words, file)
+        embeddings.Plain.write_vocabulary(words, file)
 
     def load_vectors(self, file, variant=None):
         # FIXME: allow choosing variant
@@ -300,6 +300,16 @@ cdef class Embeddings(Extractor):
 
     def save_vectors(self, file):
         return embeddings.Plain.write_vectors(file, self.table)
+
+    def dump(self, filename, variant=None):
+        if variant == 'word2vec':
+            # order by ID
+            words = [''] * len(self.dict)
+            for k,v in self.dict.iteritems():
+                words[v] = k
+            embeddings.Word2Vec.save(filename, words, self.table)
+        else:
+            embeddings.Plain.write_vectors(file, self.table)
 
     def extract(self, words):
         """
@@ -426,15 +436,17 @@ cdef class AffixExtractor(Extractor):
     padding = 0
     specials = 2                # number of specials (other, padding)
 
-    def __init__(self, size, filename=None, wordlist=[]):
+    def __init__(self, size, filename=None, wordlist=[], lowcase=True):
         """
         :param size: the dimension of the embeddings space
+        :param lowcase: set the affix in lowercase
         """
+        self.lowcase = lowcase
         specials = AffixExtractor.specials
         if filename:
             self.load_affixes(filename)
         else:
-            affixes = self.build(wordlist)
+            affixes = self.build(wordlist, lowcase=lowcase)
             # leave reserved values for specials
             self.dict = { x: i+specials for i,x in enumerate(affixes) }
         # create vectors for possible values
@@ -463,6 +475,18 @@ cdef class AffixExtractor(Extractor):
             logger.error("File %s doesn't exist." % filename)
             raise
 
+    def write(self, filename):
+        """
+        Write prefixes or suffixes to file :param filename:.
+        """
+        with open(filename, 'wb') as f:
+            # order by ID
+            affixes = [''] * len(self.dict)
+            for a, i in self.dict.iteritems():
+                affixes[i - self.specials] = a
+            for i in range(self.specials, len(self.dict)):
+                print >> f, affixes[i].encode('utf-8')
+
 # ----------------------------------------------------------------------
 
 cdef class SuffixExtractor(AffixExtractor):
@@ -481,11 +505,13 @@ cdef class SuffixExtractor(AffixExtractor):
         # if len(word) <= SuffixExtractor.max_length:
         #     return Affix.other
 
-        suffix = word[-SuffixExtractor.max_length:].lower()
+        suffix = word[-SuffixExtractor.max_length:]
+        if self.lowcase:
+            suffix = suffix.lower()
         return self.dict.get(suffix, AffixExtractor.other)
 
     def build(self, wordlist, num=200, min_occurrences=3,
-              size=SuffixExtractor.max_length):
+              length=SuffixExtractor.max_length, lowcase=True):
         """
         Creates a list with the most common suffixes found in 
         wordlist.
@@ -494,11 +520,13 @@ cdef class SuffixExtractor(AffixExtractor):
         :param num: maximum number of suffixes
         :param min_occurrences: minimum number of occurrences of each suffix
         in wordlist
-        :param size: desired size of suffixes
+        :param length: desired length of suffixes
+        :param lowcase: set the affix in lowercase
         """
-        # we take the whole word if len(x) <= size
-        all_endings = (x[-size:] for x in wordlist 
-                       if not re.search('_|\d', x[-size:]))
+        # we take the whole word if len(x) <= length
+        lowcaser = lambda x: x.lower() if lowcase else x
+        all_endings = (lowcaser(x[-length:]) for x in wordlist
+                       if not re.search('_|\d', x[-length:]))
         c = Counter(all_endings)
         common_endings = c.most_common(num)
         return [e for e, n in common_endings if n >= min_occurrences]
@@ -521,11 +549,13 @@ cdef class PrefixExtractor(AffixExtractor):
         # if len(word) <= PrefixExtractor.max_length:
         #     return Affix.other
 
-        prefix = word[:PrefixExtractor.max_length].lower()
+        prefix = word[:PrefixExtractor.max_length]
+        if self.lowcase:
+            prefix = prefix.lower()
         return self.dict.get(prefix, AffixExtractor.other)
 
     def build(cls, wordlist, num=200, min_occurrences=3,
-              size=PrefixExtractor.max_length):
+              length=PrefixExtractor.max_length, lowcase=True):
         """
         Creates a list with the most common prefixes found in 
         wordlist.
@@ -534,11 +564,13 @@ cdef class PrefixExtractor(AffixExtractor):
         :param num: maximum number of prefixes
         :param min_occurrences: minimum number of occurrences of each prefix
         in wordlist
-        :param size: desired size of prefixes
+        :param length: desired length of prefixes
+        :param lowcase: set the affix in lowercase
         """
-        # we take the whole word if len(x) <= size
-        all_beginnings = (x[-size:] for x in wordlist 
-                       if  not re.search('_|\d', x[-size:]))
+        # we take the whole word if len(x) <= length
+        lowcaser = lambda x: x.lower() if lowcase else x
+        all_beginnings = (lowcaser(x[-length:]) for x in wordlist 
+                       if  not re.search('_|\d', x[-length:]))
         c = Counter(all_beginnings)
         common_beginnings = c.most_common(num)
         return [e for e, n in common_beginnings if n >= min_occurrences]
@@ -552,15 +584,19 @@ cdef class GazetteerExtractor(Extractor):
     padding = 2
     num_values = 3              # extractor values
 
-    def __init__(self, words=None, size=5, lowcase=True):
+    def __init__(self, ngrams=None, size=5, lowcase=True, noaccents=True):
         """
-        :param words: list of words to add to gazeetteer.
+        :param ngrams: iterator on ngrams (list of words) to add to gazeetteer.
         :param size: vector dimension.
         :param lowcase: whether to compare lowercase words.
+        :param noaccents: whether to remove accents from words.
         """
         self.lowcase = lowcase
-        if words:
-            self.dict = {x: GazetteerExtractor.present for x in words}
+        self.noaccents = noaccents
+        if ngrams:
+            self.dict = <dict>Trie()
+            for ngram in ngrams:
+                self.dict.add(ngram)
             self.table = embeddings.generate_vectors(GazetteerExtractor.num_values, size)
 
     def extract(self, words):
@@ -574,39 +610,80 @@ cdef class GazetteerExtractor(Extractor):
             if token == WD.padding_left or token == WD.padding_right:
                 res[i] = GazetteerExtractor.padding
                 continue
-            entity = token.lower() if self.lowcase else token
-            if entity in self.dict:
-                res[i] = GazetteerExtractor.present
-            for j in range(i+1, len(words)):
-                if self.lowcase:
-                    entity += ' ' + words[j].lower()
-                else:
-                    entity += ' ' + words[j]
-                if entity in self.dict:
-                    for k in range(i, j+1):
-                        res[k] = GazetteerExtractor.present
+            for end in self.dict.iter(words, i, self.lowcase, self.noaccents):
+                for k in range(i, end):
+                    res[k] = GazetteerExtractor.present
         return res
 
     @classmethod
-    def create(cls, filename, size=5, lowcase=True):
+    def create(cls, filename, size=5, lowcase=True, noaccents=True):
         """
         Create extractors from gazeeteer file, consisting of lines:
           TYPE\tentity
         :param filename: file where to read list.
         :param size: size of vectors to generate.
+        :param lowcase: whether to compare lowercase words.
+        :param noaccents: whether to remove accents from words.
         """
-        classes = {}
+        classes = OrderedDict() # preserve insertion order
         with open(filename) as file:
             for line in file:
                 line = line.strip().decode('utf-8')
                 c, words = line.split(None, 1)
                 if lowcase:
                     words = words.lower()
+                if noaccents:
+                    words = strip_accents(words)
                 if c not in classes:
-                    classes[c] = set()
-                classes[c].add(words)
-        extractors = [cls(w, size, lowcase) for w in classes.values()]
+                    classes[c] = Trie()
+                classes[c].add(words.split())
+        extractors = [cls(ws, size, lowcase, noaccents) for ws in classes.values()]
         return extractors
+
+    # min number of occurrences in corpus to put in gazetteer
+    # FIXME: consider also stopping at punctuation
+    minOccurr = 1
+
+    @classmethod
+    def build(cls, sentences, formField, tagField=-1, lowcase=True, noaccents=True):
+        """
+        Build a trie for each tag in :param sentences: which counts the
+        frequency of each ngram with taht tag.
+        :param lowcase: whether to compare lowercase words.
+        :param noaccents: whether to remove accents from words.
+        """
+        # gazetteers must be kept in the same order as tags
+        tries = OrderedDict()
+        # collect n-gram
+        for sent in sentences:
+            ngram = []
+            prevTag = 'O'
+            for tok in sent:
+                tag = tok[tagField]
+                if tag[0] == 'B' or tag[0] == 'S': # Begin or Single
+                    # terminates previous ngram, start next one
+                    form = tok[formField].lower() # lowercase
+                    if ngram:
+                        clas = prevTag[2:] # strip B-/I-
+                        tries.setdefault(clas, Trie()).add(ngram, lowcase, noaccents)
+                    ngram = [form]
+                elif tag == 'O':
+                    if ngram:              # terminated ngram
+                        clas = prevTag[2:] # strip B-/I-
+                        tries.setdefault(clas, Trie()).add(ngram, lowcase, noaccents)
+                    ngram = []
+                elif ngram:     # continuing ngram (I or E)
+                    # assert(prevTag[2:] == tag[2:])
+                    form = tok[formField].lower() # lowercase
+                    ngram.append(form)
+                prevTag = tag
+            # leftover
+            if ngram:
+                clas = prevTag[2:] # strip B-/I-
+                tries.setdefault(clas, Trie()).add(ngram, lowcase, noaccents)
+        for trie in tries.itervalues():
+            trie.prune(GazetteerExtractor.minOccurr)
+        return tries
 
     def save(self, file):
         pickle.dump(self.dict, file)
@@ -614,7 +691,7 @@ cdef class GazetteerExtractor(Extractor):
         pickle.dump(self.lowcase, file)
 
     def load(self, file):
-        self.dict = pickle.load(file)
+        self.dict = <dict>pickle.load(file)
         self.table = pickle.load(file)
         self.lowcase = pickle.load(file)
 

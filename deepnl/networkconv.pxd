@@ -8,8 +8,6 @@ cdef class ConvVariables(Variables):
     cdef public np.ndarray hidden2
     # convolution layer
     cdef readonly np.ndarray conv
-    # maximum convolution indices
-    cdef readonly np.ndarray tmax
 
 cdef class ConvParameters(Parameters):
     """
@@ -18,28 +16,20 @@ cdef class ConvParameters(Parameters):
     """
 
     # the second hidden layer
-    cdef readonly np.ndarray hidden2_weights, hidden2_bias
+    cdef public np.ndarray hidden2_weights, hidden2_bias
 
-cdef class ConvGradients(ConvParameters):
+    cpdef update(self, Gradients grads, float learning_rate, Gradients ada=*)
+
+cdef class ConvGradients(Gradients):
     
-    cdef public np.ndarray conv
+    cdef public np.ndarray hidden2_weights, hidden2_bias
+    cdef readonly np.ndarray conv
 
 cdef class ConvolutionalNetwork(Network):
 
-    # FIXME: we must add it here, since Network inherits from Parameters
-    # FIXME: use dependency injection for Parameters
-    # the second hidden layer
-    cdef readonly np.ndarray hidden2_weights, hidden2_bias
-    cdef readonly int hidden2_size
+    cdef public int hidden2_size
+    cdef public int pool_size
 
-    cpdef run(self, Variables vars)
-
-    cdef np.ndarray[FLOAT_t,ndim=1] predict(self,
-                                            np.ndarray[INT_t,ndim=2] sentence,
-                                            vars,
-                                            bool train=*)
+    cdef np.ndarray[FLOAT_t,ndim=1] predict(self, list tokens)
 
     cdef float backpropagate(self, int y, Variables vars, Gradients grads)
-
-    cpdef update(self, Gradients grads, float learning_rate,
-                 Gradients ada=*)

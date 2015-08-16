@@ -21,23 +21,23 @@ cdef class Tagger(object):
     Abstract base class for sliding window sequence taggers.
     """
     
-    # cdef dict tags_dict
-    # cdef list tags
+    # cdef dict tag_index         # tag ids
+    # cdef list tags              # list of tags
 
-    def __init__(self, Converter converter, tags_dict,
-                 int left_context, int right_context, nn):
+    def __init__(self, nn, Converter converter, tag_index,
+                 int left_context, int right_context):
         """
+        :param nn: network to be used.
         :param converter: the Converter object that extracts features and
            converts them to weights.
-        :param tags_dict: dictionary of tags.
+        :param tag_index: index of tags.
         :param left_context: size of left context window.
         :param right_context: size of right context window.
-        :param nn: network to be used.
         """
-        self.converter = converter
-        self.tags_dict = tags_dict
-        self.tags = sorted(tags_dict, key=tags_dict.get)
         self.nn = nn        # dependency injection
+        self.converter = converter
+        self.tag_index = tag_index
+        self.tags = sorted(tag_index, key=tag_index.get)
         cdef np.ndarray padding_left = converter.get_padding_left()
         cdef np.ndarray padding_right = converter.get_padding_right()
         self.pre_padding = np.array(left_context * [padding_left])
@@ -53,8 +53,8 @@ cdef class Tagger(object):
         Tokens should be produced a compatible tokenizer in order to 
         match the entries in the vocabulary.
         
-        :param tokens: a list of strings
-        :param return_tokens: whether to return also tokens
+        :param tokens: a list of strings.
+        :param return_tokens: whether to return also tokens.
         :returns: a list of tags or a list of pairs (token, tag) if
             :param return_tokens: is True.
         """
@@ -77,9 +77,9 @@ cdef class Tagger(object):
         the scores for all possibile tag sequences.
         
         :param sentence: an array, where each row encodes a token.
-        :param tags: the correct tags (needed when training)
-        :return: a (len(sentence), output_size) array with the scores for all
-            tags for each token
+        :param tags: the correct tags (needed when training).
+        :return: an array of size (len(sentence), output_size) with the
+            scores for all tags for each token..
         """
         cdef slen = len(sentence)
         nn = self.nn
@@ -108,8 +108,8 @@ cdef class Tagger(object):
         vars = network.Variables()
 
         #print >> sys.stderr, padded_sentence   # DEBUG
-        #print >> sys.stderr, 'hweights', nn.hidden_weights[:4,:4] # DEBUG
-        #print >> sys.stderr, 'hbias', nn.hidden_bias[:4]          # DEBUG
+        #print >> sys.stderr, 'hweights', nn.p.hidden_weights[:4,:4] # DEBUG
+        #print >> sys.stderr, 'hbias', nn.p.hidden_bias[:4]          # DEBUG
         # run through all windows in the sentence
         for i in xrange(slen):
             window = padded_sentence[i: i+window_size]
@@ -121,7 +121,7 @@ cdef class Tagger(object):
                 vars.hidden = nn.hidden_sequence
             self.converter.lookup(window, vars.input)
             vars.output = scores[i]
-            nn.run(vars)
+            nn.forward(vars)
             # DEBUG
             # if train:
                 # print >> sys.stderr, 'input', vars.input[:4], vars.input[-4:]
@@ -135,7 +135,7 @@ cdef class Tagger(object):
         Saves the tagger to a file.
         """
         self.nn.save(file)
-        pickle.dump(self.tags_dict, file)
+        pickle.dump(self.tag_index, file)
         pickle.dump((len(self.pre_padding), len(self.post_padding)), file)
         self.converter.save(file)
 
@@ -145,10 +145,10 @@ cdef class Tagger(object):
         Loads the tagger from a file.
         """
         nn = SequenceNetwork.load(file)
-        tag_dict = pickle.load(file)
-        (left_context, right_context) = pickle.load(file)
+        tag_index = pickle.load(file)
+        left_context, right_context = pickle.load(file)
         converter = Converter()
         converter.load(file)
 
-        return cls(converter, tag_dict, left_context, right_context, nn=nn)
+        return cls(converter, tag_index, left_context, right_context, nn=nn)
 

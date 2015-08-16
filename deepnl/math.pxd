@@ -4,8 +4,8 @@ cimport numpy as np
 ctypedef np.float_t FLOAT_t
 
 # FIXHIM: no overloading in Cython
-cdef softmax(np.ndarray[FLOAT_t] a, np.ndarray out=*)
-cdef softmax2d(np.ndarray[FLOAT_t, ndim=2] a, int axis=*, np.ndarray out=*)
+cdef float[:] softmax(float[:] a, float[:] out=*)
+cdef float[:,:] softmax2d(float[:,:] a, int axis=*, float[:,:] out=*)
 
 # FIXHIM: no overloading in Cython
 cdef logsumexp(np.ndarray[FLOAT_t] a)

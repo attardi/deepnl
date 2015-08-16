@@ -1,3 +1,9 @@
+2015-07-22  Giuseppe Attardi  <attardi@di.unipi.it>
+
+	* deepnl/extractors.pyx (GazetteerExtractor): use Trie for ngrams.
+
+	* deepnl/utils.py (Trie): for storing and searching ngrams.
+
 2015-07-17  Giuseppe Attardi  <attardi@di.unipi.it>
 
 	* bin/dl-ner.py (main): use GazetteerExtractor.build()

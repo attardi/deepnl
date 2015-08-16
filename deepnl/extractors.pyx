@@ -610,7 +610,6 @@ cdef class GazetteerExtractor(Extractor):
             for end in self.dict.iter(words, i, self.lowcase, self.noaccents):
                 for k in range(i, end):
                     res[k] = GazetteerExtractor.present
-        #print >> sys.stderr, words, res               # DEBUG
         return res
 
     @classmethod

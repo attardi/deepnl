@@ -104,53 +104,58 @@ def main():
 
     parser.add_argument('model', type=str,
                         help='Model file to train/use.')
-    parser.add_argument('-w', '--window', type=int, default=5,
-                        help='Size of the word window (default 5)')
-    parser.add_argument('-s', '--embeddings-size', type=int, default=50,
-                        help='Number of features per word (default 50)',
-                        dest='embeddings_size')
-    parser.add_argument('-e', '--epochs', type=int, default=100,
-                        help='Number of training epochs (default 100)',
-                        dest='iterations')
-    parser.add_argument('-l', '--learning_rate', type=float, default=0.001,
-                        help='Learning rate for network weights (default 0.001)',
-                        dest='learning_rate')
-    parser.add_argument('-n', '--hidden', type=int, default=200,
-                        help='Number of hidden neurons (default 200)',
-                        dest='hidden')
     parser.add_argument('--threads', type=int, default=1,
                         help='Number of threads (default 1)')
-    parser.add_argument('-t', '--train', type=str, default=None,
-                        help='File with annotated data for training.')
-    parser.add_argument('--vectors', type=str, default=None,
-                        help='File where to save embeddings')
-
-    # Extractors:
-    parser.add_argument('--caps', const=5, nargs='?', type=int, default=None,
-                        help='Include capitalization features. Optionally, supply the number of features (default 5)')
-    parser.add_argument('--suffix', const=5, nargs='?', type=int, default=None,
-                            help='Include suffix features. Optionally, supply the number of features (default 5)')
-    parser.add_argument('--suffixes', type=str,
-                        help='Load suffixes from this file')
-    parser.add_argument('--prefix', const=0, nargs='?', type=int, default=None,
-                        help='Include prefix features. Optionally, '\
-                        'supply the number of features (default 0)')
-    parser.add_argument('--prefixes', type=str,
-                        help='Load prefixes from this file')
-    # common
-    parser.add_argument('--vocab', type=str, default=None,
-                        help='Vocabulary file, either read or created')
-    parser.add_argument('--vectors', type=str, default=None,
-                        help='Embeddings file, either read or created')
-    parser.add_argument('--min-occurr', type=int, default=3,
-                        help='Minimum occurrences for inclusion in vocabulary',
-                        dest='minOccurr')
-    parser.add_argument('--load', type=str, default=None,
-                        help='Load previously saved model')
-    parser.add_argument('--variant', type=str, default=None,
-                        help='Either "senna" (default), "polyglot" or "word2vec".')
     parser.add_argument('-v', '--verbose', help='Verbose mode',
                         action='store_true')
+
+    # training options
+    train = parser.add_argument_group('Train')
+    train.add_argument('-t', '--train', type=str, default=None,
+                        help='File with annotated data for training.')
+
+    train.add_argument('-w', '--window', type=int, default=5,
+                        help='Size of the word window (default 5)')
+    train.add_argument('-s', '--embeddings-size', type=int, default=50,
+                        help='Number of features per word (default 50)',
+                        dest='embeddings_size')
+    train.add_argument('-e', '--epochs', type=int, default=100,
+                        help='Number of training epochs (default 100)',
+                        dest='iterations')
+    train.add_argument('-l', '--learning_rate', type=float, default=0.001,
+                        help='Learning rate for network weights (default 0.001)',
+                        dest='learning_rate')
+    train.add_argument('-n', '--hidden', type=int, default=200,
+                        help='Number of hidden neurons (default 200)',
+                        dest='hidden')
+
+    # Embeddings
+    embeddings = parser.add_argument_group('Embeddings')
+    embeddings.add_argument('--vocab', type=str, default=None,
+                        help='Vocabulary file, either read or created')
+    embeddings.add_argument('--vectors', type=str, default=None,
+                        help='Embeddings file, either read or created')
+    embeddings.add_argument('--min-occurr', type=int, default=3,
+                        help='Minimum occurrences for inclusion in vocabulary',
+                        dest='minOccurr')
+    embeddings.add_argument('--load', type=str, default=None,
+                        help='Load previously saved model')
+    embeddings.add_argument('--variant', type=str, default=None,
+                        help='Either "senna" (default), "polyglot" or "word2vec".')
+
+    # Extractors:
+    extractors = parser.add_argument_group('Extractors')
+    extractors.add_argument('--caps', const=5, nargs='?', type=int, default=None,
+                        help='Include capitalization features. Optionally, supply the number of features (default 5)')
+    extractors.add_argument('--suffix', const=5, nargs='?', type=int, default=None,
+                            help='Include suffix features. Optionally, supply the number of features (default 5)')
+    extractors.add_argument('--suffixes', type=str,
+                        help='Load suffixes from this file')
+    extractors.add_argument('--prefix', const=0, nargs='?', type=int, default=None,
+                        help='Include prefix features. Optionally, '\
+                        'supply the number of features (default 0)')
+    extractors.add_argument('--prefixes', type=str,
+                        help='Load prefixes from this file')
 
     # Use this for obtaining defaults from config file:
     #args = arguments.get_args()

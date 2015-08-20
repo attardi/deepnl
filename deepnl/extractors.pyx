@@ -286,13 +286,13 @@ cdef class Embeddings(Extractor):
         # FIXME: allow chosing variant
         return embeddings.Plain.read_vocabulary(file)
 
-    def save_vocabulary(self, file):
+    def save_vocabulary(self, filename):
         # FIXME: allow chosing variant
         # order by ID
         words = [''] * len(self.dict)
         for k,v in self.dict.iteritems():
             words[v] = k
-        embeddings.Plain.write_vocabulary(words, file)
+        embeddings.Plain.write_vocabulary(words, filename)
 
     def load_vectors(self, file, variant=None):
         # FIXME: allow choosing variant
@@ -306,7 +306,7 @@ cdef class Embeddings(Extractor):
                 words[v] = k
             embeddings.Word2Vec.save(filename, words, self.table)
         else:
-            embeddings.Plain.write_vectors(file, self.table)
+            embeddings.Plain.write_vectors(filename, self.table)
 
     def extract(self, words):
         """

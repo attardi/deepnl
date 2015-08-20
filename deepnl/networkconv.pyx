@@ -270,10 +270,10 @@ Output size: %d
         :return: the hinge loss.
         """
 
-        # multiclass hinge loss
+        # Multiclass hinge loss:
         # hl(x, y) = max(0, 1 + max_t!=y f(x)[t] - f(x)[y])
         # Hinge loss is 0 if the score of the correct label exceeds the score
-        # of every other label by by a margin of at least 1.
+        # of every other label by a margin of at least 1.
         # m = argmax_t!=y f(x)[t]
         # dhl / df [y] = -1 if f(x)[m] - f(x)[y] > 1, else 0
         # dhl / df [t] = +1 if f(x)[t] - f(x)[y] > 1, else 0

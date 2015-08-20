@@ -67,10 +67,10 @@ cdef class ConvTrainer(Trainer):
                 self.error += loss
                 self.update(grads, self.learning_rate, sent, ada)
                 # DEBUG. verify
-                nn.forward(vars)
-                loss2 = nn.backpropagate(label, vars, grads)
-                if loss2 > loss:
-                    print >> sys.stderr, i, loss, loss2
+                nn.forward(vars) # DEBUG
+                loss2 = nn.backpropagate(label, vars, grads) # DEBUG
+                if loss2 >= loss:                             # DEBUG
+                    print >> sys.stderr, 'WORSE', i, label, loss, loss2 # DEBUG
             else:
                 self.skips += 1
             self.epoch_items += 1

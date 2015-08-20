@@ -18,14 +18,15 @@ import os
 import distutils.util
 builddir = os.path.dirname(os.path.realpath(__file__)) + '/../build/lib.'
 libdir = builddir + distutils.util.get_platform() + '-' + '.'.join(map(str, sys.version_info[:2]))
-sys.path.append(libdir)
+#sys.path.append(libdir)
+sys.path.insert(0,libdir)
 
 # local
 from deepnl.corpus import *
 from deepnl.extractors import *
-from deepnl.reader import TweetReader
 from deepnl.networkconv import ConvolutionalNetwork
 from deepnl.trainerconv import ConvTrainer
+from deepnl.reader import ClassifyReader
 
 # ----------------------------------------------------------------------
 # Auxiliary functions
@@ -103,11 +104,11 @@ def main():
     parser.add_argument('model', type=str,
                         help='Model file to train/use.')
 
-    parser.add_argument('-t', '--train', type=str, default=None,
-                      help='File with annotated data for training.')
-
     # training options
     train = parser.add_argument_group('Train')
+
+    train.add_argument('-t', '--train', type=str, default=None,
+                      help='File with annotated data for training.')
 
     train.add_argument('-w', '--window', type=int, default=5,
                         help='Size of the word window (default 5)')
@@ -174,7 +175,7 @@ def main():
     # merge args with config
 
     if args.train:
-        reader = TweetReader()
+        reader = ClassifyReader()
         # a generator (can be iterated several times)
         sentences = reader.read(args.train)
 
@@ -199,15 +200,6 @@ def main():
             logger.info("Overriding vocabulary in %s" % args.vocab)
             embeddings.save_vocabulary(args.vocab)
 
-        elif args.vocab:
-            if not args.vectors:
-                logger.error("No --vectors specified")
-                return
-            embeddings = Embeddings(args.embeddings_size, args.vocab,
-                                    args.vectors, variant=args.variant)
-            logger.info("Creating vocabulary in %s" % args.vocab)
-            embeddings.save_vocabulary(args.vocab)
-
         elif args.variant == 'word2vec':
             if os.path.exists(args.vectors):
                 embeddings = Embeddings(vectors=args.vectors,
@@ -221,6 +213,16 @@ def main():
                                         variant=args.variant)
             logger.info("Creating vocabulary in %s" % args.vocab)
             embeddings.save_vocabulary(args.vocab)
+
+        elif args.vocab:
+            if not args.vectors:
+                logger.error("No --vectors specified")
+                return
+            embeddings = Embeddings(args.embeddings_size, args.vocab,
+                                    args.vectors, variant=args.variant)
+            logger.info("Creating vocabulary in %s" % args.vocab)
+            embeddings.save_vocabulary(args.vocab)
+
         else:
             # build vocabulary and tag set
             vocab, bigrams, trigrams = reader.create_vocabulary(sentences,
@@ -268,34 +270,37 @@ def main():
 
 
         # labels from all examples
-        labels = reader.polarities
-        labels_dict = {c:i for i,c in enumerate(set(labels))}
         examples = []
         for example in sentences:
             examples.append(converter.convert(example))
+        # assign index to labels
+        labels = reader.polarities
+        labels_index = {c:i for i,c in enumerate(set(labels))}
+        labels_ids = [labels_index[i] for i in labels]
 
-        trainer = create_trainer(args, converter, labels_dict)
+        trainer = create_trainer(args, converter, labels_index)
         logger.info("Starting training with %d examples" % len(examples))
 
         report_frequency = max(args.iterations / 200, 1)
         report_frequency = 1    # DEBUG
-        trainer.train(examples, labels, args.iterations, report_frequency,
+        trainer.train(examples, labels_ids, args.iterations, report_frequency,
                       args.threads)
     
         logger.info("Saving trained model ...")
         trainer.saver(trainer)
         logger.info("... to %s" % args.model)
 
-    if args.test:
+    else:
         # predict
         with open(args.model) as file:
             classifier = ConvTrainer.load(file)
-        reader = TsvReader(args.test)
+        reader = ClassifyReader(args.test)
         
-        for tweet in reader:
-            text = tweet[TweetReader.text_field]
-            tweet[TweetReader.polarity_field] = classifier.predict(text).argmax()
-            print tweet
+        for example in reader:
+            text = example[text_field]
+            input = classifier.converter.convert(text)
+            example[reader.label_field] = classifier.nn.forward(input).argmax()
+            print example
 
 # ----------------------------------------------------------------------
 

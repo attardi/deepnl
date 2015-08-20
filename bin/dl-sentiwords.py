@@ -19,7 +19,8 @@ import os
 import distutils.util
 builddir = os.path.dirname(os.path.realpath(__file__)) + '/../build/lib.'
 libdir = builddir + distutils.util.get_platform() + '-' + '.'.join(map(str, sys.version_info[:2]))
-sys.path.append(libdir)
+#sys.path.append(libdir)
+sys.path.insert(0, libdir)
 
 # local
 from deepnl import *
@@ -46,7 +47,7 @@ def create_trainer(args, converter):
     else:
         logger.info('Creating new network...')
         # sum the number of features in all extractors' tables 
-        input_size = converter.size() * args.windows
+        input_size = converter.size() * args.window
         nn = Network(input_size, args.hidden, 2)
         options = {
             'learning_rate': args.learning_rate,
@@ -58,7 +59,7 @@ def create_trainer(args, converter):
         }
         trainer = SentimentTrainer(nn, converter, options)
 
-    trainer.saver = saver(args.output, args.vectors)
+    trainer.saver = saver(args.model, args.vectors)
 
     logger.info("... with the following parameters:")
     logger.info(trainer.nn.description())
@@ -118,7 +119,7 @@ if __name__ == '__main__':
                         help='Relative weight of normal wrt sentiment score (default 0.5)')
     parser.add_argument('train', type=str,
                         help='File with text corpus for training.')
-    parser.add_argument('-o', '--output', type=str, default=None,
+    parser.add_argument('--model', type=str, default=None,
                         help='File where to save the model')
     parser.add_argument('--vocab', type=str, required=True,
                         help='Vocabulary file, either read and updated or created')
@@ -150,7 +151,12 @@ if __name__ == '__main__':
     reader.read(args.train)
     vocab, bigrams, trigrams = reader.create_vocabulary(reader.sentences,
                                                         min_occurrences=2)
-    if os.path.exists(args.vocab):
+    if args.variant == 'word2vec' and os.path.exists(args.vectors):
+        embeddings = Embeddings(vectors=args.vectors, variant=args.variant)
+        embeddings.merge(vocab)
+        logger.info("Saving vocabulary in %s" % args.vocab)
+        embeddings.save_vocabulary(args.vocab)
+    elif os.path.exists(args.vocab):
         # start with the given vocabulary
         base_vocab = reader.load_vocabulary(args.vocab)
         if os.path.exists(args.vectors):
@@ -164,11 +170,6 @@ if __name__ == '__main__':
         # add the ngrams from the corpus
         embeddings.merge(vocab)
         logger.info("Overriding vocabulary in %s" % args.vocab)
-        embeddings.save_vocabulary(args.vocab)
-    elif args.variant == 'word2vec' and os.path.exists(args.vectors):
-        embeddings = Embeddings(vectors=args.vectors, variant=args.variant)
-        embeddings.merge(vocab)
-        logger.info("Saving vocabulary in %s" % args.vocab)
         embeddings.save_vocabulary(args.vocab)
     else:
         embeddings = Embeddings(args.embeddings_size, vocab=vocab,
@@ -201,7 +202,7 @@ if __name__ == '__main__':
                   args.iterations, report_intervals)
     
     logger.info("Overriding vectors to %s" % args.vectors)
-    embeddings.save_vectors(args.vectors)
-    if args.output:
-        logger.info("Saving trained model to %s" % args.output)
-        trainer.save(args.output)
+    embeddings.save_vectors(args.vectors, args.variant)
+    if args.model:
+        logger.info("Saving trained model to %s" % args.model)
+        trainer.save(args.model)

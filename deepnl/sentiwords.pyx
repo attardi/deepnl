@@ -2,7 +2,7 @@
 # distutils: language = c++
 
 """
-Train a sentient specific language model.
+Train a sentiment specific language model.
 """
 
 import numpy as np
@@ -290,7 +290,7 @@ cdef class SentimentTrainer(LmTrainer):
         cdef int left_context = len(self.pre_padding)
         cdef int right_context = len(self.post_padding)
         cdef int window_size = left_context + 1 + right_context
-        # FIXME: might use self.example instead of window?
+        # FIXME: might use len(self.example) instead of window_size?
         cdef np.ndarray window = np.empty((window_size, 1), dtype=np.int)
         cdef np.ndarray token, neg_token
         cdef int size = 1
@@ -319,8 +319,12 @@ cdef class SentimentTrainer(LmTrainer):
                         # extract a window of tokens around the given position
                         token = self._extract_window(window, sentence, pos, size)
                         error, neg_token = self._train_pair_s(window, grads, size, polarities[num])
-                        self.error += error
-                        self._update(grads, remaining, window, token, neg_token)
+                        self.total_items += 1
+                        if error > self.skipErr:
+                            self.error += error
+                            self._update(grads, remaining, window, token, neg_token)
+                        else:
+                            self.epoch_hits += 1
                         epoch_pairs += 1
 
                         if report_freq > 0 and \

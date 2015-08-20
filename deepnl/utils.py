@@ -299,7 +299,10 @@ class Trie(dict):
 
     def iter(self, sent, start=0, lowcase=True, noaccents=True):
         """iterate through all ngrams that occur in :param sent: starting at
-        position :param start:"""
+        position :param start:
+        :param lowcase: compare lower case tokens.
+        :param noaccents: compare disregarding accents.
+        """
         trie = self
         for cur in xrange(start, len(sent)):
             tok = sent[cur]
@@ -321,3 +324,4 @@ class Trie(dict):
                 yield [key]
             for rest in trie:
                 yield [key] + rest
+

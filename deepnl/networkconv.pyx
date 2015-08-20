@@ -277,9 +277,15 @@ Output size: %d
         # m = argmax_t!=y f(x)[t]
         # dhl / df [y] = -1 if f(x)[m] - f(x)[y] > 1, else 0
         # dhl / df [t] = +1 if f(x)[t] - f(x)[y] > 1, else 0
-        cdef int m = np.argmax(vars.output)
-        cdef float fx_m = vars.output[m]
         cdef float fx_y = vars.output[y]
+        cdef float fx_m = np.NINF # negative infinity
+        cdef int i
+        cdef float v
+        for i, v in enumerate(vars.output):
+            if i == y:
+                continue
+            if v > fx_m:
+                fx_m = v
         cdef float hinge_loss = max(0.0, 1 + fx_m - fx_y)
 
         if hinge_loss == 0.0:
@@ -328,7 +334,7 @@ Output size: %d
 
         # @see Appendix A.4:
         # (dC / df_1)[t,i] = (dC / df_2)[t,i] if t = a[i], else 0
-        cdef int i, ai
+        cdef int ai
         for i, ai in enumerate(a):
             grads.conv[i, ai] = grads.hidden_bias[ai]
 

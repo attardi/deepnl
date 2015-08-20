@@ -2890,7 +2890,7 @@ static int __pyx_pf_6deepnl_7trainer_7Trainer___init__(struct __pyx_obj_6deepnl_
  *         adaRo = options.get('ro', 0.95)
  *         adaEps = options.get('eps', 1e-8)             # <<<<<<<<<<<<<<
  * 
- *         self.skipErr = 0.01     # skip errors < this value
+ *         self.skipErr = 1e-4     # skip errors < this value
  */
   if (unlikely(__pyx_v_options == Py_None)) {
     PyErr_Format(PyExc_AttributeError, "'NoneType' object has no attribute '%s'", "get");
@@ -2905,14 +2905,14 @@ static int __pyx_pf_6deepnl_7trainer_7Trainer___init__(struct __pyx_obj_6deepnl_
   /* "deepnl/trainer.pyx":85
  *         adaEps = options.get('eps', 1e-8)
  * 
- *         self.skipErr = 0.01     # skip errors < this value             # <<<<<<<<<<<<<<
+ *         self.skipErr = 1e-4     # skip errors < this value             # <<<<<<<<<<<<<<
  * 
  *         self.verbose = options.get('verbose', False)
  */
-  __pyx_v_self->skipErr = 0.01;
+  __pyx_v_self->skipErr = 1e-4;
 
   /* "deepnl/trainer.pyx":87
- *         self.skipErr = 0.01     # skip errors < this value
+ *         self.skipErr = 1e-4     # skip errors < this value
  * 
  *         self.verbose = options.get('verbose', False)             # <<<<<<<<<<<<<<
  *         self.ngram_size = options.get('ngram_size', 1)

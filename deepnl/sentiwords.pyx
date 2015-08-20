@@ -91,9 +91,9 @@ cdef class SentimentTrainer(LmTrainer):
 
         self.alpha = options.get('alpha', 0.5)
 
-        # cumulative AdaGrad
-        self.input_adagrads_neg = np.zeros(self.nn.input_size, dtype=float)
-        self.input_adagrads_pos = np.zeros(self.nn.input_size, dtype=float)
+        # cumulative AdaGrad$
+        self.input_adagrads_neg = np.zeros(self.nn.input_size, dtype=np.double)
+        self.input_adagrads_pos = np.zeros(self.nn.input_size, dtype=np.double)
 
     @cython.boundscheck(False)
     cdef _train_pair_s(self, np.ndarray[INT_t,ndim=2] example, Gradients grads,

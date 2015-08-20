@@ -63,16 +63,16 @@ cdef class ConvTrainer(Trainer):
             nn.forward(vars)
             grads = nn.gradients(len(sent)) # allocate gradients
             loss = nn.backpropagate(label, vars, grads)
-            if loss > self.skipErr:
+            if loss > 0.0:
                 self.error += loss
                 self.update(grads, self.learning_rate, sent, ada)
-                # DEBUG. verify
-                nn.forward(vars) # DEBUG
-                loss2 = nn.backpropagate(label, vars, grads) # DEBUG
-                if loss2 >= loss:                             # DEBUG
-                    print >> sys.stderr, 'WORSE', i, label, loss, loss2 # DEBUG
+                # # DEBUG. verify
+                # nn.forward(vars) # DEBUG
+                # loss2 = nn.backpropagate(label, vars, grads) # DEBUG
+                # if loss2 > loss:                             # DEBUG
+                #     print >> sys.stderr, 'WORSE', i, label, loss, loss2 # DEBUG
             else:
-                self.skips += 1
+                self.epoch_hits += 1
             self.epoch_items += 1
             # progress report
             i += 1

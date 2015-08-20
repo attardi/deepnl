@@ -228,8 +228,23 @@ cdef class Network(object):
         :return: the hinge loss.
         """
 
-        # hinge loss
-        cdef float hinge_loss = max(0.0, 1.0 - vars.output[y])
+        # Multiclass hinge loss:
+        # hl(x, y) = max(0, 1 + max_t!=y f(x)[t] - f(x)[y])
+        # Hinge loss is 0 if the score of the correct label exceeds the score
+        # of every other label by a margin of at least 1.
+        # m = argmax_t!=y f(x)[t]
+        # dhl / df [y] = -1 if f(x)[m] - f(x)[y] > 1, else 0
+        # dhl / df [t] = +1 if f(x)[t] - f(x)[y] > 1, else 0
+        cdef float fx_y = vars.output[y]
+        cdef float fx_m = np.NINF # negative infinity
+        cdef int i
+        cdef float v
+        for i, v in enumerate(vars.output):
+            if i == y:
+                continue
+            if v > fx_m:
+                fx_m = v
+        cdef float hinge_loss = max(0.0, 1 + fx_m - fx_y)
 
         if hinge_loss == 0.0:
             return hinge_loss
@@ -238,8 +253,10 @@ cdef class Network(object):
         # minimizing C(f_4)
         # f_4 = W_2 f_3 + b_2
         # dC / db_2 = dC / df_4					(22)
-        grads.output_bias.fill(0.0)
-        grads.output_bias[y] = 1.0 # negative gradient (else 0, dealt by return)
+        # negative gradient:
+        grads.output_bias[:] = np.where(vars.output - fx_y > 1, -1, 0) # -1
+        grads.output_bias[y] = fx_y - fx_m < 1 # +1
+
         # dC / dW_2 = dC / df_4 f_3				(22)
         # (output_size) x (hidden_size) = (output_size, hidden_size)
         np.outer(grads.output_bias, vars.hidden, grads.output_weights)

@@ -82,7 +82,7 @@ cdef class Trainer(object):
         adaRo = options.get('ro', 0.95)
         adaEps = options.get('eps', 1e-8)
 
-        self.skipErr = 0.01     # skip errors < this value
+        self.skipErr = 1e-4     # skip errors < this value
 
         self.verbose = options.get('verbose', False)
         self.ngram_size = options.get('ngram_size', 1)

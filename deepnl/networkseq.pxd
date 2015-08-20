@@ -14,7 +14,11 @@ cdef class SeqGradients(Gradients):
 
 cdef class SequenceNetwork(Network):
 
+    # FIXME: cant share a global?
+    cdef public FLOAT_t skipErr
+
     cdef public np.ndarray input_sequence
+    # FIXME: put in SeqVariables
     cdef public np.ndarray hidden_sequence
 
     # FIXME: clash with method in Network

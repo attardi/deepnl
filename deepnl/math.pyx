@@ -3,14 +3,10 @@
 cimport numpy as np
 import numpy as np
 
-# not supported by Cython:
-# ctypedef np.ndarray[FLOAT_t, ndim=1] np.ndarray[FLOAT_t,ndim=1]
-# ctypedef np.ndarray[FLOAT_t, ndim=2] np.ndarray[FLOAT_t,ndim=2]
-
 # ----------------------------------------------------------------------
 # Math functions
 
-cdef float[:] softmax(float[:] a, float[:] out=None):
+cdef np.ndarray[FLOAT_t, ndim=1] softmax(np.ndarray[FLOAT_t, ndim=1] a, np.ndarray out=None):
     """Compute the ratio of exp(a) to the sum of exponentials.
 
     Parameters
@@ -31,7 +27,7 @@ cdef float[:] softmax(float[:] a, float[:] out=None):
     out /= np.sum(out)
     return out
 
-cdef float[:,:] softmax2d(float[:,:] a, int axis=0, float[:,:] out=None):
+cdef np.ndarray[FLOAT_t, ndim=2] softmax2d(np.ndarray[FLOAT_t, ndim=2] a, int axis=0, np.ndarray out=None):
     """Compute the ratio of exp(a) to the sum of exponentials along the axis.
 
     Parameters
@@ -54,7 +50,7 @@ cdef float[:,:] softmax2d(float[:,:] a, int axis=0, float[:,:] out=None):
     out /= np.sum(out, axis)
     return out
 
-cdef logsumexp(np.ndarray[FLOAT_t,ndim=1] a):
+cdef FLOAT_t logsumexp(np.ndarray[FLOAT_t,ndim=1] a):
     """Compute the log of the sum of exponentials of input elements.
     like: scipy.misc.logsumexp
 
@@ -72,7 +68,7 @@ cdef logsumexp(np.ndarray[FLOAT_t,ndim=1] a):
     a_max = a.max()
     return np.log(np.sum(np.exp(a - a_max))) + a_max
 
-cdef logsumexp2d(np.ndarray[FLOAT_t,ndim=2] a, int axis=0):
+cdef np.ndarray[FLOAT_t, ndim=1] logsumexp2d(np.ndarray[FLOAT_t,ndim=2] a, int axis=0):
     """Compute the log of the sum of exponentials of input elements.
     like: scipy.misc.logsumexp
 

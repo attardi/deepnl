@@ -298,17 +298,7 @@ cdef class Embeddings(Extractor):
         # FIXME: allow choosing variant
         return embeddings.Plain.read_vectors(file)
 
-    def dump(self, filename, variant=None):
-        if variant == 'word2vec':
-            # order by ID
-            words = [''] * len(self.dict)
-            for k,v in self.dict.iteritems():
-                words[v] = k
-            embeddings.Word2Vec.save(filename, words, self.table)
-        else:
-            embeddings.Plain.write_vectors(file, self.table)
-
-    def dump(self, filename, variant=None):
+    def save_vectors(self, filename, variant=None):
         if variant == 'word2vec':
             # order by ID
             words = [''] * len(self.dict)

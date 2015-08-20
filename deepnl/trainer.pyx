@@ -340,7 +340,7 @@ cdef class TaggerTrainer(Trainer):
         for sent, sent_tags in izip(sentences, tags):
             scores = self.tagger._tag_sequence(sent, True)
             grads = nn.gradients(len(sent))
-            error = nn.backpropagateSeq(sent_tags, grads, scores)
+            error = nn.backpropagateSeq(sent_tags, scores, grads)
             if error > self.skipErr:
                 self.error += error
                 self.update(grads, self.learning_rate, sent, ada)

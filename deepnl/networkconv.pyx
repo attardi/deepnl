@@ -186,7 +186,7 @@ Output size: %d
         
         return desc
     
-    cdef variables(self, int slen=1):
+    cpdef variables(self, int slen=1):
         """
         Allocate variables.
         :param slen: sentence length.

@@ -20,6 +20,9 @@ cimport cython
 # local
 from math cimport *
 
+# FIXME: why cant we share it?
+cdef float skipErr = 0.01
+
 # ----------------------------------------------------------------------
 
 cdef class Variables(object):
@@ -192,7 +195,7 @@ cdef class Network(object):
         
         return desc
     
-    cdef variables(self, int slen=1):
+    cpdef variables(self, int slen=1):
         """Allocate variables.
         :param slen: sequence length (for sequence or convolutional networks)
         """

@@ -330,3 +330,4 @@ cdef class SentimentTrainer(LmTrainer):
                             # periodically save language model
                             if save_period and self.total_pairs % save_period == 0:
                                 self.saver(self)
+            self._epoch_report(epoch + 1)

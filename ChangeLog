@@ -1,3 +1,15 @@
+2015-08-20  Giuseppe Attardi  <attardi@di.unipi.it>
+
+	* deepnl/math.pyx: revert to np.ndarray since memoryviews don't
+	have max operator.
+
+	* bin/dl-ner.py (main): SuffixExtractor.create() is just
+	SuffixExtractor().
+
+	* deepnl/sentiwords.pyx (train): invoke epoch_report().
+
+	* deepnl/extractors.pyx (save_vocabulary): restored.
+
 2015-08-16  Giuseppe Attardi  <attardi@di.unipi.it>
 
 	* deepnl/network.pxd ((l1_decay, l2_decay, momentum, adaRo,

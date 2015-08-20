@@ -142,12 +142,13 @@ cdef class SequenceNetwork(Network):
         # it turns out that logadd = log(exp(score)) = score
         # transitions[-1] represents initial transition, A_0,i in paper (mispelled as A_i,0)
         # delta_0(k) = ftheta_k,0 + A_0,i
-        delta[0] += self.transitions[-1]
+        delta[0] += self.p.transitions[-1]
         
+        cdef np.ndarray[FLOAT_t, ndim=1] logadd
         # logadd for the remaining tokens
         # delta_t(k) = ftheta_k,t + logadd_i(delta_t-1(i) + A_i,k)
         #            = ftheta_k,t + log(Sum_i(exp(delta_t-1(i) + A_i,k)))
-        transitions = self.transitions[:-1] # A_i,k
+        transitions = self.p.transitions[:-1] # A_i,k
         for token in xrange(1, len(delta)):
             # add and sum by columns
             # newaxis allows adding vector to columns:
@@ -169,9 +170,7 @@ cdef class SequenceNetwork(Network):
         
         :param grads: the gradients to be computed, should be initialized to 0.
         :param scores: the scores computed by the network for the whole sequence.
-        :returns: True if normal gradient calculation was performed,
-            False, if the error was too small and weights update should be
-            skipped.
+        :returns: error. If the error was too small no grads are computed.
         """
         # ftheta_i,t = network output for i-th tag, at t-th word
         # s = Sum_i(A_tags[i-1],tags[i] + ftheta_i,i), i < len(sentence)   (12)
@@ -179,7 +178,7 @@ cdef class SequenceNetwork(Network):
         cdef int tag, last_tag = self.output_size
         cdef np.ndarray[FLOAT_t,ndim=1] nth_scores
         for tag, nth_scores in izip(tags, scores):
-            correct_path_score += self.transitions[last_tag, tag] + nth_scores[tag]
+            correct_path_score += grads.transitions[last_tag, tag] + nth_scores[tag]
             last_tag = tag
         
         # delta[t] = delta_t in equation (14)
@@ -190,7 +189,8 @@ cdef class SequenceNetwork(Network):
         # Sentence-level Log-Likelihood (SLL)
         # C(ftheta,A) = logadd_j(s(x, j, theta, A)) - score(correct path)
         #error = np.log(np.sum(np.exp(delta[-1]))) - correct_path_score
-        error = logsumexp(delta[-1]) - correct_path_score
+
+        cdef FLOAT_t error = logsumexp(delta[-1]) - correct_path_score
         # if the error is too low, don't bother training (saves time and avoids
         # overfitting). An error of 0.01 means a log-prob of -0.01 for the right
         if error < self.skipErr:
@@ -205,7 +205,7 @@ cdef class SequenceNetwork(Network):
         np.negative(grads.output[-1], grads.output[-1])
 
         # (output_size, output_size)
-        cdef np.ndarray[FLOAT_t, ndim=2] transitions_t = self.transitions[:-1].T
+        cdef np.ndarray[FLOAT_t, ndim=2] transitions_t = grads.transitions[:-1].T
         
         # delta[i][j]: sum of scores of all path that assign tag j to ith-token
 
@@ -295,7 +295,7 @@ cdef class SequenceNetwork(Network):
             If no matrix was supplied, return the tags with the highest scores individually.
         """
         # pretty straightforward
-        if self.transitions is None or len(scores) == 1:
+        if self.p.transitions is None or len(scores) == 1:
             return scores.argmax(1)
 
         cdef np.ndarray[FLOAT_t,ndim=2] path_scores = np.empty_like(scores)
@@ -304,10 +304,10 @@ cdef class SequenceNetwork(Network):
         # now the actual Viterbi algorithm
         # first, get the scores for each tag at token 0
         # the last row of the transitions table has the scores for the first tag
-        path_scores[0] = scores[0] + self.transitions[-1]
+        path_scores[0] = scores[0] + self.p.transitions[-1]
         
         output_range = np.arange(self.output_size) # outside loop
-        transitions = self.transitions[:-1]        # idem
+        cdef np.ndarray[FLOAT_t,ndim=2] transitions = self.p.transitions[:-1]        # idem
 
         cdef int i
         for i in xrange(1, len(scores)):
@@ -333,7 +333,7 @@ cdef class SequenceNetwork(Network):
         return answer
 
     cdef float backpropagateSeq(self, sent_tags, scores, SeqGradients grads):
-        cdef float err =  self._calculate_gradients_sll(sent_tags, grads, scores)
+        cdef FLOAT_t err =  self._calculate_gradients_sll(sent_tags, grads, scores)
         if err > self.skipErr:
             self._backpropagate(grads)
         return err
@@ -369,7 +369,7 @@ cdef class SequenceNetwork(Network):
 
         # dC / df_3 = M_2.T dC / df_4				(23)
         #  (len, output_size) (output_size, hidden_size) = (len, hidden_size)
-        dCdf_3 = grads.output.dot(self.output_weights)
+        dCdf_3 = grads.output.dot(self.p.output_weights)
 
         # layer 3: HardTanh layer
         # no weights to adjust
@@ -392,7 +392,7 @@ cdef class SequenceNetwork(Network):
 
         # dC / df_1 = M_1.T dC / df_2
         # (len, hidden_size) (hidden_size, input_size) = (len, input_size)
-        dCdf_2.dot(self.hidden_weights, grads.input)
+        dCdf_2.dot(self.p.hidden_weights, grads.input)
         #print >> sys.stderr, 'hwg', grads.hidden_weights[:4,:4], grads.hidden_weights[-4:,-4:] # DEBUG
         #print >> sys.stderr, 'hbg', grads.hidden_bias[:4], grads.hidden_bias[-4:] # DEBUG
         #print >> sys.stderr, 'ig', grads.input[0,:4], grads.input[-1,-4:] # DEBUG

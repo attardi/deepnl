@@ -27,6 +27,7 @@ from deepnl.corpus import ConllWriter
 from deepnl.extractors import *
 from deepnl.ner_tagger import NerReader, NerTagger
 from deepnl.trainer import TaggerTrainer
+from deepnl.networkseq import SequenceNetwork
 
 # ----------------------------------------------------------------------
 # Auxiliary functions
@@ -254,7 +255,7 @@ def main():
             words = (tok[reader.formField] for sent in sentence_iter for tok in sent)
         if os.path.exists(args.suffixes):
             logger.info("Loading suffix list...")
-            extractor = SuffixExtractor.create(args.suffix, args.suffixes)
+            extractor = SuffixExtractor(args.suffix, args.suffixes)
             converter.add(extractor)
         elif args.suffixes:
             logger.info("Creating suffix list...")
@@ -267,7 +268,7 @@ def main():
                 extractor.write(args.suffixes)
         if os.path.exists(args.prefixes):
             logger.info("Loading prefix list...")
-            extractor = PrefixExtractor.create(args.prefix, args.prefixes)
+            extractor = PrefixExtractor(args.prefix, args.prefixes)
             converter.add(extractor)
         elif args.prefix:
             logger.info("Creating prefix list...")

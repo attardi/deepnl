@@ -105,7 +105,7 @@ cdef class Tagger(object):
         cdef int i
 
         # container for network variables
-        vars = network.Variables()
+        vars = nn.variables()
 
         #print >> sys.stderr, padded_sentence   # DEBUG
         #print >> sys.stderr, 'hweights', nn.p.hidden_weights[:4,:4] # DEBUG

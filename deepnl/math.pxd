@@ -2,14 +2,17 @@
 cimport numpy as np
 
 ctypedef np.float_t FLOAT_t
+# Cython does not allow this:
+# ctypedef np.ndarray[FLOAT_t, ndim=1] VECTOR_t
+# ctypedef np.ndarray[FLOAT_t, ndim=2] ARRAY_t
 
 # FIXHIM: no overloading in Cython
-cdef float[:] softmax(float[:] a, float[:] out=*)
-cdef float[:,:] softmax2d(float[:,:] a, int axis=*, float[:,:] out=*)
+cdef np.ndarray[FLOAT_t, ndim=1] softmax(np.ndarray[FLOAT_t, ndim=1] a, np.ndarray out=*)
+cdef np.ndarray[FLOAT_t, ndim=2] softmax2d(np.ndarray[FLOAT_t, ndim=2] a, int axis=*, np.ndarray out=*)
 
 # FIXHIM: no overloading in Cython
-cdef logsumexp(np.ndarray[FLOAT_t] a)
-cdef logsumexp2d(np.ndarray[FLOAT_t, ndim=2] a, int axis=*)
+cdef FLOAT_t logsumexp(np.ndarray[FLOAT_t] a)
+cdef np.ndarray[FLOAT_t, ndim=1] logsumexp2d(np.ndarray[FLOAT_t, ndim=2] a, int axis=*)
 
 cdef np.ndarray[FLOAT_t, ndim=1] tanh(np.ndarray[FLOAT_t, ndim=1] weights,
                                       np.ndarray out=*)

@@ -14,7 +14,7 @@ import time
 import threading
 
 # profiler
-import yappi
+#import yappi
 
 from Queue import Queue
 # DEBUG
@@ -302,7 +302,7 @@ cdef class LmTrainer(Trainer):
             thread.start()
 
         # start profiler
-        yappi.start()
+#        yappi.start()
 
         # fill the job queue
         for epoch in xrange(epochs):

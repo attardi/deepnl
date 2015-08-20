@@ -71,7 +71,7 @@ def saver(model_file, vectors_file, variant):
     def save(trainer):
         # save embeddings also separately
         if vectors_file:
-            trainer.save_vectors(vectors_file)
+            trainer.save_vectors(vectors_file, variant)
         with open(model_file, 'wb') as file:
             trainer.tagger.save(file)
     return save
@@ -229,8 +229,9 @@ def main():
                 embeddings = Embeddings(vectors=args.vectors,
                                         variant=args.variant)
                 tagset = reader.create_tagset(sentence_iter)
-            logger.info("Creating vocabulary in %s" % args.vocab)
-            embeddings.save_vocabulary(args.vocab)
+            if args.vocab:
+                logger.info("Creating vocabulary in %s" % args.vocab)
+                embeddings.save_vocabulary(args.vocab)
         else:
             # build vocabulary and tag set
             vocab, tagset = reader.create_vocabulary(sentence_iter,

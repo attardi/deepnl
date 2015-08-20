@@ -274,8 +274,8 @@ cdef class Trainer(object):
         self.nn.save(file)
         self.converter.save(file)
 
-    def save_vectors(self, file):
-        self.converter.extractors[0].save_vectors(file)
+    def save_vectors(self, file, variant):
+        self.converter.extractors[0].save_vectors(file, variant)
 
     @classmethod
     def load(cls, file):

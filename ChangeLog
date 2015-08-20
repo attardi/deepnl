@@ -1,5 +1,7 @@
 2015-08-20  Giuseppe Attardi  <attardi@di.unipi.it>
 
+	* deepnl/trainer.pyx (save_vectors): pass variant.
+
 	* deepnl/network.pyx: use multiclass hinge loss.
 
 	* deepnl/networkconv.pyx: fixed hinge calculation.

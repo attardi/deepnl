@@ -60,19 +60,19 @@ def create_trainer(args, converter, labels):
         }
         trainer = ConvTrainer(nn, converter, options)
 
-    trainer.saver = saver(args.model, args.vectors)
+    trainer.saver = saver(args.model, args.vectors, args.variant)
 
     logger.info("... with the following parameters:")
     logger.info(trainer.nn.description())
     
     return trainer
 
-def saver(model_file, vectors_file):
+def saver(model_file, vectors_file, variant):
     """Function for saving model periodically"""
     def save(trainer):
         # save embeddings also separately
         if vectors_file:
-            trainer.save_vectors(vectors_file)
+            trainer.save_vectors(vectors_file, variant)
         if model_file:
             with open(model_file, 'wb') as file:
                 trainer.save(file)
@@ -179,7 +179,7 @@ def main():
         # a generator (can be iterated several times)
         sentences = reader.read(args.train)
 
-        if os.path.exists(args.vocab):
+        if args.vocab and os.path.exists(args.vocab):
             # start with the given vocabulary
             base_vocab = reader.load_vocabulary(args.vocab)
             if os.path.exists(args.vectors):
@@ -211,8 +211,9 @@ def main():
             else:
                 embeddings = Embeddings(vectors=args.vectors,
                                         variant=args.variant)
-            logger.info("Creating vocabulary in %s" % args.vocab)
-            embeddings.save_vocabulary(args.vocab)
+            if args.vocab:
+                logger.info("Creating vocabulary in %s" % args.vocab)
+                embeddings.save_vocabulary(args.vocab)
 
         elif args.vocab:
             if not args.vectors:

@@ -150,5 +150,5 @@ cdef class Tagger(object):
         converter = Converter()
         converter.load(file)
 
-        return cls(converter, tag_index, left_context, right_context, nn=nn)
+        return cls(nn, converter, tag_index, left_context, right_context)
 

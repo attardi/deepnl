@@ -17,6 +17,9 @@ annotated Tweets.
 
 If you use ``deepnl``, please cite [Attardi]_ in your publications.
 
+WARNING. There has been a change in file format for models since versionn 1.3.3.
+You will have to retrain them to use with later versions.
+
 Installation
 ===========
 
@@ -210,13 +213,13 @@ Writing Extensions
 ==================
 
 You can modify or extend the code just by adding them to the directory ``deepnl``.
-To compile the extension, use the same build process, but you will also need to have _Cython installed.
+To compile the extension, use the same build process, but you will also need to have Cython_ installed.
 The compiler will issue warnings about NumPy of the type:
 
    /usr/local/lib/python2.7/dist-packages/numpy/core/include/numpy/npy_1_7_deprecated_api.h:15:2: warning: #warning "Using deprecated NumPy API, disable it by " "#defining NPY_NO_DEPRECATED_API NPY_1_7_API_VERSION" [-Wcpp]
  #warning "Using deprecated NumPy API, disable it by "
 
-Simply disregard them, since currently there is no way to fix them, until the maintainers of Cython will decide to upgrade it to use the latest API.
+Simply disregard them, since currently there is no way to fix them, until the maintainers of Cython_ will decide to upgrade it to use the latest API.
 
 Credits
 =======

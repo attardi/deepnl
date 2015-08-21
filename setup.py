@@ -44,7 +44,7 @@ setup(
     url = "https://github.com/attardi/deepnl",
 
     license = "GNU GPL",
-    version = "1.3.5",
+    version = "1.3.6",
 
     platforms = "any",
 
@@ -52,7 +52,7 @@ setup(
         " Neural network "
         " Natural language processing ",
 
-    requires = ["numpy (>= 1.8)"],
+    requires = ["numpy (>= 1.9)"],
 
     packages = ["deepnl"],
 

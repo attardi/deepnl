@@ -44,7 +44,7 @@ cdef class Network(object):
     # function to save periodically
     cdef public object saver
 
-    cpdef variables(self, int slen=*)
+    cdef variables(self, int slen=*)
     cdef gradients(self, int slen=*)
 
     cpdef forward(self, Variables vars)

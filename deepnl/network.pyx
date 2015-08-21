@@ -29,10 +29,10 @@ cdef class Variables(object):
     
     #cdef public np.ndarray input, hidden, output
 
-    def __init__(self, input_size, hidden_size, output_size):
-        self.input = np.empty(input_size)
-        self.hidden = np.empty(hidden_size)
-        self.output = np.empty(output_size)
+    def __init__(self, input_size=0, hidden_size=0, output_size=0):
+        self.input = np.empty(input_size) if input_size else None
+        self.hidden = np.empty(hidden_size) if hidden_size else None
+        self.output = np.empty(output_size) if output_size else None
 
 # ----------------------------------------------------------------------
 
@@ -97,10 +97,10 @@ cdef class Parameters(object):
             self.hidden_bias += learning_rate * grads.hidden_bias / np.sqrt(ada.hidden_bias + adaEps)
         else:
             # divide by the fan-in
-            self.output_weights += grads.output_weights * (learning_rate / self.hidden_size)
-            self.output_bias += grads.output_bias * (learning_rate / self.hidden_size)
-            self.hidden_weights += grads.hidden_weights * (learning_rate / self.input_size)
-            self.hidden_bias += grads.hidden_bias * (learning_rate / self.input_size)
+            self.output_weights += grads.output_weights * learning_rate / 100 # DEBUG / self.hidden_size
+            self.output_bias += grads.output_bias * learning_rate / 100 # DEBUG self.hidden_size
+            self.hidden_weights += grads.hidden_weights * learning_rate / 100 # DEBUG self.input_size
+            self.hidden_bias += grads.hidden_bias * learning_rate / 100 # DEBUG self.input_size
 
     def save(self, file):
         """
@@ -164,11 +164,13 @@ cdef class Network(object):
     # FIXME: make Parameters an array of Layers, each one with its
     # forward/backward/update methods.
 
-    def __init__(self, int input_size, int hidden_size, int output_size):
+    def __init__(self, int input_size, int hidden_size, int output_size,
+                 p=None):
         """
         :param input_size: number of input variables
         :param hidden_size: number of hidden variables
         :param output_size: number of output variables
+        :param p: the parameters to use.
 
         For replicability, the seed should have been set, e.g. to
            np.random.seed(42)
@@ -176,9 +178,12 @@ cdef class Network(object):
         self.input_size = input_size
         self.hidden_size = hidden_size
         self.output_size = output_size
-        self.p = Parameters(input_size, hidden_size, output_size)
-        # initialize parameters to random values
-        self.p.initialize(input_size, hidden_size, output_size)
+
+        if not p:
+            p = Parameters(input_size, hidden_size, output_size)
+            # initialize parameters to random values
+            p.initialize(input_size, hidden_size, output_size)
+        self.p = p
 
         # saver fuction
         self.saver = lambda nn: None
@@ -195,7 +200,7 @@ cdef class Network(object):
         
         return desc
     
-    cpdef variables(self, int slen=1):
+    cdef variables(self, int slen=1):
         """Allocate variables.
         :param slen: sequence length (for sequence or convolutional networks)
         """

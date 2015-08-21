@@ -252,7 +252,8 @@ cdef class Embeddings(Extractor):
             self.dict = <dict>WD(None, wordlist=wordlist, variant=variant)
             # add vectors for special symbols
             extra = len(self.dict) - len(self.table)
-            self.table = np.concatenate((self.table, embeddings.generate_vectors(extra, self.table.shape[1])))
+            if extra:
+                self.table = np.concatenate((self.table, embeddings.generate_vectors(extra, self.table.shape[1])))
         elif vocab:
             self.dict = <dict>WD(None, wordlist=vocab, variant=variant)
             if vectors and os.path.exists(vectors):
@@ -272,7 +273,8 @@ cdef class Embeddings(Extractor):
             self.dict.setdefault(word, len(self.dict)) # add if not present
         # generate vectors for added words
         extra = len(self.dict) - len(self.table)
-        self.table = np.concatenate((self.table, embeddings.generate_vectors(extra, self.table.shape[1])))
+        if extra:
+            self.table = np.concatenate((self.table, embeddings.generate_vectors(extra, self.table.shape[1])))
 
     def save(self, file):
         self.dict.save(file)

@@ -112,11 +112,13 @@ cdef class SequenceNetwork(Network):
         
     #cdef readonly np.ndarray input_sequence, hidden_sequence
     
-    def __init__(self, int input_size, int hidden_size, int output_size):
+    def __init__(self, int input_size, int hidden_size, int output_size,
+                 p=None):
+        if not p:
+            p = SeqParameters(input_size, hidden_size, output_size)
+            p.initialize(input_size, hidden_size, output_size)
         super(SequenceNetwork, self).__init__(input_size, hidden_size,
-                                              output_size)
-        self.p = SeqParameters(input_size, hidden_size, output_size)
-        self.p.initialize(input_size, hidden_size, output_size)
+                                              output_size, p)
 
     cdef gradients(self, int seqlen=1):
         return SeqGradients(self.input_size, self.hidden_size,
@@ -178,7 +180,7 @@ cdef class SequenceNetwork(Network):
         cdef int tag, last_tag = self.output_size
         cdef np.ndarray[FLOAT_t,ndim=1] nth_scores
         for tag, nth_scores in izip(tags, scores):
-            correct_path_score += grads.transitions[last_tag, tag] + nth_scores[tag]
+            correct_path_score += self.p.transitions[last_tag, tag] + nth_scores[tag]
             last_tag = tag
         
         # delta[t] = delta_t in equation (14)
@@ -205,7 +207,7 @@ cdef class SequenceNetwork(Network):
         np.negative(grads.output[-1], grads.output[-1])
 
         # (output_size, output_size)
-        cdef np.ndarray[FLOAT_t, ndim=2] transitions_t = grads.transitions[:-1].T
+        cdef np.ndarray[FLOAT_t, ndim=2] transitions_t = self.p.transitions[:-1].T
         
         # delta[i][j]: sum of scores of all path that assign tag j to ith-token
 

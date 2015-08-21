@@ -81,7 +81,7 @@ def saver(model_file, vectors_file, variant):
 def main():
 
     # set the seed for replicability
-    np.random.seed(42)          # DEBUG
+    np.random.seed(42)
 
     defaults = {}
     
@@ -150,9 +150,9 @@ def main():
     embeddings = parser.add_argument_group('Embeddings')
     embeddings.add_argument('--vocab', type=str, default='',
                         help='Vocabulary file, either read or created')
-    embeddings.add_argument('--vocab-size', type=int, default=100000,
-                        help='Maximum size of vocabulary (default 100000)')
-    embeddings.add_argument('--vectors', type=str, default=None,
+    embeddings.add_argument('--vocab-size', type=int, default=0,
+                            help='Maximum size of vocabulary (default 0)')
+    embeddings.add_argument('--vectors', type=str, default='',
                         help='Embeddings file, either read or created')
     embeddings.add_argument('--min-occurr', type=int, default=3,
                         help='Minimum occurrences for inclusion in vocabulary',
@@ -189,23 +189,28 @@ def main():
         # a generator (can be iterated several times)
         sentence_iter = reader.read(args.train)
 
-        if os.path.exists(args.vocab):
+        if args.vocab and os.path.exists(args.vocab):
             # start with the given vocabulary
             base_vocab = reader.load_vocabulary(args.vocab)
-            if os.path.exists(args.vectors):
+            if args.vectors and os.path.exists(args.vectors):
                 embeddings = Embeddings(vectors=args.vectors, vocab=base_vocab,
                                         variant=args.variant)
             else:
+                # create random embeddings
                 embeddings = Embeddings(args.embeddings_size, vocab=base_vocab,
                                         variant=args.variant)
             # add the ngrams from the corpus
             # build vocabulary and tag set
-            vocab, tagset = reader.create_vocabulary(sentence_iter,
-                                                     args.vocab_size,
-                                                     args.minOccurr)
-            embeddings.merge(vocab)
-            logger.info("Overriding vocabulary in %s" % args.vocab)
-            embeddings.save_vocabulary(args.vocab)
+            if args.vocab_size:
+                vocab, tagset = reader.create_vocabulary(sentence_iter,
+                                                         args.vocab_size,
+                                                         args.minOccurr)
+                embeddings.merge(vocab)
+                logger.info("Overriding vocabulary in %s" % args.vocab)
+                embeddings.save_vocabulary(args.vocab)
+            else:
+                vocab = base_vocab
+                tagset = reader.create_tagset(sentence_iter)
 
         elif args.vocab:
             if not args.vectors:

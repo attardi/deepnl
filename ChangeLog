@@ -1,3 +1,13 @@
+2015-08-21  Giuseppe Attardi  <attardi@di.unipi.it>
+
+	* deepnl/network.pyx (__init__): Initialization protocol for
+	class networks now requires that Parameters object be passed, for
+	avoiding double initialization in derived classes.
+
+	* bin/dl-ner.py (main): default for vocab-size is 0.
+
+	* deepnl/networkseq.pyx: fixed self.p.transitions.
+
 2015-08-20  Giuseppe Attardi  <attardi@di.unipi.it>
 
 	* deepnl/trainer.pyx (save_vectors): pass variant.

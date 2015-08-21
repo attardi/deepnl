@@ -157,20 +157,21 @@ cdef class ConvGradients(Gradients):
 cdef class ConvolutionalNetwork(Network):
     
     def __init__(self, int input_size, int hidden1_size, int hidden2_size,
-                 int output_size, int pool_size):
+                 int output_size, int pool_size, p=None):
         """
         Creates a new convolutional neural network.
         :parameter input_size: the number of network input variables.
         """
-        super(ConvolutionalNetwork, self).__init__(input_size,
-                                                   hidden1_size, output_size)
+        if not p:
+            p = ConvParameters(input_size, hidden1_size,
+                               hidden2_size, output_size)
+            p.initialize(input_size, hidden1_size, hidden2_size,
+                         output_size)
+        super(ConvolutionalNetwork, self).__init__(input_size, hidden1_size,
+                                                   output_size, p)
 
         self.pool_size = pool_size
         self.hidden2_size = hidden2_size
-        self.p = ConvParameters(input_size, hidden1_size,
-                                hidden2_size, output_size)
-        self.p.initialize(input_size, hidden1_size, hidden2_size,
-                          output_size)
         
     def description(self):
         """Returns a textual description of the network."""

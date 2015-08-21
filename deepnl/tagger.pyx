@@ -8,7 +8,7 @@ Sequence tagger exploiting a neural network.
 # standard
 import numpy as np
 import cPickle as pickle
-#import sys                      # DEBUG
+import sys                      # DEBUG
 
 # local
 import network
@@ -95,7 +95,7 @@ cdef class Tagger(object):
             # we can discard intermediate values
             nn.input_sequence = np.empty(nn.input_size)
             nn.hidden_sequence = np.empty(nn.hidden_size)
-        
+
         # add padding to the sentence
         cdef np.ndarray[INT_t,ndim=2] padded_sentence = \
             np.concatenate((self.pre_padding,
@@ -105,7 +105,8 @@ cdef class Tagger(object):
         cdef int i
 
         # container for network variables
-        vars = nn.variables()
+        #vars = nn.variables()
+        vars = network.Variables()
 
         #print >> sys.stderr, padded_sentence   # DEBUG
         #print >> sys.stderr, 'hweights', nn.p.hidden_weights[:4,:4] # DEBUG
@@ -122,11 +123,6 @@ cdef class Tagger(object):
             self.converter.lookup(window, vars.input)
             vars.output = scores[i]
             nn.forward(vars)
-            # DEBUG
-            # if train:
-                # print >> sys.stderr, 'input', vars.input[:4], vars.input[-4:]
-                # print >> sys.stderr, 'hidden', vars.hidden[:4], vars.hidden[-4:]
-                # print >> sys.stderr, 'output', vars.output[:4], vars.output[-4:]
         
         return scores
 

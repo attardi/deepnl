@@ -172,7 +172,7 @@ cdef class Trainer(object):
         validation = int(len(sentences) * 0.98)
 
         nn = self.nn
-        vars = nn.variables() # allocate variables
+        vars = nn.variables()   # allocate variables
         ada = nn.gradients()
         cdef int i = 0
         for sent, label in izip(sentences, labels):
@@ -322,10 +322,10 @@ cdef class TaggerTrainer(Trainer):
         # shuffle data
         # get the random number generator state in order to shuffle
         # sentences and their tags in the same order
-        random_state = np.random.get_state()
-        np.random.shuffle(sentences)
-        np.random.set_state(random_state)
-        np.random.shuffle(tags)
+        # random_state = np.random.get_state()
+        # np.random.shuffle(sentences)
+        # np.random.set_state(random_state)
+        # np.random.shuffle(tags)
         
         cdef SeqGradients grads
         # AdaGrad. Since sentence length varies, we accumulate into a single

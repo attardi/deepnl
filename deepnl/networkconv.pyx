@@ -316,10 +316,7 @@ Output size: %d
 
         # dC / dW_2 = dC / df_3 * f_2				(22)
         # (hidden2_size) x (hidden_size) = (hidden2_size, hidden_size)
-        try:
-            np.outer(grads.hidden2_bias, vars.hidden, grads.hidden2_weights)
-        except Exception, e:
-            print >> sys.stderr, e, np.abs(vars.hidden).min(), np.abs(grads.hidden2_weights).min() # DEBUG
+        np.outer(grads.hidden2_bias, vars.hidden, grads.hidden2_weights)
 
         # dC / df_2 = dC / df_3 * W_2				(23)
         # (hidden2_size) * (hidden2_size, hidden_size) = (hidden_size)

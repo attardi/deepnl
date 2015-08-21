@@ -395,9 +395,9 @@ cdef class SequenceNetwork(Network):
         # dC / df_1 = M_1.T dC / df_2
         # (len, hidden_size) (hidden_size, input_size) = (len, input_size)
         dCdf_2.dot(self.p.hidden_weights, grads.input)
-        #print >> sys.stderr, 'hwg', grads.hidden_weights[:4,:4], grads.hidden_weights[-4:,-4:] # DEBUG
-        #print >> sys.stderr, 'hbg', grads.hidden_bias[:4], grads.hidden_bias[-4:] # DEBUG
-        #print >> sys.stderr, 'ig', grads.input[0,:4], grads.input[-1,-4:] # DEBUG
+        # print >> sys.stderr, 'hwg', grads.hidden_weights[:4,:4], grads.hidden_weights[-4:,-4:] # DEBUG
+        # print >> sys.stderr, 'hbg', grads.hidden_bias[:4], grads.hidden_bias[-4:] # DEBUG
+        # print >> sys.stderr, 'ig', grads.input[0,:4], grads.input[-1,-4:] # DEBUG
 
     @classmethod
     def load(cls, file):

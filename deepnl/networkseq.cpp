@@ -7970,8 +7970,8 @@ static PyObject *__pyx_f_6deepnl_10networkseq_15SequenceNetwork__backpropagate(s
  *         # dC / df_1 = M_1.T dC / df_2
  *         # (len, hidden_size) (hidden_size, input_size) = (len, input_size)
  *         dCdf_2.dot(self.p.hidden_weights, grads.input)             # <<<<<<<<<<<<<<
- *         #print >> sys.stderr, 'hwg', grads.hidden_weights[:4,:4], grads.hidden_weights[-4:,-4:] # DEBUG
- *         #print >> sys.stderr, 'hbg', grads.hidden_bias[:4], grads.hidden_bias[-4:] # DEBUG
+ *         # print >> sys.stderr, 'hwg', grads.hidden_weights[:4,:4], grads.hidden_weights[-4:,-4:] # DEBUG
+ *         # print >> sys.stderr, 'hbg', grads.hidden_bias[:4], grads.hidden_bias[-4:] # DEBUG
  */
   __pyx_t_5 = __Pyx_PyObject_GetAttrStr(__pyx_v_dCdf_2, __pyx_n_s_dot); if (unlikely(!__pyx_t_5)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 397; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_GOTREF(__pyx_t_5);
@@ -11857,7 +11857,7 @@ PyMODINIT_FUNC PyInit_networkseq(void)
   __Pyx_GOTREF(__pyx_t_3);
 
   /* "deepnl/networkseq.pyx":402
- *         #print >> sys.stderr, 'ig', grads.input[0,:4], grads.input[-1,-4:] # DEBUG
+ *         # print >> sys.stderr, 'ig', grads.input[0,:4], grads.input[-1,-4:] # DEBUG
  * 
  *     @classmethod             # <<<<<<<<<<<<<<
  *     def load(cls, file):

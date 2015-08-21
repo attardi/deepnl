@@ -176,6 +176,8 @@ cdef class Trainer(object):
         ada = nn.gradients()
         cdef int i = 0
         for sent, label in izip(sentences, labels):
+            # add padding
+            sent = np.concatenate((self.pre_padding, sent, self.post_padding))
             self.converter.lookup(sent, vars.input)
             nn.forward(vars)
             grads = nn.gradients(len(sent)) # allocate gradients
@@ -322,10 +324,10 @@ cdef class TaggerTrainer(Trainer):
         # shuffle data
         # get the random number generator state in order to shuffle
         # sentences and their tags in the same order
-        # random_state = np.random.get_state()
-        # np.random.shuffle(sentences)
-        # np.random.set_state(random_state)
-        # np.random.shuffle(tags)
+        random_state = np.random.get_state()
+        np.random.shuffle(sentences)
+        np.random.set_state(random_state)
+        np.random.shuffle(tags)
         
         cdef SeqGradients grads
         # AdaGrad. Since sentence length varies, we accumulate into a single
@@ -336,10 +338,13 @@ cdef class TaggerTrainer(Trainer):
         cdef int validation = int((len(sentences) - 1) * 0.98) + 1 # at least 1
 
         cdef float error
-        cdef int i = 0
+        cdef int i = 0, slen
         for sent, sent_tags in izip(sentences, tags):
+            slen = len(sent)    # sequence length
+            # add padding
+            sent = np.concatenate((self.pre_padding, sent, self.post_padding))
             scores = self.tagger._tag_sequence(sent, True)
-            grads = nn.gradients(len(sent))
+            grads = nn.gradients(slen)
             error = nn.backpropagateSeq(sent_tags, scores, grads)
             if error > self.skipErr:
                 self.error += error
@@ -347,7 +352,7 @@ cdef class TaggerTrainer(Trainer):
             else:
                 self.skips += 1
 
-            self.epoch_items += len(sent)
+            self.epoch_items += slen
 
             # progress report
             i += 1
@@ -384,6 +389,8 @@ cdef class TaggerTrainer(Trainer):
         for i in xrange(idx, len(sentences)):
             sent = sentences[i]
             gold_tags = tags[i]
+            # add padding
+            sent = np.concatenate((self.pre_padding, sent, self.post_padding))
             scores = self.tagger._tag_sequence(sent)
             answer = self.tagger.nn._viterbi(scores)
             for pred_tag, gold_tag in izip(answer, gold_tags):
@@ -413,7 +420,7 @@ cdef class TaggerTrainer(Trainer):
         # input_size = num features * window (e.g. 60 * 5).
 
         cdef int window_size = len(self.pre_padding) + 1 + len(self.post_padding)
-        cdef int i, slen = len(sentence) - window_size
+        cdef int i, slen = len(sentence) - window_size + 1 # without padding
 
         # (len, input_size)
         cdef np.ndarray[FLOAT_t,ndim=2] input_deltas
@@ -425,7 +432,7 @@ cdef class TaggerTrainer(Trainer):
             input_deltas = learning_rate * grads.input / np.sqrt(ada.input[0] + adaEps)
         else:
             input_deltas = grads.input * learning_rate
-        
+
         for i in xrange(slen):
             window = sentence[i: i+window_size]
             self.converter.update(window, input_deltas[i])

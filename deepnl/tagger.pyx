@@ -58,8 +58,11 @@ cdef class Tagger(object):
         :returns: a list of tags or a list of pairs (token, tag) if
             :param return_tokens: is True.
         """
-        cdef np.ndarray[INT_t,ndim=2] converted = self.converter.convert(tokens)
-        cdef np.ndarray[FLOAT_t,ndim=2] scores = self._tag_sequence(converted)
+        cdef np.ndarray[INT_t,ndim=2] seq = self.converter.convert(tokens)
+        # add padding
+        seq = np.concatenate((self.pre_padding, seq, self.post_padding))
+
+        cdef np.ndarray[FLOAT_t,ndim=2] scores = self._tag_sequence(seq)
         # computes full score, combining ftheta and A (if SLL)
         answer = self.nn._viterbi(scores)
         tags = [self.tags[tag] for tag in answer]
@@ -77,12 +80,15 @@ cdef class Tagger(object):
         the scores for all possibile tag sequences.
         
         :param sentence: an array, where each row encodes a token.
+            Sentence includes padding.
         :param tags: the correct tags (needed when training).
         :return: an array of size (len(sentence), output_size) with the
             scores for all tags for each token..
         """
-        cdef slen = len(sentence)
         nn = self.nn
+        cdef int window_size = len(self.pre_padding) + 1 + len(self.post_padding)
+        cdef slen = len(sentence) - window_size + 1 # without padding
+
         # scores[t, i] = ftheta_i,t = score for i-th tag, t-th word
         cdef np.ndarray[FLOAT_t,ndim=2] scores = np.empty((slen, nn.output_size))
         
@@ -96,12 +102,6 @@ cdef class Tagger(object):
             nn.input_sequence = np.empty(nn.input_size)
             nn.hidden_sequence = np.empty(nn.hidden_size)
 
-        # add padding to the sentence
-        cdef np.ndarray[INT_t,ndim=2] padded_sentence = \
-            np.concatenate((self.pre_padding,
-                            sentence,
-                            self.post_padding))
-        cdef int window_size = len(self.pre_padding) + 1 + len(self.post_padding)
         cdef int i
 
         # container for network variables
@@ -113,7 +113,7 @@ cdef class Tagger(object):
         #print >> sys.stderr, 'hbias', nn.p.hidden_bias[:4]          # DEBUG
         # run through all windows in the sentence
         for i in xrange(slen):
-            window = padded_sentence[i: i+window_size]
+            window = sentence[i: i+window_size]
             if train:
                 vars.input = nn.input_sequence[i]
                 vars.hidden = nn.hidden_sequence[i]

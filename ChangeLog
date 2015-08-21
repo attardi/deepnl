@@ -1,5 +1,11 @@
 2015-08-21  Giuseppe Attardi  <attardi@di.unipi.it>
 
+	* deepnl/trainer.pyx (_train_epoch): add padding to sentence.
+
+	* deepnl/tagger.pyx (_tag_sequence): sentence is padded.
+
+	* bin/dl-ner.py (main): added options --eps and --ro.
+
 	* deepnl/network.pyx (__init__): Initialization protocol for
 	class networks now requires that Parameters object be passed, for
 	avoiding double initialization in derived classes.

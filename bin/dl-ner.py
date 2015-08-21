@@ -53,6 +53,8 @@ def create_trainer(args, converter, tag_index):
         nn = SequenceNetwork(input_size, args.hidden, len(tag_index))
         options = {
             'learning_rate': args.learning_rate,
+            'eps': args.eps,
+            'ro': args.ro,
             'verbose': args.verbose,
             'left_context': args.window/2,
             'right_context': args.window/2
@@ -120,7 +122,11 @@ def main():
     train.add_argument('-n', '--hidden', type=int, default=200,
                         help='Number of hidden neurons (default 200)',
                         dest='hidden')
-    parser.add_argument('-o', '--output', type=str, default='',
+    train.add_argument('--eps', type=float, default=1e-8,
+                        help='Epsilon value for AdaGrad (default 1e-8)')
+    train.add_argument('--ro', type=float, default=0.95,
+                        help='Ro value for AdaDelta (default 0.95)')
+    train.add_argument('-o', '--output', type=str, default='',
                         help='File where to save embeddings')
 
     # Extractors:

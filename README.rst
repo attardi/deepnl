@@ -17,7 +17,7 @@ annotated Tweets.
 
 If you use ``deepnl``, please cite [Attardi]_ in your publications.
 
-WARNING. There has been a change in file format for models since versionn 1.3.3.
+WARNING. There has been a change in file format for models since version 1.3.3.
 You will have to retrain them to use with later versions.
 
 Installation

@@ -22,6 +22,7 @@ import sys                      # modules
 
 # local
 from word_dictionary import WordDictionary as WD
+from network cimport adaEps
 import embeddings
 from utils import Trie, strip_accents
 
@@ -148,19 +149,34 @@ cdef class Converter(object):
                 start = end
         return out
 
-    cpdef update(self, np.ndarray[INT_t,ndim=2] sentence,
-                 np.ndarray[FLOAT_t,ndim=1] grads):
+    cpdef void clearAdaGrads(self):
+        """
+        Initialize AdaGrad.
+        """
+        for e in self.extractors:
+            e.clearAdaGrads()
+
+    cpdef update(self, np.ndarray[FLOAT_t,ndim=1] grads, float learning_rate,
+                 np.ndarray[INT_t,ndim=2] sentence):
         """
         Update the features according to the given gradients.
+        :param grads: vector of feature gradients.
+        :param larning_rate: learning rate multiplier.
         :param sentence: Each row represents a token through its indices into
             each feature table.
-        :param grads: vector of feature gradients.
         """
+        global adaEps
         cdef int start = 0, end
         for token in sentence:
             for feature, extractor in izip(token, self.extractors):
                 end = start + extractor.size()
-                extractor.table[feature] += grads[start:end] # __setitem__()
+                if extractor.adaGrads is not None:
+                    # AdaGrad
+                    extractor.adaGrads[feature] += grads[start:end] * grads[start:end]
+                    extractor.table[feature] += learning_rate * grads[start:end] / np.sqrt(extractor.adaGrads[feature] + adaEps)
+                else:
+                    extractor.table[feature] += learning_rate * grads[start:end]
+
                 start = end
 
     def save(self, file):
@@ -202,6 +218,9 @@ cdef class Extractor(object):
     # cpdef readonly dict dict
     # cpdef readonly np.ndarray table
 
+    def __init__(self):
+        self.adaGrads = None
+
     def __getitem__(self, feature):
         """
         Get the vector corresponding to the :param feature:
@@ -219,6 +238,12 @@ cdef class Extractor(object):
         :return: dimension of embeddings space
         """
         return self.table.shape[1]
+
+    cpdef void clearAdaGrads(self):
+        if self.adaGrads:
+            self.adaGrads.fill(0.0)
+        else:
+            self.adaGrads = np.zeros_like(self.table);
 
     def save(self, file):
         pickle.dump(self.dict, file)
@@ -246,6 +271,8 @@ cdef class Embeddings(Extractor):
         :param vectors: file containing the vectors
         :param variant: style of embeddgins (senna, polyglot, word2vect)
         """
+        super(Embeddings, self).__init__()
+
         if variant == 'word2vec':
             # load both vocab and vectors from single file
             self.table, wordlist = embeddings.Word2Vec.load(vectors)
@@ -357,6 +384,7 @@ cdef class Caps(object):                     # Caps(Enumeration)
 cdef class CapsExtractor(Extractor):
 
     def __init__(self, size):
+        super(CapsExtractor, self).__init__()
         self.table = embeddings.generate_vectors(Caps.num_values, size)
 
     @staticmethod
@@ -440,6 +468,7 @@ cdef class AffixExtractor(Extractor):
         :param size: the dimension of the embeddings space
         :param lowcase: set the affix in lowercase
         """
+        super(AffixExtractor, self).__init__()
         self.lowcase = lowcase
         specials = AffixExtractor.specials
         if filename:
@@ -590,6 +619,7 @@ cdef class GazetteerExtractor(Extractor):
         :param lowcase: whether to compare lowercase words.
         :param noaccents: whether to remove accents from words.
         """
+        super(GazetteerExtractor, self).__init__()
         self.lowcase = lowcase
         self.noaccents = noaccents
         if ngrams:
@@ -708,6 +738,7 @@ cdef class AttributeExtractor(Extractor):
         :param idx: index of token attribute to use.
         :[aram size: vector dimension.
         """
+        super(AttributeExtractor, self).__init__()
         self.idx = idx
         self.table = embeddings.generate_vectors(AttributeExtractor.num_values, size)
 

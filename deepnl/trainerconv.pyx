@@ -51,17 +51,19 @@ cdef class ConvTrainer(Trainer):
         validation = int(len(sentences) * 0.98)
 
         nn = self.nn
-        ada = nn.gradients()
-        cdef int i = 0
+        cdef ConvGradients grads, ada
+        cdef int i = 0, slen
         for i in xrange(validation):
             sent = sentences[i]
             label = labels[i]
+            slen = len(sent)
             # add padding
             sent = np.concatenate((self.pre_padding, sent, self.post_padding))
-            vars = nn.variables(len(sent)) # allocate variables
+            vars = nn.variables(slen) # allocate variables
             self.converter.lookup(sent, vars.input)
             nn.forward(vars)
-            grads = nn.gradients(len(sent)) # allocate gradients
+            grads = nn.gradients(slen) # allocate gradients
+            ada = nn.gradients(slen) # allocate ada gradients
             loss = nn.backpropagate(label, vars, grads)
             if loss > 0.0:
                 self.error += loss

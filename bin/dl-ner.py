@@ -104,10 +104,10 @@ def main():
     parser.add_argument('model', type=str,
                         help='Model file to train/use.')
 
-    parser.add_argument('-t', '--train', type=str, default='',
-                        help='File with annotated data for training.')
     # training options
     train = parser.add_argument_group('Train')
+    train.add_argument('-t', '--train', type=str, default='',
+                        help='File with annotated data for training.')
     train.add_argument('-w', '--window', type=int, default=5,
                         help='Size of the word window (default 5)')
     train.add_argument('-s', '--embeddings-size', type=int, default=50,
@@ -129,29 +129,6 @@ def main():
     train.add_argument('-o', '--output', type=str, default='',
                         help='File where to save embeddings')
 
-    # Extractors:
-    extractors = parser.add_argument_group('Extractors')
-    extractors.add_argument('--caps', const=5, nargs='?', type=int, default=None,
-                        help='Include capitalization features. Optionally, supply the number of features (default 5)')
-    extractors.add_argument('--suffix', const=5, nargs='?', type=int, default=None,
-                        help='Include suffix features. Optionally, supply the number of features (default 5)')
-    extractors.add_argument('--suffixes', type=str, default='',
-                        help='Load suffixes from this file')
-    extractors.add_argument('--prefix', const=0, nargs='?', type=int, default=None,
-                        help='Include prefix features. Optionally, '\
-                        'supply the number of features (default 0)')
-    extractors.add_argument('--prefixes', type=str, default='',
-                        help='Load prefixes from this file')
-    extractors.add_argument('--gazetteer', type=str,
-                        help='Load gazetteer from this file')
-    extractors.add_argument('--gsize', type=int, default=5,
-                        help='Size of gazetteer features (default 5)')
-
-    # reader
-    parser.add_argument('--form-field', type=int, default=0,
-                        help='Token field containing form (default 0)',
-                        dest='formField')
-
     # Embeddings
     embeddings = parser.add_argument_group('Embeddings')
     embeddings.add_argument('--vocab', type=str, default='',
@@ -167,6 +144,29 @@ def main():
                         help='Load previously saved model')
     embeddings.add_argument('--variant', type=str, default='',
                         help='Either "senna" (default), "polyglot" or "word2vec".')
+
+    # Extractors:
+    extractors = parser.add_argument_group('Extractors')
+    extractors.add_argument('--caps', const=5, nargs='?', type=int, default=None,
+                        help='Include capitalization features. Optionally, supply the number of features (default 5)')
+    extractors.add_argument('--suffix', const=5, nargs='?', type=int, default=None,
+                            help='Include suffix features. Optionally, supply the number of features (default 5)')
+    extractors.add_argument('--suffixes', type=str, default='',
+                        help='Load suffixes from this file')
+    extractors.add_argument('--prefix', const=5, nargs='?', type=int, default=None,
+                            help='Include prefix features. Optionally, '\
+                            'supply the number of features (default 5)')
+    extractors.add_argument('--prefixes', type=str, default='',
+                        help='Load prefixes from this file')
+    extractors.add_argument('--gazetteer', type=str,
+                        help='Load gazetteer from this file')
+    extractors.add_argument('--gsize', type=int, default=5,
+                        help='Size of gazetteer features (default 5)')
+
+    # reader
+    parser.add_argument('--form-field', type=int, default=0,
+                        help='Token field containing form (default 0)',
+                        dest='formField')
 
     # common
     parser.add_argument('--threads', type=int, default=1,

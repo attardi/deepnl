@@ -72,9 +72,6 @@ cdef class SentimentTrainer(LmTrainer):
     # alpha parameter: relative weight of standard and sentiment errors.
     cdef double alpha
 
-    cdef np.ndarray input_adagrads_neg
-    cdef np.ndarray input_adagrads_pos
-
     cdef RandomPool random_pool
 
     def __init__(self, nn, converter, options):
@@ -90,10 +87,6 @@ cdef class SentimentTrainer(LmTrainer):
         super(SentimentTrainer, self).__init__(nn, converter, options)
 
         self.alpha = options.get('alpha', 0.5)
-
-        # cumulative AdaGrad$
-        self.input_adagrads_neg = np.zeros(self.nn.input_size, dtype=np.double)
-        self.input_adagrads_pos = np.zeros(self.nn.input_size, dtype=np.double)
 
     @cython.boundscheck(False)
     cdef _train_pair_s(self, np.ndarray[INT_t,ndim=2] example, Gradients grads,
@@ -201,7 +194,6 @@ cdef class SentimentTrainer(LmTrainer):
         Update the weights along the gradients :param grads:
         """
         #cdef float LR_0 = max(0.001, self.learning_rate * remaining)
-        # AdaGrad
         cdef float LR_0 = self.learning_rate
         cdef float LR_1 = max(0.001, self.learning_rate / self.nn.input_size * remaining)
         cdef float LR_2 = max(0.001, self.learning_rate / self.nn.hidden_size * remaining)
@@ -210,56 +202,21 @@ cdef class SentimentTrainer(LmTrainer):
         cdef Parameters p = nn.p
         cdef int left_context = len(self.pre_padding)
 
+        # FIXME: use AdaGrad here too:
         p.output_weights += LR_2 * grads.output_weights
         p.output_bias += LR_2 * grads.output_bias
         
         p.hidden_weights += LR_1 * grads.hidden_weights
         p.hidden_bias += LR_1 * grads.hidden_bias
         
-        cdef np.ndarray[FLOAT_t,ndim=1] grads_input_neg, grads_input_pos
-
-        # input gradients
-	# (hidden_size) x (hidden_size, input_size) = (input_size)
-        # grads.hidden_pos.dot(p.hidden_weights, grads.input)
-        # grads.hidden_neg.dot(p.hidden_weights, grads.input_neg)
-        # AdaGrad: cumulate the square of gradients in G for parameter p:
-        # G += g^2
-        # p -= LR * g / sqrt(G + eps)
-        global adaEps
-        self.input_adagrads_pos += np.power(grads.input, 2)
-        self.input_adagrads_neg += np.power(grads.input_neg, 2)
-        grads_input_pos = LR_0 * grads.input / np.sqrt(self.input_adagrads_pos + adaEps)
-        grads_input_neg = LR_0 * grads.input_neg / np.sqrt(self.input_adagrads_neg + adaEps)
-        #grads_input_pos = LR_0 * grads.input # DEBUG
-        #grads_input_neg = LR_0 * grads.input_neg # DEBUG
-
-        cdef int i, j, embeddings_size
-        cdef np.ndarray[INT_t,ndim=1] token
-        cdef np.ndarray[FLOAT_t,ndim=2] table
-        cdef np.ndarray[FLOAT_t,ndim=1] deltas_neg, deltas_pos
-             
-        # this tracks where the deltas for the next table begins
-        cdef int offset = 0
-        for i, token in enumerate(example): 
-            for j, e in enumerate(self.converter.extractors): # just one table
-                table = e.table
-                # i-th token in the window
-                # j-th feature table (there is only one: j == 0)
-                embeddings_size = table.shape[1]
-                deltas_neg = grads_input_neg[offset: offset + embeddings_size]
-                deltas_pos = grads_input_pos[offset: offset + embeddings_size]
-                    
-                if i == left_context:
-                    # this is the middle position.
-                    # apply negative and positive deltas to different tokens
-                    table[negative_token[j]] += deltas_neg
-                    table[middle_token[j]] += deltas_pos
-                else:
-                    # this is not the middle position. both deltas apply.
-                    #print >> sys.stderr, token[j], deltas_neg, deltas_pos # DEBUG
-                    table[token[j]] += deltas_neg + deltas_pos
-                   
-                offset += embeddings_size
+        # tokens where changes apply
+        cdef np.ndarray tokens = np.vstack((example, negative_token))
+        # both changes apply to all tokens except the middle
+        cdef np.ndarray[FLOAT_t,ndim=1] deltas = grads.input + grads.input_neg
+        deltas[left_context] = grads.input[left_context] # positive token
+        deltas = np.vstack((deltas, grads.input_neg[left_context])) # negative token
+        
+        self.converter.update(deltas, self.learning_rate, tokens)
 
     def train(self, Iterable sentences, list polarities, trie,
               int epochs, int report_freq):
@@ -271,6 +228,9 @@ cdef class SentimentTrainer(LmTrainer):
         :param trie: of ngrams
         """
         # FIXME: parallelize using ASGD.
+
+        # prepare for AdaGrad
+        self.converter.clearAdaGrad()
 
         # generate 1000 random indices at a time to save time
         # (generating 1000 integers at once takes about ten times the time for a single one)

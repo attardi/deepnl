@@ -60,6 +60,9 @@ cdef class Parameters(object):
         #        should use 4 times larger initial weights for sigmoid()
         #        compared to tanh().
 
+        # set the seed for replicability
+        #np.random.seed(42)          # DEBUG
+
         high = 2.38 / np.sqrt(input_size) # [Bottou-88]
         self.hidden_weights = np.random.uniform(-high, high, (hidden_size, input_size))
         self.hidden_bias = np.random.uniform(-high, high, (hidden_size))
@@ -97,10 +100,10 @@ cdef class Parameters(object):
             self.hidden_bias += learning_rate * grads.hidden_bias / np.sqrt(ada.hidden_bias + adaEps)
         else:
             # divide by the fan-in
-            self.output_weights += grads.output_weights * learning_rate / 100 # DEBUG / self.hidden_size
-            self.output_bias += grads.output_bias * learning_rate / 100 # DEBUG self.hidden_size
-            self.hidden_weights += grads.hidden_weights * learning_rate / 100 # DEBUG self.input_size
-            self.hidden_bias += grads.hidden_bias * learning_rate / 100 # DEBUG self.input_size
+            self.output_weights += grads.output_weights * learning_rate # DEBUG / self.hidden_size
+            self.output_bias += grads.output_bias * learning_rate # DEBUG self.hidden_size
+            self.hidden_weights += grads.hidden_weights * learning_rate # DEBUG self.input_size
+            self.hidden_bias += grads.hidden_bias * learning_rate # DEBUG self.input_size
 
     def save(self, file):
         """
@@ -151,8 +154,6 @@ cdef class Gradients(Parameters):
         self.output_bias += grads.output_bias * grads.output_bias
         self.hidden_weights += grads.hidden_weights * grads.hidden_weights
         self.hidden_bias += grads.hidden_bias * grads.hidden_bias
-        # CHECKME: input too?
-        #self.input += grads.input * grads.input
 
 # ----------------------------------------------------------------------
 

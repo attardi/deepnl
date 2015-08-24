@@ -51,6 +51,8 @@ def create_trainer(args, converter):
         nn = Network(input_size, args.hidden, 2)
         options = {
             'learning_rate': args.learning_rate,
+            'eps': args.eps,
+            'ro': args.ro,
             'verbose': args.verbose,
             'left_context': args.window/2,
             'right_context': args.window/2,
@@ -111,6 +113,10 @@ if __name__ == '__main__':
     parser.add_argument('-l', '--learning-rate', type=float, default=0.001,
                         help='Learning rate for network weights (default 0.001)',
                         dest='learning_rate')
+    parser.add_argument('--eps', type=float, default=1e-8,
+                        help='Epsilon value for AdaGrad (default 1e-8)')
+    parser.add_argument('--ro', type=float, default=0.95,
+                        help='Ro value for AdaDelta (default 0.95)')
     parser.add_argument('-n', '--hidden', type=int, default=200,
                         help='Number of hidden neurons (default 200)')
     parser.add_argument('--ngrams', type=int, default=2,

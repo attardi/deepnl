@@ -111,6 +111,9 @@ cdef class Trainer(object):
         logger = logging.getLogger("Logger")
         logger.info("Training for up to %d epochs" % epochs)
         
+        # prepare for AdaGrad
+        self.converter.clearAdaGrads()
+
         self.total_items = 0
         top_accuracy = 0
         last_accuracy = 0
@@ -244,32 +247,19 @@ cdef class Trainer(object):
                         % (num, self.total_items, self.error, self.accuracy, msg))
 
     cpdef update(self, Gradients grads, float learning_rate,
-                     np.ndarray[INT_t,ndim=2] sentence, Gradients ada=None):
+                     np.ndarray[INT_t,ndim=2] sequence, Gradients ada=None):
         """
         Adjust the weights.
-        :param sentence: padded sentence.
+        :param grads: gradients to apply.
+        :param larning_rate: learning rate multiplier.
+        :param sequence: portion of padded sentence.
         :param ada: cumulative square gradients for performing AdaGrad.
         """
 
         # update network weights.
         self.nn.update(grads, learning_rate, ada)
 
-        # adjust input weights
-        cdef int i
-        if ada:
-            global adaEps
-            # since sentences have different length, we keep a single ada.input
-            for i in xrange(len(sentence)):
-                ada.input[0] += np.square(grads.input[i])
-            grads.input *= learning_rate / np.sqrt(ada.input[0] + adaEps)
-        else:
-            grads.input *= learning_rate
-
-        cdef int window_size = len(self.pre_padding) + 1 + len(self.post_padding)
-        cdef int slen = len(sentence) - window_size
-        for i in xrange(slen):
-            window = sentence[i: i+window_size]
-            self.converter.update(window, grads.input)
+        self.converter.update(grads.input, learning_rate, sequence)
 
     def save(self, file):
         np.save(file, (self.pre_padding, self.post_padding, self.ngram_size))
@@ -324,15 +314,13 @@ cdef class TaggerTrainer(Trainer):
         # shuffle data
         # get the random number generator state in order to shuffle
         # sentences and their tags in the same order
-        random_state = np.random.get_state()
-        np.random.shuffle(sentences)
-        np.random.set_state(random_state)
-        np.random.shuffle(tags)
+        # DEBUG:
+        # random_state = np.random.get_state()
+        # np.random.shuffle(sentences)
+        # np.random.set_state(random_state)
+        # np.random.shuffle(tags)
         
-        cdef SeqGradients grads
-        # AdaGrad. Since sentence length varies, we accumulate into a single
-        # item all squared input gradients
-        cdef SeqGradients ada = nn.gradients(1)
+        cdef SeqGradients grads, ada
 
         # keep last 2% for validation
         cdef int validation = int((len(sentences) - 1) * 0.98) + 1 # at least 1
@@ -344,7 +332,8 @@ cdef class TaggerTrainer(Trainer):
             # add padding
             sent = np.concatenate((self.pre_padding, sent, self.post_padding))
             scores = self.tagger._tag_sequence(sent, True)
-            grads = nn.gradients(slen)
+            grads = nn.gradients(slen) # one for each item
+            ada = nn.gradients(slen) # one for each item
             error = nn.backpropagateSeq(sent_tags, scores, grads)
             if error > self.skipErr:
                 self.error += error
@@ -406,12 +395,15 @@ cdef class TaggerTrainer(Trainer):
                  np.ndarray[INT_t,ndim=2] sentence, Gradients ada=None):
 
         """
+        :param grads: gradients to apply.
+        :param larning_rate: learning rate multiplier.
         :param sentence: the padded sentence.
+        :param ada: cumulative square gradients for performing AdaGrad.
         """
         # update network weights and transition weights.
-        (<SequenceNetwork>self.nn).update(grads, learning_rate, ada)
+        self.nn.update(grads, learning_rate, ada)
         #
-        # Adjust the features indexed by the input window.
+        # Adjust the features indexed by the input windows.
         #
         # the deltas that will be applied to the feature tables
         # they are in the same sequence as the network receives them, i.e.
@@ -422,17 +414,7 @@ cdef class TaggerTrainer(Trainer):
         cdef int window_size = len(self.pre_padding) + 1 + len(self.post_padding)
         cdef int i, slen = len(sentence) - window_size + 1 # without padding
 
-        # (len, input_size)
-        cdef np.ndarray[FLOAT_t,ndim=2] input_deltas
-        if ada:
-            global adaEps
-            # since sentences have different length, we keep a single ada.input
-            for i in xrange(slen):
-                ada.input[0] += np.square(grads.input[i])
-            input_deltas = learning_rate * grads.input / np.sqrt(ada.input[0] + adaEps)
-        else:
-            input_deltas = grads.input * learning_rate
-
+        cdef np.ndarray[INT_t,ndim=2] window
         for i in xrange(slen):
             window = sentence[i: i+window_size]
-            self.converter.update(window, input_deltas[i])
+            self.converter.update(grads.input[i], learning_rate, window)

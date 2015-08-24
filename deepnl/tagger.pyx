@@ -123,6 +123,14 @@ cdef class Tagger(object):
             self.converter.lookup(window, vars.input)
             vars.output = scores[i]
             nn.forward(vars)
+            # # DEBUG
+            # if train:
+            #     print >> sys.stderr, 'window:', self.converter.extractors[0].sentence(window)
+            #     print >> sys.stderr, 'sent:', window[:4], window[-4:]
+            #     print >> sys.stderr, 'input', vars.input[:4], vars.input[-4:]
+            #     print >> sys.stderr, 'iw', self.nn.p.hidden_weights[0,:4], self.nn.p.hidden_weights[-1,-4:]
+            #     print >> sys.stderr, 'hidden', vars.hidden[:4], vars.hidden[-4:]
+            #     print >> sys.stderr, 'output', vars.output[:4], vars.output[-4:]
         
         return scores
 

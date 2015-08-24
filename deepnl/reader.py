@@ -154,9 +154,9 @@ class PosReader(TaggerReader):
     for use by the neural network for the POS tagging task.
     """
     
-    def __init__(self):
+    def __init__(self, formField=0, tagField=-1):
         self.rare_tag = None
-        super(PosReader, self).__init__()
+        super(PosReader, self).__init__(formField=0, tagField=-1)
 
 # ----------------------------------------------------------------------
 

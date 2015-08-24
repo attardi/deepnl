@@ -1,3 +1,21 @@
+2015-08-24  Giuseppe Attardi  <attardi@di.unipi.it>
+
+	* bin/dl-pos.py (main): updated similarly to dl-ner.py.
+
+	* deepnl/reader.py (PosReader.__init__): handle form and tag fields.
+
+	* deepnl/sentiwords.pyx (train): modified implementation of
+	AdaGrad.
+
+	* deepnl/extractors.pyx (Converter.upgrade): perform properly
+	AdaGrad, using a table of accumulated squares in each extractor.
+	Added method clearAdagrad() to initialize them, which should be
+	called at the beginning of training.
+
+2015-08-23  Giuseppe Attardi  <attardi@di.unipi.it>
+
+	* bin/dl-ner.py (prefix):  default to 5.
+
 2015-08-21  Giuseppe Attardi  <attardi@di.unipi.it>
 
 	* deepnl/trainer.pyx (_train_epoch): add padding to sentence.

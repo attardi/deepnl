@@ -50,7 +50,8 @@ cdef class SeqParameters(Parameters):
         # Adjusts the transition scores table with the calculated gradients.
         if ada:
             global adaEps
-            ada.transitions += grads.transitions * grads.transitions
+            # this is done in update() above.
+            #ada.transitions += grads.transitions * grads.transitions
             self.transitions += learning_rate * grads.transitions / np.sqrt(ada.transitions + adaEps)
         else:
             self.transitions += grads.transitions * learning_rate
@@ -91,7 +92,7 @@ cdef class SeqGradients(Gradients):
         :param seq_len: sequence length.
         """
         super(SeqGradients, self).__init__(input_size, hidden_size, output_size)
-        self.input = np.zeros((seq_len, input_size)) # overrides Gradients
+        self.input = np.zeros((seq_len, input_size)) # overrides value from Gradients
         self.output = np.zeros((seq_len, output_size))
         self.transitions = np.zeros((output_size + 1, output_size))
 
@@ -102,8 +103,11 @@ cdef class SeqGradients(Gradients):
         self.transitions.fill(0.0)
 
     def addSquare(self, Gradients grads):
-        super(SeqGradients, self).addSquare(grads)
-        #self.output += grads.output * grads.output # not needed
+        #super(SeqGradients, self).addSquare(grads) # we deal differetly with input
+        self.output_weights += grads.output_weights * grads.output_weights
+        self.output_bias += grads.output_bias * grads.output_bias
+        self.hidden_weights += grads.hidden_weights * grads.hidden_weights
+        self.hidden_bias += grads.hidden_bias * grads.hidden_bias
         self.transitions += grads.transitions * grads.transitions
 
 # ----------------------------------------------------------------------
@@ -212,6 +216,7 @@ cdef class SequenceNetwork(Network):
         # delta[i][j]: sum of scores of all path that assign tag j to ith-token
 
         # now compute the gradients for the other tokens, from last to first
+        cdef np.ndarray grad_times_softmax
         cdef np.ndarray[FLOAT_t,ndim=2] path_scores = np.empty((self.output_size, self.output_size), np.float)
         for t in range(len(scores) - 2, -1, -1):
             

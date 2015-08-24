@@ -1082,7 +1082,7 @@ struct __pyx_opt_args_6deepnl_5words_9LmTrainer__extract_window {
 };
 struct __pyx_opt_args_6deepnl_10sentiwords_16SentimentTrainer__train_pair_s;
 
-/* "deepnl/sentiwords.pyx":99
+/* "deepnl/sentiwords.pyx":92
  * 
  *     @cython.boundscheck(False)
  *     cdef _train_pair_s(self, np.ndarray[INT_t,ndim=2] example, Gradients grads,             # <<<<<<<<<<<<<<
@@ -1121,8 +1121,8 @@ struct __pyx_obj_6deepnl_10extractors_Converter {
 };
 
 
-/* "extractors.pxd":45
- *                  np.ndarray[FLOAT_t,ndim=1] grads)
+/* "extractors.pxd":48
+ *                  np.ndarray[INT_t,ndim=2] sentence)
  * 
  * cdef class Extractor(object):             # <<<<<<<<<<<<<<
  * 
@@ -1133,11 +1133,12 @@ struct __pyx_obj_6deepnl_10extractors_Extractor {
   struct __pyx_vtabstruct_6deepnl_10extractors_Extractor *__pyx_vtab;
   PyObject *dict;
   PyArrayObject *table;
+  PyArrayObject *adaGrads;
 };
 
 
-/* "extractors.pxd":53
- *     cpdef int size(self)
+/* "extractors.pxd":59
+ *     cpdef void clearAdaGrads(self)
  * 
  * cdef class Embeddings(Extractor):             # <<<<<<<<<<<<<<
  *     pass
@@ -1148,7 +1149,7 @@ struct __pyx_obj_6deepnl_10extractors_Embeddings {
 };
 
 
-/* "extractors.pxd":56
+/* "extractors.pxd":62
  *     pass
  * 
  * cdef class CapsExtractor(Extractor):             # <<<<<<<<<<<<<<
@@ -1160,7 +1161,7 @@ struct __pyx_obj_6deepnl_10extractors_CapsExtractor {
 };
 
 
-/* "extractors.pxd":59
+/* "extractors.pxd":65
  *     pass
  * 
  * cdef class AffixExtractor(Extractor):             # <<<<<<<<<<<<<<
@@ -1173,7 +1174,7 @@ struct __pyx_obj_6deepnl_10extractors_AffixExtractor {
 };
 
 
-/* "extractors.pxd":62
+/* "extractors.pxd":68
  *     cdef bool lowcase
  * 
  * cdef class SuffixExtractor(AffixExtractor):             # <<<<<<<<<<<<<<
@@ -1185,7 +1186,7 @@ struct __pyx_obj_6deepnl_10extractors_SuffixExtractor {
 };
 
 
-/* "extractors.pxd":65
+/* "extractors.pxd":71
  *     pass
  * 
  * cdef class PrefixExtractor(AffixExtractor):             # <<<<<<<<<<<<<<
@@ -1197,7 +1198,7 @@ struct __pyx_obj_6deepnl_10extractors_PrefixExtractor {
 };
 
 
-/* "extractors.pxd":68
+/* "extractors.pxd":74
  *     pass
  * 
  * cdef class GazetteerExtractor(Extractor):             # <<<<<<<<<<<<<<
@@ -1462,8 +1463,6 @@ struct __pyx_obj_6deepnl_10sentiwords_SentimentTrainer {
   struct __pyx_obj_6deepnl_5words_LmTrainer __pyx_base;
   PyObject *polarities;
   double alpha;
-  PyArrayObject *input_adagrads_neg;
-  PyArrayObject *input_adagrads_pos;
   struct __pyx_obj_6deepnl_5words_RandomPool *random_pool;
 };
 
@@ -1502,13 +1501,14 @@ struct __pyx_vtabstruct_6deepnl_10extractors_Converter {
   int (*size)(struct __pyx_obj_6deepnl_10extractors_Converter *, int __pyx_skip_dispatch);
   PyArrayObject *(*convert)(struct __pyx_obj_6deepnl_10extractors_Converter *, PyObject *, int __pyx_skip_dispatch);
   PyArrayObject *(*lookup)(struct __pyx_obj_6deepnl_10extractors_Converter *, PyArrayObject *, int __pyx_skip_dispatch, struct __pyx_opt_args_6deepnl_10extractors_9Converter_lookup *__pyx_optional_args);
-  PyObject *(*update)(struct __pyx_obj_6deepnl_10extractors_Converter *, PyArrayObject *, PyArrayObject *, int __pyx_skip_dispatch);
+  void (*clearAdaGrads)(struct __pyx_obj_6deepnl_10extractors_Converter *, int __pyx_skip_dispatch);
+  PyObject *(*update)(struct __pyx_obj_6deepnl_10extractors_Converter *, PyArrayObject *, float, PyArrayObject *, int __pyx_skip_dispatch);
 };
 static struct __pyx_vtabstruct_6deepnl_10extractors_Converter *__pyx_vtabptr_6deepnl_10extractors_Converter;
 
 
-/* "extractors.pxd":45
- *                  np.ndarray[FLOAT_t,ndim=1] grads)
+/* "extractors.pxd":48
+ *                  np.ndarray[INT_t,ndim=2] sentence)
  * 
  * cdef class Extractor(object):             # <<<<<<<<<<<<<<
  * 
@@ -1517,12 +1517,13 @@ static struct __pyx_vtabstruct_6deepnl_10extractors_Converter *__pyx_vtabptr_6de
 
 struct __pyx_vtabstruct_6deepnl_10extractors_Extractor {
   int (*size)(struct __pyx_obj_6deepnl_10extractors_Extractor *, int __pyx_skip_dispatch);
+  void (*clearAdaGrads)(struct __pyx_obj_6deepnl_10extractors_Extractor *, int __pyx_skip_dispatch);
 };
 static struct __pyx_vtabstruct_6deepnl_10extractors_Extractor *__pyx_vtabptr_6deepnl_10extractors_Extractor;
 
 
-/* "extractors.pxd":53
- *     cpdef int size(self)
+/* "extractors.pxd":59
+ *     cpdef void clearAdaGrads(self)
  * 
  * cdef class Embeddings(Extractor):             # <<<<<<<<<<<<<<
  *     pass
@@ -1535,7 +1536,7 @@ struct __pyx_vtabstruct_6deepnl_10extractors_Embeddings {
 static struct __pyx_vtabstruct_6deepnl_10extractors_Embeddings *__pyx_vtabptr_6deepnl_10extractors_Embeddings;
 
 
-/* "extractors.pxd":56
+/* "extractors.pxd":62
  *     pass
  * 
  * cdef class CapsExtractor(Extractor):             # <<<<<<<<<<<<<<
@@ -1549,7 +1550,7 @@ struct __pyx_vtabstruct_6deepnl_10extractors_CapsExtractor {
 static struct __pyx_vtabstruct_6deepnl_10extractors_CapsExtractor *__pyx_vtabptr_6deepnl_10extractors_CapsExtractor;
 
 
-/* "extractors.pxd":59
+/* "extractors.pxd":65
  *     pass
  * 
  * cdef class AffixExtractor(Extractor):             # <<<<<<<<<<<<<<
@@ -1563,7 +1564,7 @@ struct __pyx_vtabstruct_6deepnl_10extractors_AffixExtractor {
 static struct __pyx_vtabstruct_6deepnl_10extractors_AffixExtractor *__pyx_vtabptr_6deepnl_10extractors_AffixExtractor;
 
 
-/* "extractors.pxd":62
+/* "extractors.pxd":68
  *     cdef bool lowcase
  * 
  * cdef class SuffixExtractor(AffixExtractor):             # <<<<<<<<<<<<<<
@@ -1577,7 +1578,7 @@ struct __pyx_vtabstruct_6deepnl_10extractors_SuffixExtractor {
 static struct __pyx_vtabstruct_6deepnl_10extractors_SuffixExtractor *__pyx_vtabptr_6deepnl_10extractors_SuffixExtractor;
 
 
-/* "extractors.pxd":65
+/* "extractors.pxd":71
  *     pass
  * 
  * cdef class PrefixExtractor(AffixExtractor):             # <<<<<<<<<<<<<<
@@ -1591,7 +1592,7 @@ struct __pyx_vtabstruct_6deepnl_10extractors_PrefixExtractor {
 static struct __pyx_vtabstruct_6deepnl_10extractors_PrefixExtractor *__pyx_vtabptr_6deepnl_10extractors_PrefixExtractor;
 
 
-/* "extractors.pxd":68
+/* "extractors.pxd":74
  *     pass
  * 
  * cdef class GazetteerExtractor(Extractor):             # <<<<<<<<<<<<<<
@@ -2009,11 +2010,6 @@ static CYTHON_INLINE int __Pyx_PyObject_SetAttrStr(PyObject* obj, PyObject* attr
 static CYTHON_INLINE void __Pyx_ErrRestore(PyObject *type, PyObject *value, PyObject *tb);
 static CYTHON_INLINE void __Pyx_ErrFetch(PyObject **type, PyObject **value, PyObject **tb);
 
-static CYTHON_INLINE PyObject* __Pyx_PyObject_GetSlice(
-        PyObject* obj, Py_ssize_t cstart, Py_ssize_t cstop,
-        PyObject** py_start, PyObject** py_stop, PyObject** py_slice,
-        int has_cstart, int has_cstop, int wraparound);
-
 static void __Pyx_RaiseBufferIndexError(int axis);
 
 static CYTHON_INLINE int __Pyx_ArgTypeTest(PyObject *obj, PyTypeObject *type, int none_allowed,
@@ -2149,8 +2145,6 @@ static CYTHON_INLINE int __Pyx_PyInt_As_int(PyObject *);
 static CYTHON_INLINE PyObject* __Pyx_PyInt_From_int(int value);
 
 static CYTHON_INLINE PyObject* __Pyx_PyInt_From_long(long value);
-
-static CYTHON_INLINE PyObject* __Pyx_PyInt_From_npy_long(npy_long value);
 
 #if CYTHON_CCOMPLEX
   #ifdef __cplusplus
@@ -2318,7 +2312,7 @@ static int __Pyx_ImportFunction(PyObject *module, const char *funcname, void (**
 static int __Pyx_InitStrings(__Pyx_StringTabEntry *t);
 
 static PyObject *__pyx_f_6deepnl_10sentiwords_16SentimentTrainer__train_pair_s(struct __pyx_obj_6deepnl_10sentiwords_SentimentTrainer *__pyx_v_self, PyArrayObject *__pyx_v_example, struct __pyx_obj_6deepnl_7network_Gradients *__pyx_v_grads, struct __pyx_opt_args_6deepnl_10sentiwords_16SentimentTrainer__train_pair_s *__pyx_optional_args); /* proto*/
-static PyObject *__pyx_f_6deepnl_10sentiwords_16SentimentTrainer__update(struct __pyx_obj_6deepnl_10sentiwords_SentimentTrainer *__pyx_v_self, struct __pyx_obj_6deepnl_7network_Gradients *__pyx_v_grads, float __pyx_v_remaining, PyArrayObject *__pyx_v_example, PyArrayObject *__pyx_v_middle_token, PyArrayObject *__pyx_v_negative_token); /* proto*/
+static PyObject *__pyx_f_6deepnl_10sentiwords_16SentimentTrainer__update(struct __pyx_obj_6deepnl_10sentiwords_SentimentTrainer *__pyx_v_self, struct __pyx_obj_6deepnl_7network_Gradients *__pyx_v_grads, float __pyx_v_remaining, PyArrayObject *__pyx_v_example, CYTHON_UNUSED PyArrayObject *__pyx_v_middle_token, PyArrayObject *__pyx_v_negative_token); /* proto*/
 
 /* Module declarations from 'cython' */
 
@@ -2475,8 +2469,8 @@ int __pyx_module_is_main_deepnl__sentiwords = 0;
 /* Implementation of 'deepnl.sentiwords' */
 static PyObject *__pyx_builtin_super;
 static PyObject *__pyx_builtin_xrange;
-static PyObject *__pyx_builtin_enumerate;
 static PyObject *__pyx_builtin_sum;
+static PyObject *__pyx_builtin_enumerate;
 static PyObject *__pyx_builtin_ValueError;
 static PyObject *__pyx_builtin_range;
 static PyObject *__pyx_builtin_RuntimeError;
@@ -2514,7 +2508,6 @@ static char __pyx_k_main[] = "__main__";
 static char __pyx_k_next[] = "next";
 static char __pyx_k_send[] = "send";
 static char __pyx_k_sent[] = "sent";
-static char __pyx_k_sqrt[] = "sqrt";
 static char __pyx_k_test[] = "__test__";
 static char __pyx_k_trie[] = "trie";
 static char __pyx_k_alpha[] = "alpha";
@@ -2527,7 +2520,6 @@ static char __pyx_k_empty[] = "empty";
 static char __pyx_k_input[] = "input";
 static char __pyx_k_numpy[] = "numpy";
 static char __pyx_k_outer[] = "outer";
-static char __pyx_k_power[] = "power";
 static char __pyx_k_range[] = "range";
 static char __pyx_k_shape[] = "shape";
 static char __pyx_k_start[] = "start";
@@ -2535,11 +2527,11 @@ static char __pyx_k_super[] = "super";
 static char __pyx_k_table[] = "table";
 static char __pyx_k_throw[] = "throw";
 static char __pyx_k_zeros[] = "zeros";
-static char __pyx_k_double[] = "double";
 static char __pyx_k_epochs[] = "epochs";
 static char __pyx_k_hidden[] = "hidden";
 static char __pyx_k_import[] = "__import__";
 static char __pyx_k_output[] = "output";
+static char __pyx_k_vstack[] = "vstack";
 static char __pyx_k_xrange[] = "xrange";
 static char __pyx_k_options[] = "options";
 static char __pyx_k_itertrie[] = "itertrie";
@@ -2557,6 +2549,7 @@ static char __pyx_k_hidden_size[] = "hidden_size";
 static char __pyx_k_output_size[] = "output_size";
 static char __pyx_k_report_freq[] = "report_freq";
 static char __pyx_k_RuntimeError[] = "RuntimeError";
+static char __pyx_k_clearAdaGrad[] = "clearAdaGrad";
 static char __pyx_k_epoch_report[] = "_epoch_report";
 static char __pyx_k_progress_report[] = "_progress_report";
 static char __pyx_k_deepnl_sentiwords[] = "deepnl.sentiwords";
@@ -2577,13 +2570,13 @@ static PyObject *__pyx_n_s_alpha;
 static PyObject *__pyx_n_s_args;
 static PyObject *__pyx_n_s_array;
 static PyObject *__pyx_n_s_clear;
+static PyObject *__pyx_n_s_clearAdaGrad;
 static PyObject *__pyx_n_s_close;
 static PyObject *__pyx_n_s_converter;
 static PyObject *__pyx_n_s_cur;
 static PyObject *__pyx_n_s_deepnl_sentiwords;
 static PyObject *__pyx_n_s_depth;
 static PyObject *__pyx_n_s_dot;
-static PyObject *__pyx_n_s_double;
 static PyObject *__pyx_n_s_dtype;
 static PyObject *__pyx_n_s_empty;
 static PyObject *__pyx_n_s_enumerate;
@@ -2615,7 +2608,6 @@ static PyObject *__pyx_n_s_outer;
 static PyObject *__pyx_n_s_output;
 static PyObject *__pyx_n_s_output_size;
 static PyObject *__pyx_n_s_polarities;
-static PyObject *__pyx_n_s_power;
 static PyObject *__pyx_n_s_progress_report;
 static PyObject *__pyx_n_s_pyx_vtable;
 static PyObject *__pyx_n_s_range;
@@ -2624,7 +2616,6 @@ static PyObject *__pyx_n_s_send;
 static PyObject *__pyx_n_s_sent;
 static PyObject *__pyx_n_s_sentences;
 static PyObject *__pyx_n_s_shape;
-static PyObject *__pyx_n_s_sqrt;
 static PyObject *__pyx_n_s_start;
 static PyObject *__pyx_n_s_sum;
 static PyObject *__pyx_n_s_super;
@@ -2636,6 +2627,7 @@ static PyObject *__pyx_n_s_tok;
 static PyObject *__pyx_n_s_tr;
 static PyObject *__pyx_n_s_trie;
 static PyObject *__pyx_kp_u_unknown_dtype_code_in_numpy_pxd;
+static PyObject *__pyx_n_s_vstack;
 static PyObject *__pyx_n_s_xrange;
 static PyObject *__pyx_n_s_zeros;
 static int __pyx_pf_6deepnl_10sentiwords_13SentGradients___init__(struct __pyx_obj_6deepnl_10sentiwords_SentGradients *__pyx_v_self, int __pyx_v_input_size, int __pyx_v_hidden_size, int __pyx_v_output_size); /* proto */
@@ -2661,7 +2653,6 @@ static PyObject *__pyx_float_0_0;
 static PyObject *__pyx_float_0_5;
 static PyObject *__pyx_int_0;
 static PyObject *__pyx_int_1;
-static PyObject *__pyx_int_2;
 static PyObject *__pyx_tuple_;
 static PyObject *__pyx_tuple__2;
 static PyObject *__pyx_tuple__3;
@@ -3819,7 +3810,7 @@ static PyObject *__pyx_gb_6deepnl_10sentiwords_2generator(__pyx_CoroutineObject 
   return __pyx_r;
 }
 
-/* "deepnl/sentiwords.pyx":80
+/* "deepnl/sentiwords.pyx":77
  *     cdef RandomPool random_pool
  * 
  *     def __init__(self, nn, converter, options):             # <<<<<<<<<<<<<<
@@ -3864,16 +3855,16 @@ static int __pyx_pw_6deepnl_10sentiwords_16SentimentTrainer_1__init__(PyObject *
         case  1:
         if (likely((values[1] = PyDict_GetItem(__pyx_kwds, __pyx_n_s_converter)) != 0)) kw_args--;
         else {
-          __Pyx_RaiseArgtupleInvalid("__init__", 1, 3, 3, 1); {__pyx_filename = __pyx_f[0]; __pyx_lineno = 80; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
+          __Pyx_RaiseArgtupleInvalid("__init__", 1, 3, 3, 1); {__pyx_filename = __pyx_f[0]; __pyx_lineno = 77; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
         }
         case  2:
         if (likely((values[2] = PyDict_GetItem(__pyx_kwds, __pyx_n_s_options)) != 0)) kw_args--;
         else {
-          __Pyx_RaiseArgtupleInvalid("__init__", 1, 3, 3, 2); {__pyx_filename = __pyx_f[0]; __pyx_lineno = 80; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
+          __Pyx_RaiseArgtupleInvalid("__init__", 1, 3, 3, 2); {__pyx_filename = __pyx_f[0]; __pyx_lineno = 77; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
         }
       }
       if (unlikely(kw_args > 0)) {
-        if (unlikely(__Pyx_ParseOptionalKeywords(__pyx_kwds, __pyx_pyargnames, 0, values, pos_args, "__init__") < 0)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 80; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
+        if (unlikely(__Pyx_ParseOptionalKeywords(__pyx_kwds, __pyx_pyargnames, 0, values, pos_args, "__init__") < 0)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 77; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
       }
     } else if (PyTuple_GET_SIZE(__pyx_args) != 3) {
       goto __pyx_L5_argtuple_error;
@@ -3888,7 +3879,7 @@ static int __pyx_pw_6deepnl_10sentiwords_16SentimentTrainer_1__init__(PyObject *
   }
   goto __pyx_L4_argument_unpacking_done;
   __pyx_L5_argtuple_error:;
-  __Pyx_RaiseArgtupleInvalid("__init__", 1, 3, 3, PyTuple_GET_SIZE(__pyx_args)); {__pyx_filename = __pyx_f[0]; __pyx_lineno = 80; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
+  __Pyx_RaiseArgtupleInvalid("__init__", 1, 3, 3, PyTuple_GET_SIZE(__pyx_args)); {__pyx_filename = __pyx_f[0]; __pyx_lineno = 77; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
   __pyx_L3_error:;
   __Pyx_AddTraceback("deepnl.sentiwords.SentimentTrainer.__init__", __pyx_clineno, __pyx_lineno, __pyx_filename);
   __Pyx_RefNannyFinishContext();
@@ -3910,20 +3901,19 @@ static int __pyx_pf_6deepnl_10sentiwords_16SentimentTrainer___init__(struct __py
   Py_ssize_t __pyx_t_4;
   PyObject *__pyx_t_5 = NULL;
   double __pyx_t_6;
-  PyObject *__pyx_t_7 = NULL;
   int __pyx_lineno = 0;
   const char *__pyx_filename = NULL;
   int __pyx_clineno = 0;
   __Pyx_RefNannySetupContext("__init__", 0);
 
-  /* "deepnl/sentiwords.pyx":90
+  /* "deepnl/sentiwords.pyx":87
  *         :param alpha: default 0.5
  *         """
  *         super(SentimentTrainer, self).__init__(nn, converter, options)             # <<<<<<<<<<<<<<
  * 
  *         self.alpha = options.get('alpha', 0.5)
  */
-  __pyx_t_2 = PyTuple_New(2); if (unlikely(!__pyx_t_2)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 90; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_t_2 = PyTuple_New(2); if (unlikely(!__pyx_t_2)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 87; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_GOTREF(__pyx_t_2);
   __Pyx_INCREF(((PyObject *)__pyx_ptype_6deepnl_10sentiwords_SentimentTrainer));
   __Pyx_GIVEREF(((PyObject *)__pyx_ptype_6deepnl_10sentiwords_SentimentTrainer));
@@ -3931,10 +3921,10 @@ static int __pyx_pf_6deepnl_10sentiwords_16SentimentTrainer___init__(struct __py
   __Pyx_INCREF(((PyObject *)__pyx_v_self));
   __Pyx_GIVEREF(((PyObject *)__pyx_v_self));
   PyTuple_SET_ITEM(__pyx_t_2, 1, ((PyObject *)__pyx_v_self));
-  __pyx_t_3 = __Pyx_PyObject_Call(__pyx_builtin_super, __pyx_t_2, NULL); if (unlikely(!__pyx_t_3)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 90; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_t_3 = __Pyx_PyObject_Call(__pyx_builtin_super, __pyx_t_2, NULL); if (unlikely(!__pyx_t_3)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 87; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_GOTREF(__pyx_t_3);
   __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
-  __pyx_t_2 = __Pyx_PyObject_GetAttrStr(__pyx_t_3, __pyx_n_s_init); if (unlikely(!__pyx_t_2)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 90; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_t_2 = __Pyx_PyObject_GetAttrStr(__pyx_t_3, __pyx_n_s_init); if (unlikely(!__pyx_t_2)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 87; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_GOTREF(__pyx_t_2);
   __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
   __pyx_t_3 = NULL;
@@ -3949,7 +3939,7 @@ static int __pyx_pf_6deepnl_10sentiwords_16SentimentTrainer___init__(struct __py
       __pyx_t_4 = 1;
     }
   }
-  __pyx_t_5 = PyTuple_New(3+__pyx_t_4); if (unlikely(!__pyx_t_5)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 90; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_t_5 = PyTuple_New(3+__pyx_t_4); if (unlikely(!__pyx_t_5)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 87; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_GOTREF(__pyx_t_5);
   if (__pyx_t_3) {
     __Pyx_GIVEREF(__pyx_t_3); PyTuple_SET_ITEM(__pyx_t_5, 0, __pyx_t_3); __pyx_t_3 = NULL;
@@ -3963,109 +3953,29 @@ static int __pyx_pf_6deepnl_10sentiwords_16SentimentTrainer___init__(struct __py
   __Pyx_INCREF(__pyx_v_options);
   __Pyx_GIVEREF(__pyx_v_options);
   PyTuple_SET_ITEM(__pyx_t_5, 2+__pyx_t_4, __pyx_v_options);
-  __pyx_t_1 = __Pyx_PyObject_Call(__pyx_t_2, __pyx_t_5, NULL); if (unlikely(!__pyx_t_1)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 90; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_t_1 = __Pyx_PyObject_Call(__pyx_t_2, __pyx_t_5, NULL); if (unlikely(!__pyx_t_1)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 87; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_GOTREF(__pyx_t_1);
   __Pyx_DECREF(__pyx_t_5); __pyx_t_5 = 0;
   __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
 
-  /* "deepnl/sentiwords.pyx":92
+  /* "deepnl/sentiwords.pyx":89
  *         super(SentimentTrainer, self).__init__(nn, converter, options)
  * 
  *         self.alpha = options.get('alpha', 0.5)             # <<<<<<<<<<<<<<
  * 
- *         # cumulative AdaGrad$
+ *     @cython.boundscheck(False)
  */
-  __pyx_t_1 = __Pyx_PyObject_GetAttrStr(__pyx_v_options, __pyx_n_s_get); if (unlikely(!__pyx_t_1)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 92; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_t_1 = __Pyx_PyObject_GetAttrStr(__pyx_v_options, __pyx_n_s_get); if (unlikely(!__pyx_t_1)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 89; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_GOTREF(__pyx_t_1);
-  __pyx_t_2 = __Pyx_PyObject_Call(__pyx_t_1, __pyx_tuple__4, NULL); if (unlikely(!__pyx_t_2)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 92; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_t_2 = __Pyx_PyObject_Call(__pyx_t_1, __pyx_tuple__4, NULL); if (unlikely(!__pyx_t_2)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 89; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_GOTREF(__pyx_t_2);
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
-  __pyx_t_6 = __pyx_PyFloat_AsDouble(__pyx_t_2); if (unlikely((__pyx_t_6 == (double)-1) && PyErr_Occurred())) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 92; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_t_6 = __pyx_PyFloat_AsDouble(__pyx_t_2); if (unlikely((__pyx_t_6 == (double)-1) && PyErr_Occurred())) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 89; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
   __pyx_v_self->alpha = __pyx_t_6;
 
-  /* "deepnl/sentiwords.pyx":95
- * 
- *         # cumulative AdaGrad$
- *         self.input_adagrads_neg = np.zeros(self.nn.input_size, dtype=np.double)             # <<<<<<<<<<<<<<
- *         self.input_adagrads_pos = np.zeros(self.nn.input_size, dtype=np.double)
- * 
- */
-  __pyx_t_2 = __Pyx_GetModuleGlobalName(__pyx_n_s_np); if (unlikely(!__pyx_t_2)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 95; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
-  __Pyx_GOTREF(__pyx_t_2);
-  __pyx_t_1 = __Pyx_PyObject_GetAttrStr(__pyx_t_2, __pyx_n_s_zeros); if (unlikely(!__pyx_t_1)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 95; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
-  __Pyx_GOTREF(__pyx_t_1);
-  __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
-  __pyx_t_2 = __Pyx_PyInt_From_int(__pyx_v_self->__pyx_base.__pyx_base.nn->input_size); if (unlikely(!__pyx_t_2)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 95; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
-  __Pyx_GOTREF(__pyx_t_2);
-  __pyx_t_5 = PyTuple_New(1); if (unlikely(!__pyx_t_5)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 95; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
-  __Pyx_GOTREF(__pyx_t_5);
-  __Pyx_GIVEREF(__pyx_t_2);
-  PyTuple_SET_ITEM(__pyx_t_5, 0, __pyx_t_2);
-  __pyx_t_2 = 0;
-  __pyx_t_2 = PyDict_New(); if (unlikely(!__pyx_t_2)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 95; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
-  __Pyx_GOTREF(__pyx_t_2);
-  __pyx_t_3 = __Pyx_GetModuleGlobalName(__pyx_n_s_np); if (unlikely(!__pyx_t_3)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 95; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
-  __Pyx_GOTREF(__pyx_t_3);
-  __pyx_t_7 = __Pyx_PyObject_GetAttrStr(__pyx_t_3, __pyx_n_s_double); if (unlikely(!__pyx_t_7)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 95; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
-  __Pyx_GOTREF(__pyx_t_7);
-  __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
-  if (PyDict_SetItem(__pyx_t_2, __pyx_n_s_dtype, __pyx_t_7) < 0) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 95; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
-  __Pyx_DECREF(__pyx_t_7); __pyx_t_7 = 0;
-  __pyx_t_7 = __Pyx_PyObject_Call(__pyx_t_1, __pyx_t_5, __pyx_t_2); if (unlikely(!__pyx_t_7)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 95; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
-  __Pyx_GOTREF(__pyx_t_7);
-  __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
-  __Pyx_DECREF(__pyx_t_5); __pyx_t_5 = 0;
-  __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
-  if (!(likely(((__pyx_t_7) == Py_None) || likely(__Pyx_TypeTest(__pyx_t_7, __pyx_ptype_5numpy_ndarray))))) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 95; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
-  __Pyx_GIVEREF(__pyx_t_7);
-  __Pyx_GOTREF(__pyx_v_self->input_adagrads_neg);
-  __Pyx_DECREF(((PyObject *)__pyx_v_self->input_adagrads_neg));
-  __pyx_v_self->input_adagrads_neg = ((PyArrayObject *)__pyx_t_7);
-  __pyx_t_7 = 0;
-
-  /* "deepnl/sentiwords.pyx":96
- *         # cumulative AdaGrad$
- *         self.input_adagrads_neg = np.zeros(self.nn.input_size, dtype=np.double)
- *         self.input_adagrads_pos = np.zeros(self.nn.input_size, dtype=np.double)             # <<<<<<<<<<<<<<
- * 
- *     @cython.boundscheck(False)
- */
-  __pyx_t_7 = __Pyx_GetModuleGlobalName(__pyx_n_s_np); if (unlikely(!__pyx_t_7)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 96; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
-  __Pyx_GOTREF(__pyx_t_7);
-  __pyx_t_2 = __Pyx_PyObject_GetAttrStr(__pyx_t_7, __pyx_n_s_zeros); if (unlikely(!__pyx_t_2)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 96; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
-  __Pyx_GOTREF(__pyx_t_2);
-  __Pyx_DECREF(__pyx_t_7); __pyx_t_7 = 0;
-  __pyx_t_7 = __Pyx_PyInt_From_int(__pyx_v_self->__pyx_base.__pyx_base.nn->input_size); if (unlikely(!__pyx_t_7)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 96; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
-  __Pyx_GOTREF(__pyx_t_7);
-  __pyx_t_5 = PyTuple_New(1); if (unlikely(!__pyx_t_5)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 96; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
-  __Pyx_GOTREF(__pyx_t_5);
-  __Pyx_GIVEREF(__pyx_t_7);
-  PyTuple_SET_ITEM(__pyx_t_5, 0, __pyx_t_7);
-  __pyx_t_7 = 0;
-  __pyx_t_7 = PyDict_New(); if (unlikely(!__pyx_t_7)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 96; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
-  __Pyx_GOTREF(__pyx_t_7);
-  __pyx_t_1 = __Pyx_GetModuleGlobalName(__pyx_n_s_np); if (unlikely(!__pyx_t_1)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 96; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
-  __Pyx_GOTREF(__pyx_t_1);
-  __pyx_t_3 = __Pyx_PyObject_GetAttrStr(__pyx_t_1, __pyx_n_s_double); if (unlikely(!__pyx_t_3)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 96; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
-  __Pyx_GOTREF(__pyx_t_3);
-  __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
-  if (PyDict_SetItem(__pyx_t_7, __pyx_n_s_dtype, __pyx_t_3) < 0) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 96; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
-  __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
-  __pyx_t_3 = __Pyx_PyObject_Call(__pyx_t_2, __pyx_t_5, __pyx_t_7); if (unlikely(!__pyx_t_3)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 96; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
-  __Pyx_GOTREF(__pyx_t_3);
-  __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
-  __Pyx_DECREF(__pyx_t_5); __pyx_t_5 = 0;
-  __Pyx_DECREF(__pyx_t_7); __pyx_t_7 = 0;
-  if (!(likely(((__pyx_t_3) == Py_None) || likely(__Pyx_TypeTest(__pyx_t_3, __pyx_ptype_5numpy_ndarray))))) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 96; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
-  __Pyx_GIVEREF(__pyx_t_3);
-  __Pyx_GOTREF(__pyx_v_self->input_adagrads_pos);
-  __Pyx_DECREF(((PyObject *)__pyx_v_self->input_adagrads_pos));
-  __pyx_v_self->input_adagrads_pos = ((PyArrayObject *)__pyx_t_3);
-  __pyx_t_3 = 0;
-
-  /* "deepnl/sentiwords.pyx":80
+  /* "deepnl/sentiwords.pyx":77
  *     cdef RandomPool random_pool
  * 
  *     def __init__(self, nn, converter, options):             # <<<<<<<<<<<<<<
@@ -4081,7 +3991,6 @@ static int __pyx_pf_6deepnl_10sentiwords_16SentimentTrainer___init__(struct __py
   __Pyx_XDECREF(__pyx_t_2);
   __Pyx_XDECREF(__pyx_t_3);
   __Pyx_XDECREF(__pyx_t_5);
-  __Pyx_XDECREF(__pyx_t_7);
   __Pyx_AddTraceback("deepnl.sentiwords.SentimentTrainer.__init__", __pyx_clineno, __pyx_lineno, __pyx_filename);
   __pyx_r = -1;
   __pyx_L0:;
@@ -4089,7 +3998,7 @@ static int __pyx_pf_6deepnl_10sentiwords_16SentimentTrainer___init__(struct __py
   return __pyx_r;
 }
 
-/* "deepnl/sentiwords.pyx":99
+/* "deepnl/sentiwords.pyx":92
  * 
  *     @cython.boundscheck(False)
  *     cdef _train_pair_s(self, np.ndarray[INT_t,ndim=2] example, Gradients grads,             # <<<<<<<<<<<<<<
@@ -4188,11 +4097,11 @@ static PyObject *__pyx_f_6deepnl_10sentiwords_16SentimentTrainer__train_pair_s(s
   __pyx_pybuffernd_example.rcbuffer = &__pyx_pybuffer_example;
   {
     __Pyx_BufFmt_StackElem __pyx_stack[1];
-    if (unlikely(__Pyx_GetBufferAndValidate(&__pyx_pybuffernd_example.rcbuffer->pybuffer, (PyObject*)__pyx_v_example, &__Pyx_TypeInfo_nn___pyx_t_6deepnl_7trainer_INT_t, PyBUF_FORMAT| PyBUF_STRIDES, 2, 0, __pyx_stack) == -1)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 99; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+    if (unlikely(__Pyx_GetBufferAndValidate(&__pyx_pybuffernd_example.rcbuffer->pybuffer, (PyObject*)__pyx_v_example, &__Pyx_TypeInfo_nn___pyx_t_6deepnl_7trainer_INT_t, PyBUF_FORMAT| PyBUF_STRIDES, 2, 0, __pyx_stack) == -1)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 92; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   }
   __pyx_pybuffernd_example.diminfo[0].strides = __pyx_pybuffernd_example.rcbuffer->pybuffer.strides[0]; __pyx_pybuffernd_example.diminfo[0].shape = __pyx_pybuffernd_example.rcbuffer->pybuffer.shape[0]; __pyx_pybuffernd_example.diminfo[1].strides = __pyx_pybuffernd_example.rcbuffer->pybuffer.strides[1]; __pyx_pybuffernd_example.diminfo[1].shape = __pyx_pybuffernd_example.rcbuffer->pybuffer.shape[1];
 
-  /* "deepnl/sentiwords.pyx":113
+  /* "deepnl/sentiwords.pyx":106
  *         # a token is a list of feature IDs.
  *         # token[0] is the list with the WordDictionary index of the word,
  *         cdef int left_context = len(self.pre_padding)             # <<<<<<<<<<<<<<
@@ -4201,26 +4110,26 @@ static PyObject *__pyx_f_6deepnl_10sentiwords_16SentimentTrainer__train_pair_s(s
  */
   __pyx_t_1 = ((PyObject *)__pyx_v_self->__pyx_base.__pyx_base.pre_padding);
   __Pyx_INCREF(__pyx_t_1);
-  __pyx_t_2 = PyObject_Length(__pyx_t_1); if (unlikely(__pyx_t_2 == -1)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 113; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_t_2 = PyObject_Length(__pyx_t_1); if (unlikely(__pyx_t_2 == -1)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 106; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
   __pyx_v_left_context = __pyx_t_2;
 
-  /* "deepnl/sentiwords.pyx":114
+  /* "deepnl/sentiwords.pyx":107
  *         # token[0] is the list with the WordDictionary index of the word,
  *         cdef int left_context = len(self.pre_padding)
  *         cdef np.ndarray[INT_t,ndim=1] middle_token = example[left_context]             # <<<<<<<<<<<<<<
  *         cdef np.ndarray[INT_t,ndim=1] variant
  * 
  */
-  __pyx_t_1 = __Pyx_GetItemInt(((PyObject *)__pyx_v_example), __pyx_v_left_context, int, 1, __Pyx_PyInt_From_int, 0, 1, 0); if (unlikely(__pyx_t_1 == NULL)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 114; __pyx_clineno = __LINE__; goto __pyx_L1_error;};
+  __pyx_t_1 = __Pyx_GetItemInt(((PyObject *)__pyx_v_example), __pyx_v_left_context, int, 1, __Pyx_PyInt_From_int, 0, 1, 0); if (unlikely(__pyx_t_1 == NULL)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 107; __pyx_clineno = __LINE__; goto __pyx_L1_error;};
   __Pyx_GOTREF(__pyx_t_1);
-  if (!(likely(((__pyx_t_1) == Py_None) || likely(__Pyx_TypeTest(__pyx_t_1, __pyx_ptype_5numpy_ndarray))))) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 114; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  if (!(likely(((__pyx_t_1) == Py_None) || likely(__Pyx_TypeTest(__pyx_t_1, __pyx_ptype_5numpy_ndarray))))) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 107; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __pyx_t_3 = ((PyArrayObject *)__pyx_t_1);
   {
     __Pyx_BufFmt_StackElem __pyx_stack[1];
     if (unlikely(__Pyx_GetBufferAndValidate(&__pyx_pybuffernd_middle_token.rcbuffer->pybuffer, (PyObject*)__pyx_t_3, &__Pyx_TypeInfo_nn___pyx_t_6deepnl_7trainer_INT_t, PyBUF_FORMAT| PyBUF_STRIDES, 1, 0, __pyx_stack) == -1)) {
       __pyx_v_middle_token = ((PyArrayObject *)Py_None); __Pyx_INCREF(Py_None); __pyx_pybuffernd_middle_token.rcbuffer->pybuffer.buf = NULL;
-      {__pyx_filename = __pyx_f[0]; __pyx_lineno = 114; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+      {__pyx_filename = __pyx_f[0]; __pyx_lineno = 107; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
     } else {__pyx_pybuffernd_middle_token.diminfo[0].strides = __pyx_pybuffernd_middle_token.rcbuffer->pybuffer.strides[0]; __pyx_pybuffernd_middle_token.diminfo[0].shape = __pyx_pybuffernd_middle_token.rcbuffer->pybuffer.shape[0];
     }
   }
@@ -4228,7 +4137,7 @@ static PyObject *__pyx_f_6deepnl_10sentiwords_16SentimentTrainer__train_pair_s(s
   __pyx_v_middle_token = ((PyArrayObject *)__pyx_t_1);
   __pyx_t_1 = 0;
 
-  /* "deepnl/sentiwords.pyx":118
+  /* "deepnl/sentiwords.pyx":111
  * 
  *         # ensure to generate a different word
  *         while True:             # <<<<<<<<<<<<<<
@@ -4237,14 +4146,14 @@ static PyObject *__pyx_f_6deepnl_10sentiwords_16SentimentTrainer__train_pair_s(s
  */
   while (1) {
 
-    /* "deepnl/sentiwords.pyx":119
+    /* "deepnl/sentiwords.pyx":112
  *         # ensure to generate a different word
  *         while True:
  *             variant = self.random_pool.next()             # <<<<<<<<<<<<<<
  *             if variant[0] != middle_token[0]:
  *                 break
  */
-    __pyx_t_4 = __Pyx_PyObject_GetAttrStr(((PyObject *)__pyx_v_self->random_pool), __pyx_n_s_next); if (unlikely(!__pyx_t_4)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 119; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+    __pyx_t_4 = __Pyx_PyObject_GetAttrStr(((PyObject *)__pyx_v_self->random_pool), __pyx_n_s_next); if (unlikely(!__pyx_t_4)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 112; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
     __Pyx_GOTREF(__pyx_t_4);
     __pyx_t_5 = NULL;
     if (CYTHON_COMPILING_IN_CPYTHON && likely(PyMethod_Check(__pyx_t_4))) {
@@ -4257,14 +4166,14 @@ static PyObject *__pyx_f_6deepnl_10sentiwords_16SentimentTrainer__train_pair_s(s
       }
     }
     if (__pyx_t_5) {
-      __pyx_t_1 = __Pyx_PyObject_CallOneArg(__pyx_t_4, __pyx_t_5); if (unlikely(!__pyx_t_1)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 119; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+      __pyx_t_1 = __Pyx_PyObject_CallOneArg(__pyx_t_4, __pyx_t_5); if (unlikely(!__pyx_t_1)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 112; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
       __Pyx_DECREF(__pyx_t_5); __pyx_t_5 = 0;
     } else {
-      __pyx_t_1 = __Pyx_PyObject_CallNoArg(__pyx_t_4); if (unlikely(!__pyx_t_1)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 119; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+      __pyx_t_1 = __Pyx_PyObject_CallNoArg(__pyx_t_4); if (unlikely(!__pyx_t_1)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 112; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
     }
     __Pyx_GOTREF(__pyx_t_1);
     __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
-    if (!(likely(((__pyx_t_1) == Py_None) || likely(__Pyx_TypeTest(__pyx_t_1, __pyx_ptype_5numpy_ndarray))))) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 119; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+    if (!(likely(((__pyx_t_1) == Py_None) || likely(__Pyx_TypeTest(__pyx_t_1, __pyx_ptype_5numpy_ndarray))))) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 112; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
     __pyx_t_6 = ((PyArrayObject *)__pyx_t_1);
     {
       __Pyx_BufFmt_StackElem __pyx_stack[1];
@@ -4280,13 +4189,13 @@ static PyObject *__pyx_f_6deepnl_10sentiwords_16SentimentTrainer__train_pair_s(s
         }
       }
       __pyx_pybuffernd_variant.diminfo[0].strides = __pyx_pybuffernd_variant.rcbuffer->pybuffer.strides[0]; __pyx_pybuffernd_variant.diminfo[0].shape = __pyx_pybuffernd_variant.rcbuffer->pybuffer.shape[0];
-      if (unlikely(__pyx_t_7 < 0)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 119; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+      if (unlikely(__pyx_t_7 < 0)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 112; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
     }
     __pyx_t_6 = 0;
     __Pyx_XDECREF_SET(__pyx_v_variant, ((PyArrayObject *)__pyx_t_1));
     __pyx_t_1 = 0;
 
-    /* "deepnl/sentiwords.pyx":120
+    /* "deepnl/sentiwords.pyx":113
  *         while True:
  *             variant = self.random_pool.next()
  *             if variant[0] != middle_token[0]:             # <<<<<<<<<<<<<<
@@ -4300,7 +4209,7 @@ static PyObject *__pyx_f_6deepnl_10sentiwords_16SentimentTrainer__train_pair_s(s
     __pyx_t_13 = (((*__Pyx_BufPtrStrided1d(__pyx_t_6deepnl_7trainer_INT_t *, __pyx_pybuffernd_variant.rcbuffer->pybuffer.buf, __pyx_t_11, __pyx_pybuffernd_variant.diminfo[0].strides)) != (*__Pyx_BufPtrStrided1d(__pyx_t_6deepnl_7trainer_INT_t *, __pyx_pybuffernd_middle_token.rcbuffer->pybuffer.buf, __pyx_t_12, __pyx_pybuffernd_middle_token.diminfo[0].strides))) != 0);
     if (__pyx_t_13) {
 
-      /* "deepnl/sentiwords.pyx":121
+      /* "deepnl/sentiwords.pyx":114
  *             variant = self.random_pool.next()
  *             if variant[0] != middle_token[0]:
  *                 break             # <<<<<<<<<<<<<<
@@ -4309,7 +4218,7 @@ static PyObject *__pyx_f_6deepnl_10sentiwords_16SentimentTrainer__train_pair_s(s
  */
       goto __pyx_L4_break;
 
-      /* "deepnl/sentiwords.pyx":120
+      /* "deepnl/sentiwords.pyx":113
  *         while True:
  *             variant = self.random_pool.next()
  *             if variant[0] != middle_token[0]:             # <<<<<<<<<<<<<<
@@ -4320,7 +4229,7 @@ static PyObject *__pyx_f_6deepnl_10sentiwords_16SentimentTrainer__train_pair_s(s
   }
   __pyx_L4_break:;
 
-  /* "deepnl/sentiwords.pyx":123
+  /* "deepnl/sentiwords.pyx":116
  *                 break
  * 
  *         cdef Network nn = self.nn             # <<<<<<<<<<<<<<
@@ -4332,7 +4241,7 @@ static PyObject *__pyx_f_6deepnl_10sentiwords_16SentimentTrainer__train_pair_s(s
   __pyx_v_nn = ((struct __pyx_obj_6deepnl_7network_Network *)__pyx_t_1);
   __pyx_t_1 = 0;
 
-  /* "deepnl/sentiwords.pyx":124
+  /* "deepnl/sentiwords.pyx":117
  * 
  *         cdef Network nn = self.nn
  *         cdef Parameters p = nn.p             # <<<<<<<<<<<<<<
@@ -4344,91 +4253,91 @@ static PyObject *__pyx_f_6deepnl_10sentiwords_16SentimentTrainer__train_pair_s(s
   __pyx_v_p = ((struct __pyx_obj_6deepnl_7network_Parameters *)__pyx_t_1);
   __pyx_t_1 = 0;
 
-  /* "deepnl/sentiwords.pyx":126
+  /* "deepnl/sentiwords.pyx":119
  *         cdef Parameters p = nn.p
  *         # FIXME: avoid allocation
  *         vars_pos = nn.variables()             # <<<<<<<<<<<<<<
  *         self.converter.lookup(example, vars_pos.input)
  *         nn.forward(vars_pos)
  */
-  __pyx_t_1 = ((struct __pyx_vtabstruct_6deepnl_7network_Network *)__pyx_v_nn->__pyx_vtab)->variables(__pyx_v_nn, NULL); if (unlikely(!__pyx_t_1)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 126; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_t_1 = ((struct __pyx_vtabstruct_6deepnl_7network_Network *)__pyx_v_nn->__pyx_vtab)->variables(__pyx_v_nn, NULL); if (unlikely(!__pyx_t_1)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 119; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_GOTREF(__pyx_t_1);
   __pyx_v_vars_pos = __pyx_t_1;
   __pyx_t_1 = 0;
 
-  /* "deepnl/sentiwords.pyx":127
+  /* "deepnl/sentiwords.pyx":120
  *         # FIXME: avoid allocation
  *         vars_pos = nn.variables()
  *         self.converter.lookup(example, vars_pos.input)             # <<<<<<<<<<<<<<
  *         nn.forward(vars_pos)
  * 
  */
-  __pyx_t_1 = __Pyx_PyObject_GetAttrStr(__pyx_v_vars_pos, __pyx_n_s_input); if (unlikely(!__pyx_t_1)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 127; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_t_1 = __Pyx_PyObject_GetAttrStr(__pyx_v_vars_pos, __pyx_n_s_input); if (unlikely(!__pyx_t_1)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 120; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_GOTREF(__pyx_t_1);
-  if (!(likely(((__pyx_t_1) == Py_None) || likely(__Pyx_TypeTest(__pyx_t_1, __pyx_ptype_5numpy_ndarray))))) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 127; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  if (!(likely(((__pyx_t_1) == Py_None) || likely(__Pyx_TypeTest(__pyx_t_1, __pyx_ptype_5numpy_ndarray))))) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 120; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __pyx_t_14.__pyx_n = 1;
   __pyx_t_14.out = ((PyArrayObject *)__pyx_t_1);
-  __pyx_t_4 = ((PyObject *)((struct __pyx_vtabstruct_6deepnl_10extractors_Converter *)__pyx_v_self->__pyx_base.__pyx_base.converter->__pyx_vtab)->lookup(__pyx_v_self->__pyx_base.__pyx_base.converter, ((PyArrayObject *)__pyx_v_example), 0, &__pyx_t_14)); if (unlikely(!__pyx_t_4)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 127; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_t_4 = ((PyObject *)((struct __pyx_vtabstruct_6deepnl_10extractors_Converter *)__pyx_v_self->__pyx_base.__pyx_base.converter->__pyx_vtab)->lookup(__pyx_v_self->__pyx_base.__pyx_base.converter, ((PyArrayObject *)__pyx_v_example), 0, &__pyx_t_14)); if (unlikely(!__pyx_t_4)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 120; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_GOTREF(__pyx_t_4);
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
   __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
 
-  /* "deepnl/sentiwords.pyx":128
+  /* "deepnl/sentiwords.pyx":121
  *         vars_pos = nn.variables()
  *         self.converter.lookup(example, vars_pos.input)
  *         nn.forward(vars_pos)             # <<<<<<<<<<<<<<
  * 
  *         vars_neg = nn.variables()
  */
-  if (!(likely(((__pyx_v_vars_pos) == Py_None) || likely(__Pyx_TypeTest(__pyx_v_vars_pos, __pyx_ptype_6deepnl_7network_Variables))))) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 128; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
-  __pyx_t_4 = ((struct __pyx_vtabstruct_6deepnl_7network_Network *)__pyx_v_nn->__pyx_vtab)->forward(__pyx_v_nn, ((struct __pyx_obj_6deepnl_7network_Variables *)__pyx_v_vars_pos), 0); if (unlikely(!__pyx_t_4)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 128; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  if (!(likely(((__pyx_v_vars_pos) == Py_None) || likely(__Pyx_TypeTest(__pyx_v_vars_pos, __pyx_ptype_6deepnl_7network_Variables))))) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 121; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_t_4 = ((struct __pyx_vtabstruct_6deepnl_7network_Network *)__pyx_v_nn->__pyx_vtab)->forward(__pyx_v_nn, ((struct __pyx_obj_6deepnl_7network_Variables *)__pyx_v_vars_pos), 0); if (unlikely(!__pyx_t_4)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 121; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_GOTREF(__pyx_t_4);
   __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
 
-  /* "deepnl/sentiwords.pyx":130
+  /* "deepnl/sentiwords.pyx":123
  *         nn.forward(vars_pos)
  * 
  *         vars_neg = nn.variables()             # <<<<<<<<<<<<<<
  *         cdef np.ndarray[INT_t,ndim=1] negative_token = np.array(variant, dtype=int)
  *         #print >> sys.stderr, 'pos', self.converter.extractors[0].sentence(example).encode('utf-8') # DEBUG
  */
-  __pyx_t_4 = ((struct __pyx_vtabstruct_6deepnl_7network_Network *)__pyx_v_nn->__pyx_vtab)->variables(__pyx_v_nn, NULL); if (unlikely(!__pyx_t_4)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 130; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_t_4 = ((struct __pyx_vtabstruct_6deepnl_7network_Network *)__pyx_v_nn->__pyx_vtab)->variables(__pyx_v_nn, NULL); if (unlikely(!__pyx_t_4)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 123; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_GOTREF(__pyx_t_4);
   __pyx_v_vars_neg = __pyx_t_4;
   __pyx_t_4 = 0;
 
-  /* "deepnl/sentiwords.pyx":131
+  /* "deepnl/sentiwords.pyx":124
  * 
  *         vars_neg = nn.variables()
  *         cdef np.ndarray[INT_t,ndim=1] negative_token = np.array(variant, dtype=int)             # <<<<<<<<<<<<<<
  *         #print >> sys.stderr, 'pos', self.converter.extractors[0].sentence(example).encode('utf-8') # DEBUG
  *         #print >> sys.stderr, vars_pos.input[128:132] # DEBUG
  */
-  __pyx_t_4 = __Pyx_GetModuleGlobalName(__pyx_n_s_np); if (unlikely(!__pyx_t_4)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 131; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_t_4 = __Pyx_GetModuleGlobalName(__pyx_n_s_np); if (unlikely(!__pyx_t_4)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 124; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_GOTREF(__pyx_t_4);
-  __pyx_t_1 = __Pyx_PyObject_GetAttrStr(__pyx_t_4, __pyx_n_s_array); if (unlikely(!__pyx_t_1)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 131; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_t_1 = __Pyx_PyObject_GetAttrStr(__pyx_t_4, __pyx_n_s_array); if (unlikely(!__pyx_t_1)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 124; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_GOTREF(__pyx_t_1);
   __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
-  __pyx_t_4 = PyTuple_New(1); if (unlikely(!__pyx_t_4)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 131; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_t_4 = PyTuple_New(1); if (unlikely(!__pyx_t_4)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 124; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_GOTREF(__pyx_t_4);
   __Pyx_INCREF(((PyObject *)__pyx_v_variant));
   __Pyx_GIVEREF(((PyObject *)__pyx_v_variant));
   PyTuple_SET_ITEM(__pyx_t_4, 0, ((PyObject *)__pyx_v_variant));
-  __pyx_t_5 = PyDict_New(); if (unlikely(!__pyx_t_5)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 131; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_t_5 = PyDict_New(); if (unlikely(!__pyx_t_5)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 124; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_GOTREF(__pyx_t_5);
-  if (PyDict_SetItem(__pyx_t_5, __pyx_n_s_dtype, ((PyObject *)(&PyInt_Type))) < 0) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 131; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
-  __pyx_t_15 = __Pyx_PyObject_Call(__pyx_t_1, __pyx_t_4, __pyx_t_5); if (unlikely(!__pyx_t_15)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 131; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  if (PyDict_SetItem(__pyx_t_5, __pyx_n_s_dtype, ((PyObject *)(&PyInt_Type))) < 0) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 124; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_t_15 = __Pyx_PyObject_Call(__pyx_t_1, __pyx_t_4, __pyx_t_5); if (unlikely(!__pyx_t_15)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 124; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_GOTREF(__pyx_t_15);
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
   __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
   __Pyx_DECREF(__pyx_t_5); __pyx_t_5 = 0;
-  if (!(likely(((__pyx_t_15) == Py_None) || likely(__Pyx_TypeTest(__pyx_t_15, __pyx_ptype_5numpy_ndarray))))) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 131; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  if (!(likely(((__pyx_t_15) == Py_None) || likely(__Pyx_TypeTest(__pyx_t_15, __pyx_ptype_5numpy_ndarray))))) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 124; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __pyx_t_16 = ((PyArrayObject *)__pyx_t_15);
   {
     __Pyx_BufFmt_StackElem __pyx_stack[1];
     if (unlikely(__Pyx_GetBufferAndValidate(&__pyx_pybuffernd_negative_token.rcbuffer->pybuffer, (PyObject*)__pyx_t_16, &__Pyx_TypeInfo_nn___pyx_t_6deepnl_7trainer_INT_t, PyBUF_FORMAT| PyBUF_STRIDES, 1, 0, __pyx_stack) == -1)) {
       __pyx_v_negative_token = ((PyArrayObject *)Py_None); __Pyx_INCREF(Py_None); __pyx_pybuffernd_negative_token.rcbuffer->pybuffer.buf = NULL;
-      {__pyx_filename = __pyx_f[0]; __pyx_lineno = 131; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+      {__pyx_filename = __pyx_f[0]; __pyx_lineno = 124; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
     } else {__pyx_pybuffernd_negative_token.diminfo[0].strides = __pyx_pybuffernd_negative_token.rcbuffer->pybuffer.strides[0]; __pyx_pybuffernd_negative_token.diminfo[0].shape = __pyx_pybuffernd_negative_token.rcbuffer->pybuffer.shape[0];
     }
   }
@@ -4436,147 +4345,147 @@ static PyObject *__pyx_f_6deepnl_10sentiwords_16SentimentTrainer__train_pair_s(s
   __pyx_v_negative_token = ((PyArrayObject *)__pyx_t_15);
   __pyx_t_15 = 0;
 
-  /* "deepnl/sentiwords.pyx":134
+  /* "deepnl/sentiwords.pyx":127
  *         #print >> sys.stderr, 'pos', self.converter.extractors[0].sentence(example).encode('utf-8') # DEBUG
  *         #print >> sys.stderr, vars_pos.input[128:132] # DEBUG
  *         example[left_context] = negative_token             # <<<<<<<<<<<<<<
  *         self.converter.lookup(example, vars_neg.input)
  *         #print >> sys.stderr, 'neg', self.converter.extractors[0].sentence(example).encode('utf-8') # DEBUG
  */
-  if (unlikely(__Pyx_SetItemInt(((PyObject *)__pyx_v_example), __pyx_v_left_context, ((PyObject *)__pyx_v_negative_token), int, 1, __Pyx_PyInt_From_int, 0, 1, 0) < 0)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 134; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  if (unlikely(__Pyx_SetItemInt(((PyObject *)__pyx_v_example), __pyx_v_left_context, ((PyObject *)__pyx_v_negative_token), int, 1, __Pyx_PyInt_From_int, 0, 1, 0) < 0)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 127; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
 
-  /* "deepnl/sentiwords.pyx":135
+  /* "deepnl/sentiwords.pyx":128
  *         #print >> sys.stderr, vars_pos.input[128:132] # DEBUG
  *         example[left_context] = negative_token
  *         self.converter.lookup(example, vars_neg.input)             # <<<<<<<<<<<<<<
  *         #print >> sys.stderr, 'neg', self.converter.extractors[0].sentence(example).encode('utf-8') # DEBUG
  *         #print >> sys.stderr, vars_neg.input[128:132] # DEBUG
  */
-  __pyx_t_15 = __Pyx_PyObject_GetAttrStr(__pyx_v_vars_neg, __pyx_n_s_input); if (unlikely(!__pyx_t_15)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 135; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_t_15 = __Pyx_PyObject_GetAttrStr(__pyx_v_vars_neg, __pyx_n_s_input); if (unlikely(!__pyx_t_15)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 128; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_GOTREF(__pyx_t_15);
-  if (!(likely(((__pyx_t_15) == Py_None) || likely(__Pyx_TypeTest(__pyx_t_15, __pyx_ptype_5numpy_ndarray))))) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 135; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  if (!(likely(((__pyx_t_15) == Py_None) || likely(__Pyx_TypeTest(__pyx_t_15, __pyx_ptype_5numpy_ndarray))))) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 128; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __pyx_t_14.__pyx_n = 1;
   __pyx_t_14.out = ((PyArrayObject *)__pyx_t_15);
-  __pyx_t_5 = ((PyObject *)((struct __pyx_vtabstruct_6deepnl_10extractors_Converter *)__pyx_v_self->__pyx_base.__pyx_base.converter->__pyx_vtab)->lookup(__pyx_v_self->__pyx_base.__pyx_base.converter, ((PyArrayObject *)__pyx_v_example), 0, &__pyx_t_14)); if (unlikely(!__pyx_t_5)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 135; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_t_5 = ((PyObject *)((struct __pyx_vtabstruct_6deepnl_10extractors_Converter *)__pyx_v_self->__pyx_base.__pyx_base.converter->__pyx_vtab)->lookup(__pyx_v_self->__pyx_base.__pyx_base.converter, ((PyArrayObject *)__pyx_v_example), 0, &__pyx_t_14)); if (unlikely(!__pyx_t_5)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 128; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_GOTREF(__pyx_t_5);
   __Pyx_DECREF(__pyx_t_15); __pyx_t_15 = 0;
   __Pyx_DECREF(__pyx_t_5); __pyx_t_5 = 0;
 
-  /* "deepnl/sentiwords.pyx":138
+  /* "deepnl/sentiwords.pyx":131
  *         #print >> sys.stderr, 'neg', self.converter.extractors[0].sentence(example).encode('utf-8') # DEBUG
  *         #print >> sys.stderr, vars_neg.input[128:132] # DEBUG
  *         nn.forward(vars_neg)             # <<<<<<<<<<<<<<
  * 
  *         cdef float errorCW = max(0, 1 - vars_pos.output[0] + vars_neg.output[0])
  */
-  if (!(likely(((__pyx_v_vars_neg) == Py_None) || likely(__Pyx_TypeTest(__pyx_v_vars_neg, __pyx_ptype_6deepnl_7network_Variables))))) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 138; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
-  __pyx_t_5 = ((struct __pyx_vtabstruct_6deepnl_7network_Network *)__pyx_v_nn->__pyx_vtab)->forward(__pyx_v_nn, ((struct __pyx_obj_6deepnl_7network_Variables *)__pyx_v_vars_neg), 0); if (unlikely(!__pyx_t_5)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 138; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  if (!(likely(((__pyx_v_vars_neg) == Py_None) || likely(__Pyx_TypeTest(__pyx_v_vars_neg, __pyx_ptype_6deepnl_7network_Variables))))) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 131; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_t_5 = ((struct __pyx_vtabstruct_6deepnl_7network_Network *)__pyx_v_nn->__pyx_vtab)->forward(__pyx_v_nn, ((struct __pyx_obj_6deepnl_7network_Variables *)__pyx_v_vars_neg), 0); if (unlikely(!__pyx_t_5)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 131; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_GOTREF(__pyx_t_5);
   __Pyx_DECREF(__pyx_t_5); __pyx_t_5 = 0;
 
-  /* "deepnl/sentiwords.pyx":140
+  /* "deepnl/sentiwords.pyx":133
  *         nn.forward(vars_neg)
  * 
  *         cdef float errorCW = max(0, 1 - vars_pos.output[0] + vars_neg.output[0])             # <<<<<<<<<<<<<<
  *         cdef float errorUS = max(0, 1 - polarity * vars_pos.output[1] + polarity * vars_neg.output[1])
  *         cdef float error = self.alpha * errorCW + (1 - self.alpha) * errorUS
  */
-  __pyx_t_5 = __Pyx_PyObject_GetAttrStr(__pyx_v_vars_pos, __pyx_n_s_output); if (unlikely(!__pyx_t_5)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 140; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_t_5 = __Pyx_PyObject_GetAttrStr(__pyx_v_vars_pos, __pyx_n_s_output); if (unlikely(!__pyx_t_5)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 133; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_GOTREF(__pyx_t_5);
-  __pyx_t_15 = __Pyx_GetItemInt(__pyx_t_5, 0, long, 1, __Pyx_PyInt_From_long, 0, 0, 0); if (unlikely(__pyx_t_15 == NULL)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 140; __pyx_clineno = __LINE__; goto __pyx_L1_error;};
+  __pyx_t_15 = __Pyx_GetItemInt(__pyx_t_5, 0, long, 1, __Pyx_PyInt_From_long, 0, 0, 0); if (unlikely(__pyx_t_15 == NULL)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 133; __pyx_clineno = __LINE__; goto __pyx_L1_error;};
   __Pyx_GOTREF(__pyx_t_15);
   __Pyx_DECREF(__pyx_t_5); __pyx_t_5 = 0;
-  __pyx_t_5 = __Pyx_PyInt_SubtractCObj(__pyx_int_1, __pyx_t_15, 1, 0); if (unlikely(!__pyx_t_5)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 140; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_t_5 = __Pyx_PyInt_SubtractCObj(__pyx_int_1, __pyx_t_15, 1, 0); if (unlikely(!__pyx_t_5)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 133; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_GOTREF(__pyx_t_5);
   __Pyx_DECREF(__pyx_t_15); __pyx_t_15 = 0;
-  __pyx_t_15 = __Pyx_PyObject_GetAttrStr(__pyx_v_vars_neg, __pyx_n_s_output); if (unlikely(!__pyx_t_15)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 140; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_t_15 = __Pyx_PyObject_GetAttrStr(__pyx_v_vars_neg, __pyx_n_s_output); if (unlikely(!__pyx_t_15)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 133; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_GOTREF(__pyx_t_15);
-  __pyx_t_4 = __Pyx_GetItemInt(__pyx_t_15, 0, long, 1, __Pyx_PyInt_From_long, 0, 0, 0); if (unlikely(__pyx_t_4 == NULL)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 140; __pyx_clineno = __LINE__; goto __pyx_L1_error;};
+  __pyx_t_4 = __Pyx_GetItemInt(__pyx_t_15, 0, long, 1, __Pyx_PyInt_From_long, 0, 0, 0); if (unlikely(__pyx_t_4 == NULL)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 133; __pyx_clineno = __LINE__; goto __pyx_L1_error;};
   __Pyx_GOTREF(__pyx_t_4);
   __Pyx_DECREF(__pyx_t_15); __pyx_t_15 = 0;
-  __pyx_t_15 = PyNumber_Add(__pyx_t_5, __pyx_t_4); if (unlikely(!__pyx_t_15)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 140; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_t_15 = PyNumber_Add(__pyx_t_5, __pyx_t_4); if (unlikely(!__pyx_t_15)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 133; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_GOTREF(__pyx_t_15);
   __Pyx_DECREF(__pyx_t_5); __pyx_t_5 = 0;
   __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
   __pyx_t_17 = 0;
-  __pyx_t_5 = __Pyx_PyInt_From_long(__pyx_t_17); if (unlikely(!__pyx_t_5)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 140; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_t_5 = __Pyx_PyInt_From_long(__pyx_t_17); if (unlikely(!__pyx_t_5)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 133; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_GOTREF(__pyx_t_5);
-  __pyx_t_1 = PyObject_RichCompare(__pyx_t_15, __pyx_t_5, Py_GT); __Pyx_XGOTREF(__pyx_t_1); if (unlikely(!__pyx_t_1)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 140; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_t_1 = PyObject_RichCompare(__pyx_t_15, __pyx_t_5, Py_GT); __Pyx_XGOTREF(__pyx_t_1); if (unlikely(!__pyx_t_1)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 133; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_DECREF(__pyx_t_5); __pyx_t_5 = 0;
-  __pyx_t_13 = __Pyx_PyObject_IsTrue(__pyx_t_1); if (unlikely(__pyx_t_13 < 0)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 140; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_t_13 = __Pyx_PyObject_IsTrue(__pyx_t_1); if (unlikely(__pyx_t_13 < 0)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 133; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
   if (__pyx_t_13) {
     __Pyx_INCREF(__pyx_t_15);
     __pyx_t_4 = __pyx_t_15;
   } else {
-    __pyx_t_1 = __Pyx_PyInt_From_long(__pyx_t_17); if (unlikely(!__pyx_t_1)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 140; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+    __pyx_t_1 = __Pyx_PyInt_From_long(__pyx_t_17); if (unlikely(!__pyx_t_1)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 133; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
     __Pyx_GOTREF(__pyx_t_1);
     __pyx_t_4 = __pyx_t_1;
     __pyx_t_1 = 0;
   }
   __Pyx_DECREF(__pyx_t_15); __pyx_t_15 = 0;
-  __pyx_t_18 = __pyx_PyFloat_AsFloat(__pyx_t_4); if (unlikely((__pyx_t_18 == (float)-1) && PyErr_Occurred())) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 140; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_t_18 = __pyx_PyFloat_AsFloat(__pyx_t_4); if (unlikely((__pyx_t_18 == (float)-1) && PyErr_Occurred())) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 133; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
   __pyx_v_errorCW = __pyx_t_18;
 
-  /* "deepnl/sentiwords.pyx":141
+  /* "deepnl/sentiwords.pyx":134
  * 
  *         cdef float errorCW = max(0, 1 - vars_pos.output[0] + vars_neg.output[0])
  *         cdef float errorUS = max(0, 1 - polarity * vars_pos.output[1] + polarity * vars_neg.output[1])             # <<<<<<<<<<<<<<
  *         cdef float error = self.alpha * errorCW + (1 - self.alpha) * errorUS
  *         #print >> sys.stderr, 'error', errorCW, errorUS, error # DEBUG
  */
-  __pyx_t_4 = __Pyx_PyInt_From_int(__pyx_v_polarity); if (unlikely(!__pyx_t_4)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 141; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_t_4 = __Pyx_PyInt_From_int(__pyx_v_polarity); if (unlikely(!__pyx_t_4)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 134; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_GOTREF(__pyx_t_4);
-  __pyx_t_15 = __Pyx_PyObject_GetAttrStr(__pyx_v_vars_pos, __pyx_n_s_output); if (unlikely(!__pyx_t_15)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 141; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_t_15 = __Pyx_PyObject_GetAttrStr(__pyx_v_vars_pos, __pyx_n_s_output); if (unlikely(!__pyx_t_15)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 134; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_GOTREF(__pyx_t_15);
-  __pyx_t_1 = __Pyx_GetItemInt(__pyx_t_15, 1, long, 1, __Pyx_PyInt_From_long, 0, 0, 0); if (unlikely(__pyx_t_1 == NULL)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 141; __pyx_clineno = __LINE__; goto __pyx_L1_error;};
+  __pyx_t_1 = __Pyx_GetItemInt(__pyx_t_15, 1, long, 1, __Pyx_PyInt_From_long, 0, 0, 0); if (unlikely(__pyx_t_1 == NULL)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 134; __pyx_clineno = __LINE__; goto __pyx_L1_error;};
   __Pyx_GOTREF(__pyx_t_1);
   __Pyx_DECREF(__pyx_t_15); __pyx_t_15 = 0;
-  __pyx_t_15 = PyNumber_Multiply(__pyx_t_4, __pyx_t_1); if (unlikely(!__pyx_t_15)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 141; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_t_15 = PyNumber_Multiply(__pyx_t_4, __pyx_t_1); if (unlikely(!__pyx_t_15)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 134; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_GOTREF(__pyx_t_15);
   __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
-  __pyx_t_1 = __Pyx_PyInt_SubtractCObj(__pyx_int_1, __pyx_t_15, 1, 0); if (unlikely(!__pyx_t_1)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 141; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_t_1 = __Pyx_PyInt_SubtractCObj(__pyx_int_1, __pyx_t_15, 1, 0); if (unlikely(!__pyx_t_1)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 134; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_GOTREF(__pyx_t_1);
   __Pyx_DECREF(__pyx_t_15); __pyx_t_15 = 0;
-  __pyx_t_15 = __Pyx_PyInt_From_int(__pyx_v_polarity); if (unlikely(!__pyx_t_15)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 141; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_t_15 = __Pyx_PyInt_From_int(__pyx_v_polarity); if (unlikely(!__pyx_t_15)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 134; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_GOTREF(__pyx_t_15);
-  __pyx_t_4 = __Pyx_PyObject_GetAttrStr(__pyx_v_vars_neg, __pyx_n_s_output); if (unlikely(!__pyx_t_4)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 141; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_t_4 = __Pyx_PyObject_GetAttrStr(__pyx_v_vars_neg, __pyx_n_s_output); if (unlikely(!__pyx_t_4)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 134; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_GOTREF(__pyx_t_4);
-  __pyx_t_5 = __Pyx_GetItemInt(__pyx_t_4, 1, long, 1, __Pyx_PyInt_From_long, 0, 0, 0); if (unlikely(__pyx_t_5 == NULL)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 141; __pyx_clineno = __LINE__; goto __pyx_L1_error;};
+  __pyx_t_5 = __Pyx_GetItemInt(__pyx_t_4, 1, long, 1, __Pyx_PyInt_From_long, 0, 0, 0); if (unlikely(__pyx_t_5 == NULL)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 134; __pyx_clineno = __LINE__; goto __pyx_L1_error;};
   __Pyx_GOTREF(__pyx_t_5);
   __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
-  __pyx_t_4 = PyNumber_Multiply(__pyx_t_15, __pyx_t_5); if (unlikely(!__pyx_t_4)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 141; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_t_4 = PyNumber_Multiply(__pyx_t_15, __pyx_t_5); if (unlikely(!__pyx_t_4)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 134; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_GOTREF(__pyx_t_4);
   __Pyx_DECREF(__pyx_t_15); __pyx_t_15 = 0;
   __Pyx_DECREF(__pyx_t_5); __pyx_t_5 = 0;
-  __pyx_t_5 = PyNumber_Add(__pyx_t_1, __pyx_t_4); if (unlikely(!__pyx_t_5)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 141; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_t_5 = PyNumber_Add(__pyx_t_1, __pyx_t_4); if (unlikely(!__pyx_t_5)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 134; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_GOTREF(__pyx_t_5);
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
   __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
   __pyx_t_17 = 0;
-  __pyx_t_1 = __Pyx_PyInt_From_long(__pyx_t_17); if (unlikely(!__pyx_t_1)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 141; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_t_1 = __Pyx_PyInt_From_long(__pyx_t_17); if (unlikely(!__pyx_t_1)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 134; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_GOTREF(__pyx_t_1);
-  __pyx_t_15 = PyObject_RichCompare(__pyx_t_5, __pyx_t_1, Py_GT); __Pyx_XGOTREF(__pyx_t_15); if (unlikely(!__pyx_t_15)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 141; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_t_15 = PyObject_RichCompare(__pyx_t_5, __pyx_t_1, Py_GT); __Pyx_XGOTREF(__pyx_t_15); if (unlikely(!__pyx_t_15)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 134; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
-  __pyx_t_13 = __Pyx_PyObject_IsTrue(__pyx_t_15); if (unlikely(__pyx_t_13 < 0)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 141; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_t_13 = __Pyx_PyObject_IsTrue(__pyx_t_15); if (unlikely(__pyx_t_13 < 0)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 134; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_DECREF(__pyx_t_15); __pyx_t_15 = 0;
   if (__pyx_t_13) {
     __Pyx_INCREF(__pyx_t_5);
     __pyx_t_4 = __pyx_t_5;
   } else {
-    __pyx_t_15 = __Pyx_PyInt_From_long(__pyx_t_17); if (unlikely(!__pyx_t_15)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 141; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+    __pyx_t_15 = __Pyx_PyInt_From_long(__pyx_t_17); if (unlikely(!__pyx_t_15)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 134; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
     __Pyx_GOTREF(__pyx_t_15);
     __pyx_t_4 = __pyx_t_15;
     __pyx_t_15 = 0;
   }
   __Pyx_DECREF(__pyx_t_5); __pyx_t_5 = 0;
-  __pyx_t_18 = __pyx_PyFloat_AsFloat(__pyx_t_4); if (unlikely((__pyx_t_18 == (float)-1) && PyErr_Occurred())) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 141; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_t_18 = __pyx_PyFloat_AsFloat(__pyx_t_4); if (unlikely((__pyx_t_18 == (float)-1) && PyErr_Occurred())) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 134; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
   __pyx_v_errorUS = __pyx_t_18;
 
-  /* "deepnl/sentiwords.pyx":142
+  /* "deepnl/sentiwords.pyx":135
  *         cdef float errorCW = max(0, 1 - vars_pos.output[0] + vars_neg.output[0])
  *         cdef float errorUS = max(0, 1 - polarity * vars_pos.output[1] + polarity * vars_neg.output[1])
  *         cdef float error = self.alpha * errorCW + (1 - self.alpha) * errorUS             # <<<<<<<<<<<<<<
@@ -4585,7 +4494,7 @@ static PyObject *__pyx_f_6deepnl_10sentiwords_16SentimentTrainer__train_pair_s(s
  */
   __pyx_v_error = ((__pyx_v_self->alpha * __pyx_v_errorCW) + ((1.0 - __pyx_v_self->alpha) * __pyx_v_errorUS));
 
-  /* "deepnl/sentiwords.pyx":144
+  /* "deepnl/sentiwords.pyx":137
  *         cdef float error = self.alpha * errorCW + (1 - self.alpha) * errorUS
  *         #print >> sys.stderr, 'error', errorCW, errorUS, error # DEBUG
  *         self.error += error             # <<<<<<<<<<<<<<
@@ -4594,18 +4503,18 @@ static PyObject *__pyx_f_6deepnl_10sentiwords_16SentimentTrainer__train_pair_s(s
  */
   __pyx_v_self->__pyx_base.__pyx_base.error = (__pyx_v_self->__pyx_base.__pyx_base.error + __pyx_v_error);
 
-  /* "deepnl/sentiwords.pyx":145
+  /* "deepnl/sentiwords.pyx":138
  *         #print >> sys.stderr, 'error', errorCW, errorUS, error # DEBUG
  *         self.error += error
  *         self.avg_error.add(error) # moving average             # <<<<<<<<<<<<<<
  *         self.total_pairs += 1
  *         if error == 0:
  */
-  __pyx_t_4 = ((struct __pyx_vtabstruct_6deepnl_7trainer_MovingAverage *)__pyx_v_self->__pyx_base.__pyx_base.avg_error->__pyx_vtab)->add(__pyx_v_self->__pyx_base.__pyx_base.avg_error, __pyx_v_error); if (unlikely(!__pyx_t_4)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 145; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_t_4 = ((struct __pyx_vtabstruct_6deepnl_7trainer_MovingAverage *)__pyx_v_self->__pyx_base.__pyx_base.avg_error->__pyx_vtab)->add(__pyx_v_self->__pyx_base.__pyx_base.avg_error, __pyx_v_error); if (unlikely(!__pyx_t_4)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 138; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_GOTREF(__pyx_t_4);
   __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
 
-  /* "deepnl/sentiwords.pyx":146
+  /* "deepnl/sentiwords.pyx":139
  *         self.error += error
  *         self.avg_error.add(error) # moving average
  *         self.total_pairs += 1             # <<<<<<<<<<<<<<
@@ -4614,7 +4523,7 @@ static PyObject *__pyx_f_6deepnl_10sentiwords_16SentimentTrainer__train_pair_s(s
  */
   __pyx_v_self->__pyx_base.total_pairs = (__pyx_v_self->__pyx_base.total_pairs + 1);
 
-  /* "deepnl/sentiwords.pyx":147
+  /* "deepnl/sentiwords.pyx":140
  *         self.avg_error.add(error) # moving average
  *         self.total_pairs += 1
  *         if error == 0:             # <<<<<<<<<<<<<<
@@ -4624,7 +4533,7 @@ static PyObject *__pyx_f_6deepnl_10sentiwords_16SentimentTrainer__train_pair_s(s
   __pyx_t_13 = ((__pyx_v_error == 0.0) != 0);
   if (__pyx_t_13) {
 
-    /* "deepnl/sentiwords.pyx":148
+    /* "deepnl/sentiwords.pyx":141
  *         self.total_pairs += 1
  *         if error == 0:
  *             self.skips += 1             # <<<<<<<<<<<<<<
@@ -4633,7 +4542,7 @@ static PyObject *__pyx_f_6deepnl_10sentiwords_16SentimentTrainer__train_pair_s(s
  */
     __pyx_v_self->__pyx_base.__pyx_base.skips = (__pyx_v_self->__pyx_base.__pyx_base.skips + 1);
 
-    /* "deepnl/sentiwords.pyx":149
+    /* "deepnl/sentiwords.pyx":142
  *         if error == 0:
  *             self.skips += 1
  *             return error, variant             # <<<<<<<<<<<<<<
@@ -4641,9 +4550,9 @@ static PyObject *__pyx_f_6deepnl_10sentiwords_16SentimentTrainer__train_pair_s(s
  *         # Compute the gradients
  */
     __Pyx_XDECREF(__pyx_r);
-    __pyx_t_4 = PyFloat_FromDouble(__pyx_v_error); if (unlikely(!__pyx_t_4)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 149; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+    __pyx_t_4 = PyFloat_FromDouble(__pyx_v_error); if (unlikely(!__pyx_t_4)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 142; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
     __Pyx_GOTREF(__pyx_t_4);
-    __pyx_t_5 = PyTuple_New(2); if (unlikely(!__pyx_t_5)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 149; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+    __pyx_t_5 = PyTuple_New(2); if (unlikely(!__pyx_t_5)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 142; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
     __Pyx_GOTREF(__pyx_t_5);
     __Pyx_GIVEREF(__pyx_t_4);
     PyTuple_SET_ITEM(__pyx_t_5, 0, __pyx_t_4);
@@ -4655,7 +4564,7 @@ static PyObject *__pyx_f_6deepnl_10sentiwords_16SentimentTrainer__train_pair_s(s
     __pyx_t_5 = 0;
     goto __pyx_L0;
 
-    /* "deepnl/sentiwords.pyx":147
+    /* "deepnl/sentiwords.pyx":140
  *         self.avg_error.add(error) # moving average
  *         self.total_pairs += 1
  *         if error == 0:             # <<<<<<<<<<<<<<
@@ -4664,19 +4573,19 @@ static PyObject *__pyx_f_6deepnl_10sentiwords_16SentimentTrainer__train_pair_s(s
  */
   }
 
-  /* "deepnl/sentiwords.pyx":157
+  /* "deepnl/sentiwords.pyx":150
  * 
  *         # @see A.8 in Collobert et al. 2011.
  *         cdef np.ndarray[FLOAT_t,ndim=1] grads_pos_score = np.array([0.0, 0.0])             # <<<<<<<<<<<<<<
  *         cdef np.ndarray[FLOAT_t,ndim=1] grads_neg_score = np.array([0.0, 0.0])
  *         if (errorCW > 0):
  */
-  __pyx_t_4 = __Pyx_GetModuleGlobalName(__pyx_n_s_np); if (unlikely(!__pyx_t_4)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 157; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_t_4 = __Pyx_GetModuleGlobalName(__pyx_n_s_np); if (unlikely(!__pyx_t_4)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 150; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_GOTREF(__pyx_t_4);
-  __pyx_t_15 = __Pyx_PyObject_GetAttrStr(__pyx_t_4, __pyx_n_s_array); if (unlikely(!__pyx_t_15)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 157; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_t_15 = __Pyx_PyObject_GetAttrStr(__pyx_t_4, __pyx_n_s_array); if (unlikely(!__pyx_t_15)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 150; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_GOTREF(__pyx_t_15);
   __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
-  __pyx_t_4 = PyList_New(2); if (unlikely(!__pyx_t_4)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 157; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_t_4 = PyList_New(2); if (unlikely(!__pyx_t_4)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 150; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_GOTREF(__pyx_t_4);
   __Pyx_INCREF(__pyx_float_0_0);
   __Pyx_GIVEREF(__pyx_float_0_0);
@@ -4695,28 +4604,28 @@ static PyObject *__pyx_f_6deepnl_10sentiwords_16SentimentTrainer__train_pair_s(s
     }
   }
   if (!__pyx_t_1) {
-    __pyx_t_5 = __Pyx_PyObject_CallOneArg(__pyx_t_15, __pyx_t_4); if (unlikely(!__pyx_t_5)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 157; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+    __pyx_t_5 = __Pyx_PyObject_CallOneArg(__pyx_t_15, __pyx_t_4); if (unlikely(!__pyx_t_5)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 150; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
     __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
     __Pyx_GOTREF(__pyx_t_5);
   } else {
-    __pyx_t_19 = PyTuple_New(1+1); if (unlikely(!__pyx_t_19)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 157; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+    __pyx_t_19 = PyTuple_New(1+1); if (unlikely(!__pyx_t_19)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 150; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
     __Pyx_GOTREF(__pyx_t_19);
     __Pyx_GIVEREF(__pyx_t_1); PyTuple_SET_ITEM(__pyx_t_19, 0, __pyx_t_1); __pyx_t_1 = NULL;
     __Pyx_GIVEREF(__pyx_t_4);
     PyTuple_SET_ITEM(__pyx_t_19, 0+1, __pyx_t_4);
     __pyx_t_4 = 0;
-    __pyx_t_5 = __Pyx_PyObject_Call(__pyx_t_15, __pyx_t_19, NULL); if (unlikely(!__pyx_t_5)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 157; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+    __pyx_t_5 = __Pyx_PyObject_Call(__pyx_t_15, __pyx_t_19, NULL); if (unlikely(!__pyx_t_5)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 150; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
     __Pyx_GOTREF(__pyx_t_5);
     __Pyx_DECREF(__pyx_t_19); __pyx_t_19 = 0;
   }
   __Pyx_DECREF(__pyx_t_15); __pyx_t_15 = 0;
-  if (!(likely(((__pyx_t_5) == Py_None) || likely(__Pyx_TypeTest(__pyx_t_5, __pyx_ptype_5numpy_ndarray))))) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 157; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  if (!(likely(((__pyx_t_5) == Py_None) || likely(__Pyx_TypeTest(__pyx_t_5, __pyx_ptype_5numpy_ndarray))))) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 150; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __pyx_t_20 = ((PyArrayObject *)__pyx_t_5);
   {
     __Pyx_BufFmt_StackElem __pyx_stack[1];
     if (unlikely(__Pyx_GetBufferAndValidate(&__pyx_pybuffernd_grads_pos_score.rcbuffer->pybuffer, (PyObject*)__pyx_t_20, &__Pyx_TypeInfo_nn___pyx_t_6deepnl_10extractors_FLOAT_t, PyBUF_FORMAT| PyBUF_STRIDES| PyBUF_WRITABLE, 1, 0, __pyx_stack) == -1)) {
       __pyx_v_grads_pos_score = ((PyArrayObject *)Py_None); __Pyx_INCREF(Py_None); __pyx_pybuffernd_grads_pos_score.rcbuffer->pybuffer.buf = NULL;
-      {__pyx_filename = __pyx_f[0]; __pyx_lineno = 157; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+      {__pyx_filename = __pyx_f[0]; __pyx_lineno = 150; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
     } else {__pyx_pybuffernd_grads_pos_score.diminfo[0].strides = __pyx_pybuffernd_grads_pos_score.rcbuffer->pybuffer.strides[0]; __pyx_pybuffernd_grads_pos_score.diminfo[0].shape = __pyx_pybuffernd_grads_pos_score.rcbuffer->pybuffer.shape[0];
     }
   }
@@ -4724,19 +4633,19 @@ static PyObject *__pyx_f_6deepnl_10sentiwords_16SentimentTrainer__train_pair_s(s
   __pyx_v_grads_pos_score = ((PyArrayObject *)__pyx_t_5);
   __pyx_t_5 = 0;
 
-  /* "deepnl/sentiwords.pyx":158
+  /* "deepnl/sentiwords.pyx":151
  *         # @see A.8 in Collobert et al. 2011.
  *         cdef np.ndarray[FLOAT_t,ndim=1] grads_pos_score = np.array([0.0, 0.0])
  *         cdef np.ndarray[FLOAT_t,ndim=1] grads_neg_score = np.array([0.0, 0.0])             # <<<<<<<<<<<<<<
  *         if (errorCW > 0):
  *             grads_pos_score[0] = 1.0
  */
-  __pyx_t_15 = __Pyx_GetModuleGlobalName(__pyx_n_s_np); if (unlikely(!__pyx_t_15)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 158; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_t_15 = __Pyx_GetModuleGlobalName(__pyx_n_s_np); if (unlikely(!__pyx_t_15)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 151; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_GOTREF(__pyx_t_15);
-  __pyx_t_19 = __Pyx_PyObject_GetAttrStr(__pyx_t_15, __pyx_n_s_array); if (unlikely(!__pyx_t_19)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 158; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_t_19 = __Pyx_PyObject_GetAttrStr(__pyx_t_15, __pyx_n_s_array); if (unlikely(!__pyx_t_19)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 151; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_GOTREF(__pyx_t_19);
   __Pyx_DECREF(__pyx_t_15); __pyx_t_15 = 0;
-  __pyx_t_15 = PyList_New(2); if (unlikely(!__pyx_t_15)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 158; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_t_15 = PyList_New(2); if (unlikely(!__pyx_t_15)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 151; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_GOTREF(__pyx_t_15);
   __Pyx_INCREF(__pyx_float_0_0);
   __Pyx_GIVEREF(__pyx_float_0_0);
@@ -4755,28 +4664,28 @@ static PyObject *__pyx_f_6deepnl_10sentiwords_16SentimentTrainer__train_pair_s(s
     }
   }
   if (!__pyx_t_4) {
-    __pyx_t_5 = __Pyx_PyObject_CallOneArg(__pyx_t_19, __pyx_t_15); if (unlikely(!__pyx_t_5)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 158; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+    __pyx_t_5 = __Pyx_PyObject_CallOneArg(__pyx_t_19, __pyx_t_15); if (unlikely(!__pyx_t_5)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 151; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
     __Pyx_DECREF(__pyx_t_15); __pyx_t_15 = 0;
     __Pyx_GOTREF(__pyx_t_5);
   } else {
-    __pyx_t_1 = PyTuple_New(1+1); if (unlikely(!__pyx_t_1)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 158; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+    __pyx_t_1 = PyTuple_New(1+1); if (unlikely(!__pyx_t_1)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 151; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
     __Pyx_GOTREF(__pyx_t_1);
     __Pyx_GIVEREF(__pyx_t_4); PyTuple_SET_ITEM(__pyx_t_1, 0, __pyx_t_4); __pyx_t_4 = NULL;
     __Pyx_GIVEREF(__pyx_t_15);
     PyTuple_SET_ITEM(__pyx_t_1, 0+1, __pyx_t_15);
     __pyx_t_15 = 0;
-    __pyx_t_5 = __Pyx_PyObject_Call(__pyx_t_19, __pyx_t_1, NULL); if (unlikely(!__pyx_t_5)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 158; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+    __pyx_t_5 = __Pyx_PyObject_Call(__pyx_t_19, __pyx_t_1, NULL); if (unlikely(!__pyx_t_5)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 151; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
     __Pyx_GOTREF(__pyx_t_5);
     __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
   }
   __Pyx_DECREF(__pyx_t_19); __pyx_t_19 = 0;
-  if (!(likely(((__pyx_t_5) == Py_None) || likely(__Pyx_TypeTest(__pyx_t_5, __pyx_ptype_5numpy_ndarray))))) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 158; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  if (!(likely(((__pyx_t_5) == Py_None) || likely(__Pyx_TypeTest(__pyx_t_5, __pyx_ptype_5numpy_ndarray))))) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 151; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __pyx_t_21 = ((PyArrayObject *)__pyx_t_5);
   {
     __Pyx_BufFmt_StackElem __pyx_stack[1];
     if (unlikely(__Pyx_GetBufferAndValidate(&__pyx_pybuffernd_grads_neg_score.rcbuffer->pybuffer, (PyObject*)__pyx_t_21, &__Pyx_TypeInfo_nn___pyx_t_6deepnl_10extractors_FLOAT_t, PyBUF_FORMAT| PyBUF_STRIDES| PyBUF_WRITABLE, 1, 0, __pyx_stack) == -1)) {
       __pyx_v_grads_neg_score = ((PyArrayObject *)Py_None); __Pyx_INCREF(Py_None); __pyx_pybuffernd_grads_neg_score.rcbuffer->pybuffer.buf = NULL;
-      {__pyx_filename = __pyx_f[0]; __pyx_lineno = 158; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+      {__pyx_filename = __pyx_f[0]; __pyx_lineno = 151; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
     } else {__pyx_pybuffernd_grads_neg_score.diminfo[0].strides = __pyx_pybuffernd_grads_neg_score.rcbuffer->pybuffer.strides[0]; __pyx_pybuffernd_grads_neg_score.diminfo[0].shape = __pyx_pybuffernd_grads_neg_score.rcbuffer->pybuffer.shape[0];
     }
   }
@@ -4784,7 +4693,7 @@ static PyObject *__pyx_f_6deepnl_10sentiwords_16SentimentTrainer__train_pair_s(s
   __pyx_v_grads_neg_score = ((PyArrayObject *)__pyx_t_5);
   __pyx_t_5 = 0;
 
-  /* "deepnl/sentiwords.pyx":159
+  /* "deepnl/sentiwords.pyx":152
  *         cdef np.ndarray[FLOAT_t,ndim=1] grads_pos_score = np.array([0.0, 0.0])
  *         cdef np.ndarray[FLOAT_t,ndim=1] grads_neg_score = np.array([0.0, 0.0])
  *         if (errorCW > 0):             # <<<<<<<<<<<<<<
@@ -4794,7 +4703,7 @@ static PyObject *__pyx_f_6deepnl_10sentiwords_16SentimentTrainer__train_pair_s(s
   __pyx_t_13 = ((__pyx_v_errorCW > 0.0) != 0);
   if (__pyx_t_13) {
 
-    /* "deepnl/sentiwords.pyx":160
+    /* "deepnl/sentiwords.pyx":153
  *         cdef np.ndarray[FLOAT_t,ndim=1] grads_neg_score = np.array([0.0, 0.0])
  *         if (errorCW > 0):
  *             grads_pos_score[0] = 1.0             # <<<<<<<<<<<<<<
@@ -4805,7 +4714,7 @@ static PyObject *__pyx_f_6deepnl_10sentiwords_16SentimentTrainer__train_pair_s(s
     if (__pyx_t_22 < 0) __pyx_t_22 += __pyx_pybuffernd_grads_pos_score.diminfo[0].shape;
     *__Pyx_BufPtrStrided1d(__pyx_t_6deepnl_10extractors_FLOAT_t *, __pyx_pybuffernd_grads_pos_score.rcbuffer->pybuffer.buf, __pyx_t_22, __pyx_pybuffernd_grads_pos_score.diminfo[0].strides) = 1.0;
 
-    /* "deepnl/sentiwords.pyx":161
+    /* "deepnl/sentiwords.pyx":154
  *         if (errorCW > 0):
  *             grads_pos_score[0] = 1.0
  *             grads_neg_score[0] = -1.0             # <<<<<<<<<<<<<<
@@ -4816,7 +4725,7 @@ static PyObject *__pyx_f_6deepnl_10sentiwords_16SentimentTrainer__train_pair_s(s
     if (__pyx_t_23 < 0) __pyx_t_23 += __pyx_pybuffernd_grads_neg_score.diminfo[0].shape;
     *__Pyx_BufPtrStrided1d(__pyx_t_6deepnl_10extractors_FLOAT_t *, __pyx_pybuffernd_grads_neg_score.rcbuffer->pybuffer.buf, __pyx_t_23, __pyx_pybuffernd_grads_neg_score.diminfo[0].strides) = -1.0;
 
-    /* "deepnl/sentiwords.pyx":159
+    /* "deepnl/sentiwords.pyx":152
  *         cdef np.ndarray[FLOAT_t,ndim=1] grads_pos_score = np.array([0.0, 0.0])
  *         cdef np.ndarray[FLOAT_t,ndim=1] grads_neg_score = np.array([0.0, 0.0])
  *         if (errorCW > 0):             # <<<<<<<<<<<<<<
@@ -4825,7 +4734,7 @@ static PyObject *__pyx_f_6deepnl_10sentiwords_16SentimentTrainer__train_pair_s(s
  */
   }
 
-  /* "deepnl/sentiwords.pyx":162
+  /* "deepnl/sentiwords.pyx":155
  *             grads_pos_score[0] = 1.0
  *             grads_neg_score[0] = -1.0
  *         if (errorUS > 0):             # <<<<<<<<<<<<<<
@@ -4835,7 +4744,7 @@ static PyObject *__pyx_f_6deepnl_10sentiwords_16SentimentTrainer__train_pair_s(s
   __pyx_t_13 = ((__pyx_v_errorUS > 0.0) != 0);
   if (__pyx_t_13) {
 
-    /* "deepnl/sentiwords.pyx":163
+    /* "deepnl/sentiwords.pyx":156
  *             grads_neg_score[0] = -1.0
  *         if (errorUS > 0):
  *             grads_pos_score[1] = 1.0             # <<<<<<<<<<<<<<
@@ -4846,7 +4755,7 @@ static PyObject *__pyx_f_6deepnl_10sentiwords_16SentimentTrainer__train_pair_s(s
     if (__pyx_t_24 < 0) __pyx_t_24 += __pyx_pybuffernd_grads_pos_score.diminfo[0].shape;
     *__Pyx_BufPtrStrided1d(__pyx_t_6deepnl_10extractors_FLOAT_t *, __pyx_pybuffernd_grads_pos_score.rcbuffer->pybuffer.buf, __pyx_t_24, __pyx_pybuffernd_grads_pos_score.diminfo[0].strides) = 1.0;
 
-    /* "deepnl/sentiwords.pyx":164
+    /* "deepnl/sentiwords.pyx":157
  *         if (errorUS > 0):
  *             grads_pos_score[1] = 1.0
  *             grads_neg_score[1] = -1.0             # <<<<<<<<<<<<<<
@@ -4857,7 +4766,7 @@ static PyObject *__pyx_f_6deepnl_10sentiwords_16SentimentTrainer__train_pair_s(s
     if (__pyx_t_25 < 0) __pyx_t_25 += __pyx_pybuffernd_grads_neg_score.diminfo[0].shape;
     *__Pyx_BufPtrStrided1d(__pyx_t_6deepnl_10extractors_FLOAT_t *, __pyx_pybuffernd_grads_neg_score.rcbuffer->pybuffer.buf, __pyx_t_25, __pyx_pybuffernd_grads_neg_score.diminfo[0].strides) = -1.0;
 
-    /* "deepnl/sentiwords.pyx":162
+    /* "deepnl/sentiwords.pyx":155
  *             grads_pos_score[0] = 1.0
  *             grads_neg_score[0] = -1.0
  *         if (errorUS > 0):             # <<<<<<<<<<<<<<
@@ -4866,35 +4775,35 @@ static PyObject *__pyx_f_6deepnl_10sentiwords_16SentimentTrainer__train_pair_s(s
  */
   }
 
-  /* "deepnl/sentiwords.pyx":175
+  /* "deepnl/sentiwords.pyx":168
  *         # Output layer
  *         # CHECKME: summing they cancel each other:
  *         grads.output_bias = grads_pos_score + grads_neg_score             # <<<<<<<<<<<<<<
  *         # (2, hidden_size) = (2) x (hidden_size)
  *         grads.output_weights = np.outer(grads_pos_score, vars_pos.hidden) +\
  */
-  __pyx_t_5 = PyNumber_Add(((PyObject *)__pyx_v_grads_pos_score), ((PyObject *)__pyx_v_grads_neg_score)); if (unlikely(!__pyx_t_5)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 175; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_t_5 = PyNumber_Add(((PyObject *)__pyx_v_grads_pos_score), ((PyObject *)__pyx_v_grads_neg_score)); if (unlikely(!__pyx_t_5)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 168; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_GOTREF(__pyx_t_5);
-  if (!(likely(((__pyx_t_5) == Py_None) || likely(__Pyx_TypeTest(__pyx_t_5, __pyx_ptype_5numpy_ndarray))))) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 175; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  if (!(likely(((__pyx_t_5) == Py_None) || likely(__Pyx_TypeTest(__pyx_t_5, __pyx_ptype_5numpy_ndarray))))) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 168; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_GIVEREF(__pyx_t_5);
   __Pyx_GOTREF(__pyx_v_grads->__pyx_base.output_bias);
   __Pyx_DECREF(((PyObject *)__pyx_v_grads->__pyx_base.output_bias));
   __pyx_v_grads->__pyx_base.output_bias = ((PyArrayObject *)__pyx_t_5);
   __pyx_t_5 = 0;
 
-  /* "deepnl/sentiwords.pyx":177
+  /* "deepnl/sentiwords.pyx":170
  *         grads.output_bias = grads_pos_score + grads_neg_score
  *         # (2, hidden_size) = (2) x (hidden_size)
  *         grads.output_weights = np.outer(grads_pos_score, vars_pos.hidden) +\             # <<<<<<<<<<<<<<
  *                                np.outer(grads_neg_score, vars_neg.hidden)
  *         #print >> sys.stderr, 'gow', grads.output_weights[0,128:132] # DEBUG
  */
-  __pyx_t_19 = __Pyx_GetModuleGlobalName(__pyx_n_s_np); if (unlikely(!__pyx_t_19)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 177; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_t_19 = __Pyx_GetModuleGlobalName(__pyx_n_s_np); if (unlikely(!__pyx_t_19)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 170; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_GOTREF(__pyx_t_19);
-  __pyx_t_1 = __Pyx_PyObject_GetAttrStr(__pyx_t_19, __pyx_n_s_outer); if (unlikely(!__pyx_t_1)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 177; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_t_1 = __Pyx_PyObject_GetAttrStr(__pyx_t_19, __pyx_n_s_outer); if (unlikely(!__pyx_t_1)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 170; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_GOTREF(__pyx_t_1);
   __Pyx_DECREF(__pyx_t_19); __pyx_t_19 = 0;
-  __pyx_t_19 = __Pyx_PyObject_GetAttrStr(__pyx_v_vars_pos, __pyx_n_s_hidden); if (unlikely(!__pyx_t_19)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 177; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_t_19 = __Pyx_PyObject_GetAttrStr(__pyx_v_vars_pos, __pyx_n_s_hidden); if (unlikely(!__pyx_t_19)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 170; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_GOTREF(__pyx_t_19);
   __pyx_t_15 = NULL;
   __pyx_t_2 = 0;
@@ -4908,7 +4817,7 @@ static PyObject *__pyx_f_6deepnl_10sentiwords_16SentimentTrainer__train_pair_s(s
       __pyx_t_2 = 1;
     }
   }
-  __pyx_t_4 = PyTuple_New(2+__pyx_t_2); if (unlikely(!__pyx_t_4)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 177; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_t_4 = PyTuple_New(2+__pyx_t_2); if (unlikely(!__pyx_t_4)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 170; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_GOTREF(__pyx_t_4);
   if (__pyx_t_15) {
     __Pyx_GIVEREF(__pyx_t_15); PyTuple_SET_ITEM(__pyx_t_4, 0, __pyx_t_15); __pyx_t_15 = NULL;
@@ -4919,24 +4828,24 @@ static PyObject *__pyx_f_6deepnl_10sentiwords_16SentimentTrainer__train_pair_s(s
   __Pyx_GIVEREF(__pyx_t_19);
   PyTuple_SET_ITEM(__pyx_t_4, 1+__pyx_t_2, __pyx_t_19);
   __pyx_t_19 = 0;
-  __pyx_t_5 = __Pyx_PyObject_Call(__pyx_t_1, __pyx_t_4, NULL); if (unlikely(!__pyx_t_5)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 177; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_t_5 = __Pyx_PyObject_Call(__pyx_t_1, __pyx_t_4, NULL); if (unlikely(!__pyx_t_5)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 170; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_GOTREF(__pyx_t_5);
   __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
 
-  /* "deepnl/sentiwords.pyx":178
+  /* "deepnl/sentiwords.pyx":171
  *         # (2, hidden_size) = (2) x (hidden_size)
  *         grads.output_weights = np.outer(grads_pos_score, vars_pos.hidden) +\
  *                                np.outer(grads_neg_score, vars_neg.hidden)             # <<<<<<<<<<<<<<
  *         #print >> sys.stderr, 'gow', grads.output_weights[0,128:132] # DEBUG
  * 
  */
-  __pyx_t_4 = __Pyx_GetModuleGlobalName(__pyx_n_s_np); if (unlikely(!__pyx_t_4)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 178; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_t_4 = __Pyx_GetModuleGlobalName(__pyx_n_s_np); if (unlikely(!__pyx_t_4)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 171; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_GOTREF(__pyx_t_4);
-  __pyx_t_19 = __Pyx_PyObject_GetAttrStr(__pyx_t_4, __pyx_n_s_outer); if (unlikely(!__pyx_t_19)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 178; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_t_19 = __Pyx_PyObject_GetAttrStr(__pyx_t_4, __pyx_n_s_outer); if (unlikely(!__pyx_t_19)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 171; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_GOTREF(__pyx_t_19);
   __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
-  __pyx_t_4 = __Pyx_PyObject_GetAttrStr(__pyx_v_vars_neg, __pyx_n_s_hidden); if (unlikely(!__pyx_t_4)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 178; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_t_4 = __Pyx_PyObject_GetAttrStr(__pyx_v_vars_neg, __pyx_n_s_hidden); if (unlikely(!__pyx_t_4)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 171; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_GOTREF(__pyx_t_4);
   __pyx_t_15 = NULL;
   __pyx_t_2 = 0;
@@ -4950,7 +4859,7 @@ static PyObject *__pyx_f_6deepnl_10sentiwords_16SentimentTrainer__train_pair_s(s
       __pyx_t_2 = 1;
     }
   }
-  __pyx_t_26 = PyTuple_New(2+__pyx_t_2); if (unlikely(!__pyx_t_26)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 178; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_t_26 = PyTuple_New(2+__pyx_t_2); if (unlikely(!__pyx_t_26)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 171; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_GOTREF(__pyx_t_26);
   if (__pyx_t_15) {
     __Pyx_GIVEREF(__pyx_t_15); PyTuple_SET_ITEM(__pyx_t_26, 0, __pyx_t_15); __pyx_t_15 = NULL;
@@ -4961,43 +4870,43 @@ static PyObject *__pyx_f_6deepnl_10sentiwords_16SentimentTrainer__train_pair_s(s
   __Pyx_GIVEREF(__pyx_t_4);
   PyTuple_SET_ITEM(__pyx_t_26, 1+__pyx_t_2, __pyx_t_4);
   __pyx_t_4 = 0;
-  __pyx_t_1 = __Pyx_PyObject_Call(__pyx_t_19, __pyx_t_26, NULL); if (unlikely(!__pyx_t_1)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 178; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_t_1 = __Pyx_PyObject_Call(__pyx_t_19, __pyx_t_26, NULL); if (unlikely(!__pyx_t_1)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 171; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_GOTREF(__pyx_t_1);
   __Pyx_DECREF(__pyx_t_26); __pyx_t_26 = 0;
   __Pyx_DECREF(__pyx_t_19); __pyx_t_19 = 0;
 
-  /* "deepnl/sentiwords.pyx":177
+  /* "deepnl/sentiwords.pyx":170
  *         grads.output_bias = grads_pos_score + grads_neg_score
  *         # (2, hidden_size) = (2) x (hidden_size)
  *         grads.output_weights = np.outer(grads_pos_score, vars_pos.hidden) +\             # <<<<<<<<<<<<<<
  *                                np.outer(grads_neg_score, vars_neg.hidden)
  *         #print >> sys.stderr, 'gow', grads.output_weights[0,128:132] # DEBUG
  */
-  __pyx_t_19 = PyNumber_Add(__pyx_t_5, __pyx_t_1); if (unlikely(!__pyx_t_19)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 177; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_t_19 = PyNumber_Add(__pyx_t_5, __pyx_t_1); if (unlikely(!__pyx_t_19)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 170; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_GOTREF(__pyx_t_19);
   __Pyx_DECREF(__pyx_t_5); __pyx_t_5 = 0;
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
-  if (!(likely(((__pyx_t_19) == Py_None) || likely(__Pyx_TypeTest(__pyx_t_19, __pyx_ptype_5numpy_ndarray))))) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 177; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  if (!(likely(((__pyx_t_19) == Py_None) || likely(__Pyx_TypeTest(__pyx_t_19, __pyx_ptype_5numpy_ndarray))))) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 170; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_GIVEREF(__pyx_t_19);
   __Pyx_GOTREF(__pyx_v_grads->__pyx_base.output_weights);
   __Pyx_DECREF(((PyObject *)__pyx_v_grads->__pyx_base.output_weights));
   __pyx_v_grads->__pyx_base.output_weights = ((PyArrayObject *)__pyx_t_19);
   __pyx_t_19 = 0;
 
-  /* "deepnl/sentiwords.pyx":183
+  /* "deepnl/sentiwords.pyx":176
  *         # Hidden layer
  *         # (hidden_size) = (2) * (2, hidden_size)
  *         grads.hidden_pos = hardtanhe(vars_pos.hidden) * grads_pos_score.dot(p.output_weights)             # <<<<<<<<<<<<<<
  *         grads.hidden_neg = hardtanhe(vars_neg.hidden) * grads_neg_score.dot(p.output_weights)
  * 
  */
-  __pyx_t_19 = __Pyx_PyObject_GetAttrStr(__pyx_v_vars_pos, __pyx_n_s_hidden); if (unlikely(!__pyx_t_19)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 183; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_t_19 = __Pyx_PyObject_GetAttrStr(__pyx_v_vars_pos, __pyx_n_s_hidden); if (unlikely(!__pyx_t_19)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 176; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_GOTREF(__pyx_t_19);
-  if (!(likely(((__pyx_t_19) == Py_None) || likely(__Pyx_TypeTest(__pyx_t_19, __pyx_ptype_5numpy_ndarray))))) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 183; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
-  __pyx_t_1 = ((PyObject *)__pyx_f_6deepnl_4math_hardtanhe(((PyArrayObject *)__pyx_t_19), NULL)); if (unlikely(!__pyx_t_1)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 183; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  if (!(likely(((__pyx_t_19) == Py_None) || likely(__Pyx_TypeTest(__pyx_t_19, __pyx_ptype_5numpy_ndarray))))) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 176; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_t_1 = ((PyObject *)__pyx_f_6deepnl_4math_hardtanhe(((PyArrayObject *)__pyx_t_19), NULL)); if (unlikely(!__pyx_t_1)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 176; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_GOTREF(__pyx_t_1);
   __Pyx_DECREF(__pyx_t_19); __pyx_t_19 = 0;
-  __pyx_t_5 = __Pyx_PyObject_GetAttrStr(((PyObject *)__pyx_v_grads_pos_score), __pyx_n_s_dot); if (unlikely(!__pyx_t_5)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 183; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_t_5 = __Pyx_PyObject_GetAttrStr(((PyObject *)__pyx_v_grads_pos_score), __pyx_n_s_dot); if (unlikely(!__pyx_t_5)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 176; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_GOTREF(__pyx_t_5);
   __pyx_t_26 = NULL;
   if (CYTHON_COMPILING_IN_CPYTHON && likely(PyMethod_Check(__pyx_t_5))) {
@@ -5010,41 +4919,41 @@ static PyObject *__pyx_f_6deepnl_10sentiwords_16SentimentTrainer__train_pair_s(s
     }
   }
   if (!__pyx_t_26) {
-    __pyx_t_19 = __Pyx_PyObject_CallOneArg(__pyx_t_5, ((PyObject *)__pyx_v_p->output_weights)); if (unlikely(!__pyx_t_19)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 183; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+    __pyx_t_19 = __Pyx_PyObject_CallOneArg(__pyx_t_5, ((PyObject *)__pyx_v_p->output_weights)); if (unlikely(!__pyx_t_19)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 176; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
     __Pyx_GOTREF(__pyx_t_19);
   } else {
-    __pyx_t_4 = PyTuple_New(1+1); if (unlikely(!__pyx_t_4)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 183; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+    __pyx_t_4 = PyTuple_New(1+1); if (unlikely(!__pyx_t_4)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 176; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
     __Pyx_GOTREF(__pyx_t_4);
     __Pyx_GIVEREF(__pyx_t_26); PyTuple_SET_ITEM(__pyx_t_4, 0, __pyx_t_26); __pyx_t_26 = NULL;
     __Pyx_INCREF(((PyObject *)__pyx_v_p->output_weights));
     __Pyx_GIVEREF(((PyObject *)__pyx_v_p->output_weights));
     PyTuple_SET_ITEM(__pyx_t_4, 0+1, ((PyObject *)__pyx_v_p->output_weights));
-    __pyx_t_19 = __Pyx_PyObject_Call(__pyx_t_5, __pyx_t_4, NULL); if (unlikely(!__pyx_t_19)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 183; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+    __pyx_t_19 = __Pyx_PyObject_Call(__pyx_t_5, __pyx_t_4, NULL); if (unlikely(!__pyx_t_19)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 176; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
     __Pyx_GOTREF(__pyx_t_19);
     __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
   }
   __Pyx_DECREF(__pyx_t_5); __pyx_t_5 = 0;
-  __pyx_t_5 = PyNumber_Multiply(__pyx_t_1, __pyx_t_19); if (unlikely(!__pyx_t_5)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 183; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_t_5 = PyNumber_Multiply(__pyx_t_1, __pyx_t_19); if (unlikely(!__pyx_t_5)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 176; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_GOTREF(__pyx_t_5);
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
   __Pyx_DECREF(__pyx_t_19); __pyx_t_19 = 0;
-  if (__Pyx_PyObject_SetAttrStr(((PyObject *)__pyx_v_grads), __pyx_n_s_hidden_pos, __pyx_t_5) < 0) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 183; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  if (__Pyx_PyObject_SetAttrStr(((PyObject *)__pyx_v_grads), __pyx_n_s_hidden_pos, __pyx_t_5) < 0) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 176; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_DECREF(__pyx_t_5); __pyx_t_5 = 0;
 
-  /* "deepnl/sentiwords.pyx":184
+  /* "deepnl/sentiwords.pyx":177
  *         # (hidden_size) = (2) * (2, hidden_size)
  *         grads.hidden_pos = hardtanhe(vars_pos.hidden) * grads_pos_score.dot(p.output_weights)
  *         grads.hidden_neg = hardtanhe(vars_neg.hidden) * grads_neg_score.dot(p.output_weights)             # <<<<<<<<<<<<<<
  * 
  *         # Input layer
  */
-  __pyx_t_5 = __Pyx_PyObject_GetAttrStr(__pyx_v_vars_neg, __pyx_n_s_hidden); if (unlikely(!__pyx_t_5)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 184; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_t_5 = __Pyx_PyObject_GetAttrStr(__pyx_v_vars_neg, __pyx_n_s_hidden); if (unlikely(!__pyx_t_5)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 177; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_GOTREF(__pyx_t_5);
-  if (!(likely(((__pyx_t_5) == Py_None) || likely(__Pyx_TypeTest(__pyx_t_5, __pyx_ptype_5numpy_ndarray))))) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 184; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
-  __pyx_t_19 = ((PyObject *)__pyx_f_6deepnl_4math_hardtanhe(((PyArrayObject *)__pyx_t_5), NULL)); if (unlikely(!__pyx_t_19)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 184; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  if (!(likely(((__pyx_t_5) == Py_None) || likely(__Pyx_TypeTest(__pyx_t_5, __pyx_ptype_5numpy_ndarray))))) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 177; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_t_19 = ((PyObject *)__pyx_f_6deepnl_4math_hardtanhe(((PyArrayObject *)__pyx_t_5), NULL)); if (unlikely(!__pyx_t_19)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 177; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_GOTREF(__pyx_t_19);
   __Pyx_DECREF(__pyx_t_5); __pyx_t_5 = 0;
-  __pyx_t_1 = __Pyx_PyObject_GetAttrStr(((PyObject *)__pyx_v_grads_neg_score), __pyx_n_s_dot); if (unlikely(!__pyx_t_1)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 184; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_t_1 = __Pyx_PyObject_GetAttrStr(((PyObject *)__pyx_v_grads_neg_score), __pyx_n_s_dot); if (unlikely(!__pyx_t_1)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 177; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_GOTREF(__pyx_t_1);
   __pyx_t_4 = NULL;
   if (CYTHON_COMPILING_IN_CPYTHON && likely(PyMethod_Check(__pyx_t_1))) {
@@ -5057,42 +4966,42 @@ static PyObject *__pyx_f_6deepnl_10sentiwords_16SentimentTrainer__train_pair_s(s
     }
   }
   if (!__pyx_t_4) {
-    __pyx_t_5 = __Pyx_PyObject_CallOneArg(__pyx_t_1, ((PyObject *)__pyx_v_p->output_weights)); if (unlikely(!__pyx_t_5)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 184; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+    __pyx_t_5 = __Pyx_PyObject_CallOneArg(__pyx_t_1, ((PyObject *)__pyx_v_p->output_weights)); if (unlikely(!__pyx_t_5)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 177; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
     __Pyx_GOTREF(__pyx_t_5);
   } else {
-    __pyx_t_26 = PyTuple_New(1+1); if (unlikely(!__pyx_t_26)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 184; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+    __pyx_t_26 = PyTuple_New(1+1); if (unlikely(!__pyx_t_26)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 177; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
     __Pyx_GOTREF(__pyx_t_26);
     __Pyx_GIVEREF(__pyx_t_4); PyTuple_SET_ITEM(__pyx_t_26, 0, __pyx_t_4); __pyx_t_4 = NULL;
     __Pyx_INCREF(((PyObject *)__pyx_v_p->output_weights));
     __Pyx_GIVEREF(((PyObject *)__pyx_v_p->output_weights));
     PyTuple_SET_ITEM(__pyx_t_26, 0+1, ((PyObject *)__pyx_v_p->output_weights));
-    __pyx_t_5 = __Pyx_PyObject_Call(__pyx_t_1, __pyx_t_26, NULL); if (unlikely(!__pyx_t_5)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 184; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+    __pyx_t_5 = __Pyx_PyObject_Call(__pyx_t_1, __pyx_t_26, NULL); if (unlikely(!__pyx_t_5)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 177; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
     __Pyx_GOTREF(__pyx_t_5);
     __Pyx_DECREF(__pyx_t_26); __pyx_t_26 = 0;
   }
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
-  __pyx_t_1 = PyNumber_Multiply(__pyx_t_19, __pyx_t_5); if (unlikely(!__pyx_t_1)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 184; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_t_1 = PyNumber_Multiply(__pyx_t_19, __pyx_t_5); if (unlikely(!__pyx_t_1)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 177; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_GOTREF(__pyx_t_1);
   __Pyx_DECREF(__pyx_t_19); __pyx_t_19 = 0;
   __Pyx_DECREF(__pyx_t_5); __pyx_t_5 = 0;
-  if (__Pyx_PyObject_SetAttrStr(((PyObject *)__pyx_v_grads), __pyx_n_s_hidden_neg, __pyx_t_1) < 0) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 184; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  if (__Pyx_PyObject_SetAttrStr(((PyObject *)__pyx_v_grads), __pyx_n_s_hidden_neg, __pyx_t_1) < 0) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 177; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
 
-  /* "deepnl/sentiwords.pyx":188
+  /* "deepnl/sentiwords.pyx":181
  *         # Input layer
  *         # (hidden_size) x (input_size) = (hidden_size, input_size)
  *         grads.hidden_weights = np.outer(grads.hidden_pos, vars_pos.input) +\             # <<<<<<<<<<<<<<
  *                                np.outer(grads.hidden_neg, vars_neg.input)
  * 
  */
-  __pyx_t_5 = __Pyx_GetModuleGlobalName(__pyx_n_s_np); if (unlikely(!__pyx_t_5)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 188; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_t_5 = __Pyx_GetModuleGlobalName(__pyx_n_s_np); if (unlikely(!__pyx_t_5)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 181; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_GOTREF(__pyx_t_5);
-  __pyx_t_19 = __Pyx_PyObject_GetAttrStr(__pyx_t_5, __pyx_n_s_outer); if (unlikely(!__pyx_t_19)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 188; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_t_19 = __Pyx_PyObject_GetAttrStr(__pyx_t_5, __pyx_n_s_outer); if (unlikely(!__pyx_t_19)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 181; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_GOTREF(__pyx_t_19);
   __Pyx_DECREF(__pyx_t_5); __pyx_t_5 = 0;
-  __pyx_t_5 = __Pyx_PyObject_GetAttrStr(((PyObject *)__pyx_v_grads), __pyx_n_s_hidden_pos); if (unlikely(!__pyx_t_5)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 188; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_t_5 = __Pyx_PyObject_GetAttrStr(((PyObject *)__pyx_v_grads), __pyx_n_s_hidden_pos); if (unlikely(!__pyx_t_5)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 181; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_GOTREF(__pyx_t_5);
-  __pyx_t_26 = __Pyx_PyObject_GetAttrStr(__pyx_v_vars_pos, __pyx_n_s_input); if (unlikely(!__pyx_t_26)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 188; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_t_26 = __Pyx_PyObject_GetAttrStr(__pyx_v_vars_pos, __pyx_n_s_input); if (unlikely(!__pyx_t_26)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 181; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_GOTREF(__pyx_t_26);
   __pyx_t_4 = NULL;
   __pyx_t_2 = 0;
@@ -5106,7 +5015,7 @@ static PyObject *__pyx_f_6deepnl_10sentiwords_16SentimentTrainer__train_pair_s(s
       __pyx_t_2 = 1;
     }
   }
-  __pyx_t_15 = PyTuple_New(2+__pyx_t_2); if (unlikely(!__pyx_t_15)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 188; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_t_15 = PyTuple_New(2+__pyx_t_2); if (unlikely(!__pyx_t_15)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 181; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_GOTREF(__pyx_t_15);
   if (__pyx_t_4) {
     __Pyx_GIVEREF(__pyx_t_4); PyTuple_SET_ITEM(__pyx_t_15, 0, __pyx_t_4); __pyx_t_4 = NULL;
@@ -5117,26 +5026,26 @@ static PyObject *__pyx_f_6deepnl_10sentiwords_16SentimentTrainer__train_pair_s(s
   PyTuple_SET_ITEM(__pyx_t_15, 1+__pyx_t_2, __pyx_t_26);
   __pyx_t_5 = 0;
   __pyx_t_26 = 0;
-  __pyx_t_1 = __Pyx_PyObject_Call(__pyx_t_19, __pyx_t_15, NULL); if (unlikely(!__pyx_t_1)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 188; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_t_1 = __Pyx_PyObject_Call(__pyx_t_19, __pyx_t_15, NULL); if (unlikely(!__pyx_t_1)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 181; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_GOTREF(__pyx_t_1);
   __Pyx_DECREF(__pyx_t_15); __pyx_t_15 = 0;
   __Pyx_DECREF(__pyx_t_19); __pyx_t_19 = 0;
 
-  /* "deepnl/sentiwords.pyx":189
+  /* "deepnl/sentiwords.pyx":182
  *         # (hidden_size) x (input_size) = (hidden_size, input_size)
  *         grads.hidden_weights = np.outer(grads.hidden_pos, vars_pos.input) +\
  *                                np.outer(grads.hidden_neg, vars_neg.input)             # <<<<<<<<<<<<<<
  * 
  *         #print >> sys.stderr, 'ghw', grads.hidden_weights[0,128:132] # DEBUG
  */
-  __pyx_t_15 = __Pyx_GetModuleGlobalName(__pyx_n_s_np); if (unlikely(!__pyx_t_15)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 189; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_t_15 = __Pyx_GetModuleGlobalName(__pyx_n_s_np); if (unlikely(!__pyx_t_15)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 182; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_GOTREF(__pyx_t_15);
-  __pyx_t_26 = __Pyx_PyObject_GetAttrStr(__pyx_t_15, __pyx_n_s_outer); if (unlikely(!__pyx_t_26)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 189; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_t_26 = __Pyx_PyObject_GetAttrStr(__pyx_t_15, __pyx_n_s_outer); if (unlikely(!__pyx_t_26)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 182; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_GOTREF(__pyx_t_26);
   __Pyx_DECREF(__pyx_t_15); __pyx_t_15 = 0;
-  __pyx_t_15 = __Pyx_PyObject_GetAttrStr(((PyObject *)__pyx_v_grads), __pyx_n_s_hidden_neg); if (unlikely(!__pyx_t_15)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 189; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_t_15 = __Pyx_PyObject_GetAttrStr(((PyObject *)__pyx_v_grads), __pyx_n_s_hidden_neg); if (unlikely(!__pyx_t_15)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 182; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_GOTREF(__pyx_t_15);
-  __pyx_t_5 = __Pyx_PyObject_GetAttrStr(__pyx_v_vars_neg, __pyx_n_s_input); if (unlikely(!__pyx_t_5)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 189; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_t_5 = __Pyx_PyObject_GetAttrStr(__pyx_v_vars_neg, __pyx_n_s_input); if (unlikely(!__pyx_t_5)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 182; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_GOTREF(__pyx_t_5);
   __pyx_t_4 = NULL;
   __pyx_t_2 = 0;
@@ -5150,7 +5059,7 @@ static PyObject *__pyx_f_6deepnl_10sentiwords_16SentimentTrainer__train_pair_s(s
       __pyx_t_2 = 1;
     }
   }
-  __pyx_t_27 = PyTuple_New(2+__pyx_t_2); if (unlikely(!__pyx_t_27)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 189; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_t_27 = PyTuple_New(2+__pyx_t_2); if (unlikely(!__pyx_t_27)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 182; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_GOTREF(__pyx_t_27);
   if (__pyx_t_4) {
     __Pyx_GIVEREF(__pyx_t_4); PyTuple_SET_ITEM(__pyx_t_27, 0, __pyx_t_4); __pyx_t_4 = NULL;
@@ -5161,52 +5070,52 @@ static PyObject *__pyx_f_6deepnl_10sentiwords_16SentimentTrainer__train_pair_s(s
   PyTuple_SET_ITEM(__pyx_t_27, 1+__pyx_t_2, __pyx_t_5);
   __pyx_t_15 = 0;
   __pyx_t_5 = 0;
-  __pyx_t_19 = __Pyx_PyObject_Call(__pyx_t_26, __pyx_t_27, NULL); if (unlikely(!__pyx_t_19)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 189; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_t_19 = __Pyx_PyObject_Call(__pyx_t_26, __pyx_t_27, NULL); if (unlikely(!__pyx_t_19)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 182; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_GOTREF(__pyx_t_19);
   __Pyx_DECREF(__pyx_t_27); __pyx_t_27 = 0;
   __Pyx_DECREF(__pyx_t_26); __pyx_t_26 = 0;
 
-  /* "deepnl/sentiwords.pyx":188
+  /* "deepnl/sentiwords.pyx":181
  *         # Input layer
  *         # (hidden_size) x (input_size) = (hidden_size, input_size)
  *         grads.hidden_weights = np.outer(grads.hidden_pos, vars_pos.input) +\             # <<<<<<<<<<<<<<
  *                                np.outer(grads.hidden_neg, vars_neg.input)
  * 
  */
-  __pyx_t_26 = PyNumber_Add(__pyx_t_1, __pyx_t_19); if (unlikely(!__pyx_t_26)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 188; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_t_26 = PyNumber_Add(__pyx_t_1, __pyx_t_19); if (unlikely(!__pyx_t_26)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 181; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_GOTREF(__pyx_t_26);
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
   __Pyx_DECREF(__pyx_t_19); __pyx_t_19 = 0;
-  if (!(likely(((__pyx_t_26) == Py_None) || likely(__Pyx_TypeTest(__pyx_t_26, __pyx_ptype_5numpy_ndarray))))) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 188; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  if (!(likely(((__pyx_t_26) == Py_None) || likely(__Pyx_TypeTest(__pyx_t_26, __pyx_ptype_5numpy_ndarray))))) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 181; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_GIVEREF(__pyx_t_26);
   __Pyx_GOTREF(__pyx_v_grads->__pyx_base.hidden_weights);
   __Pyx_DECREF(((PyObject *)__pyx_v_grads->__pyx_base.hidden_weights));
   __pyx_v_grads->__pyx_base.hidden_weights = ((PyArrayObject *)__pyx_t_26);
   __pyx_t_26 = 0;
 
-  /* "deepnl/sentiwords.pyx":192
+  /* "deepnl/sentiwords.pyx":185
  * 
  *         #print >> sys.stderr, 'ghw', grads.hidden_weights[0,128:132] # DEBUG
  *         grads.hidden_bias = grads.hidden_pos + grads.hidden_neg             # <<<<<<<<<<<<<<
  * 
  *         return error, variant
  */
-  __pyx_t_26 = __Pyx_PyObject_GetAttrStr(((PyObject *)__pyx_v_grads), __pyx_n_s_hidden_pos); if (unlikely(!__pyx_t_26)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 192; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_t_26 = __Pyx_PyObject_GetAttrStr(((PyObject *)__pyx_v_grads), __pyx_n_s_hidden_pos); if (unlikely(!__pyx_t_26)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 185; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_GOTREF(__pyx_t_26);
-  __pyx_t_19 = __Pyx_PyObject_GetAttrStr(((PyObject *)__pyx_v_grads), __pyx_n_s_hidden_neg); if (unlikely(!__pyx_t_19)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 192; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_t_19 = __Pyx_PyObject_GetAttrStr(((PyObject *)__pyx_v_grads), __pyx_n_s_hidden_neg); if (unlikely(!__pyx_t_19)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 185; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_GOTREF(__pyx_t_19);
-  __pyx_t_1 = PyNumber_Add(__pyx_t_26, __pyx_t_19); if (unlikely(!__pyx_t_1)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 192; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_t_1 = PyNumber_Add(__pyx_t_26, __pyx_t_19); if (unlikely(!__pyx_t_1)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 185; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_GOTREF(__pyx_t_1);
   __Pyx_DECREF(__pyx_t_26); __pyx_t_26 = 0;
   __Pyx_DECREF(__pyx_t_19); __pyx_t_19 = 0;
-  if (!(likely(((__pyx_t_1) == Py_None) || likely(__Pyx_TypeTest(__pyx_t_1, __pyx_ptype_5numpy_ndarray))))) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 192; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  if (!(likely(((__pyx_t_1) == Py_None) || likely(__Pyx_TypeTest(__pyx_t_1, __pyx_ptype_5numpy_ndarray))))) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 185; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_GIVEREF(__pyx_t_1);
   __Pyx_GOTREF(__pyx_v_grads->__pyx_base.hidden_bias);
   __Pyx_DECREF(((PyObject *)__pyx_v_grads->__pyx_base.hidden_bias));
   __pyx_v_grads->__pyx_base.hidden_bias = ((PyArrayObject *)__pyx_t_1);
   __pyx_t_1 = 0;
 
-  /* "deepnl/sentiwords.pyx":194
+  /* "deepnl/sentiwords.pyx":187
  *         grads.hidden_bias = grads.hidden_pos + grads.hidden_neg
  * 
  *         return error, variant             # <<<<<<<<<<<<<<
@@ -5214,9 +5123,9 @@ static PyObject *__pyx_f_6deepnl_10sentiwords_16SentimentTrainer__train_pair_s(s
  *     cdef _update(self, Gradients grads, float remaining,
  */
   __Pyx_XDECREF(__pyx_r);
-  __pyx_t_1 = PyFloat_FromDouble(__pyx_v_error); if (unlikely(!__pyx_t_1)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 194; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_t_1 = PyFloat_FromDouble(__pyx_v_error); if (unlikely(!__pyx_t_1)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 187; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_GOTREF(__pyx_t_1);
-  __pyx_t_19 = PyTuple_New(2); if (unlikely(!__pyx_t_19)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 194; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_t_19 = PyTuple_New(2); if (unlikely(!__pyx_t_19)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 187; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_GOTREF(__pyx_t_19);
   __Pyx_GIVEREF(__pyx_t_1);
   PyTuple_SET_ITEM(__pyx_t_19, 0, __pyx_t_1);
@@ -5228,7 +5137,7 @@ static PyObject *__pyx_f_6deepnl_10sentiwords_16SentimentTrainer__train_pair_s(s
   __pyx_t_19 = 0;
   goto __pyx_L0;
 
-  /* "deepnl/sentiwords.pyx":99
+  /* "deepnl/sentiwords.pyx":92
  * 
  *     @cython.boundscheck(False)
  *     cdef _train_pair_s(self, np.ndarray[INT_t,ndim=2] example, Gradients grads,             # <<<<<<<<<<<<<<
@@ -5279,7 +5188,7 @@ static PyObject *__pyx_f_6deepnl_10sentiwords_16SentimentTrainer__train_pair_s(s
   return __pyx_r;
 }
 
-/* "deepnl/sentiwords.pyx":196
+/* "deepnl/sentiwords.pyx":189
  *         return error, variant
  * 
  *     cdef _update(self, Gradients grads, float remaining,             # <<<<<<<<<<<<<<
@@ -5287,42 +5196,23 @@ static PyObject *__pyx_f_6deepnl_10sentiwords_16SentimentTrainer__train_pair_s(s
  *                  np.ndarray[INT_t,ndim=1] middle_token,
  */
 
-static PyObject *__pyx_f_6deepnl_10sentiwords_16SentimentTrainer__update(struct __pyx_obj_6deepnl_10sentiwords_SentimentTrainer *__pyx_v_self, struct __pyx_obj_6deepnl_7network_Gradients *__pyx_v_grads, float __pyx_v_remaining, PyArrayObject *__pyx_v_example, PyArrayObject *__pyx_v_middle_token, PyArrayObject *__pyx_v_negative_token) {
-  float __pyx_v_LR_0;
+static PyObject *__pyx_f_6deepnl_10sentiwords_16SentimentTrainer__update(struct __pyx_obj_6deepnl_10sentiwords_SentimentTrainer *__pyx_v_self, struct __pyx_obj_6deepnl_7network_Gradients *__pyx_v_grads, float __pyx_v_remaining, PyArrayObject *__pyx_v_example, CYTHON_UNUSED PyArrayObject *__pyx_v_middle_token, PyArrayObject *__pyx_v_negative_token) {
+  CYTHON_UNUSED float __pyx_v_LR_0;
   float __pyx_v_LR_1;
   float __pyx_v_LR_2;
   struct __pyx_obj_6deepnl_7network_Network *__pyx_v_nn = 0;
   struct __pyx_obj_6deepnl_7network_Parameters *__pyx_v_p = 0;
   int __pyx_v_left_context;
-  PyArrayObject *__pyx_v_grads_input_neg = 0;
-  PyArrayObject *__pyx_v_grads_input_pos = 0;
-  int __pyx_v_i;
-  int __pyx_v_j;
-  int __pyx_v_embeddings_size;
-  PyArrayObject *__pyx_v_token = 0;
-  PyArrayObject *__pyx_v_table = 0;
-  PyArrayObject *__pyx_v_deltas_neg = 0;
-  PyArrayObject *__pyx_v_deltas_pos = 0;
-  int __pyx_v_offset;
-  PyObject *__pyx_v_e = NULL;
-  __Pyx_LocalBuf_ND __pyx_pybuffernd_deltas_neg;
-  __Pyx_Buffer __pyx_pybuffer_deltas_neg;
-  __Pyx_LocalBuf_ND __pyx_pybuffernd_deltas_pos;
-  __Pyx_Buffer __pyx_pybuffer_deltas_pos;
+  PyArrayObject *__pyx_v_tokens = 0;
+  PyArrayObject *__pyx_v_deltas = 0;
+  __Pyx_LocalBuf_ND __pyx_pybuffernd_deltas;
+  __Pyx_Buffer __pyx_pybuffer_deltas;
   __Pyx_LocalBuf_ND __pyx_pybuffernd_example;
   __Pyx_Buffer __pyx_pybuffer_example;
-  __Pyx_LocalBuf_ND __pyx_pybuffernd_grads_input_neg;
-  __Pyx_Buffer __pyx_pybuffer_grads_input_neg;
-  __Pyx_LocalBuf_ND __pyx_pybuffernd_grads_input_pos;
-  __Pyx_Buffer __pyx_pybuffer_grads_input_pos;
   __Pyx_LocalBuf_ND __pyx_pybuffernd_middle_token;
   __Pyx_Buffer __pyx_pybuffer_middle_token;
   __Pyx_LocalBuf_ND __pyx_pybuffernd_negative_token;
   __Pyx_Buffer __pyx_pybuffer_negative_token;
-  __Pyx_LocalBuf_ND __pyx_pybuffernd_table;
-  __Pyx_Buffer __pyx_pybuffer_table;
-  __Pyx_LocalBuf_ND __pyx_pybuffernd_token;
-  __Pyx_Buffer __pyx_pybuffer_token;
   PyObject *__pyx_r = NULL;
   __Pyx_RefNannyDeclarations
   float __pyx_t_1;
@@ -5334,52 +5224,21 @@ static PyObject *__pyx_f_6deepnl_10sentiwords_16SentimentTrainer__update(struct 
   PyObject *__pyx_t_7 = NULL;
   PyObject *__pyx_t_8 = NULL;
   PyObject *__pyx_t_9 = NULL;
-  PyObject *__pyx_t_10 = NULL;
-  PyArrayObject *__pyx_t_11 = NULL;
-  int __pyx_t_12;
-  PyObject *__pyx_t_13 = NULL;
+  PyArrayObject *__pyx_t_10 = NULL;
+  __pyx_t_6deepnl_10extractors_FLOAT_t __pyx_t_11;
+  Py_ssize_t __pyx_t_12;
+  int __pyx_t_13;
   PyObject *__pyx_t_14 = NULL;
   PyObject *__pyx_t_15 = NULL;
-  PyObject *(*__pyx_t_16)(PyObject *);
-  PyArrayObject *__pyx_t_17 = NULL;
-  int __pyx_t_18;
-  Py_ssize_t __pyx_t_19;
-  PyArrayObject *__pyx_t_20 = NULL;
-  int __pyx_t_21;
-  PyArrayObject *__pyx_t_22 = NULL;
-  int __pyx_t_23;
-  Py_ssize_t __pyx_t_24;
-  __pyx_t_6deepnl_7trainer_INT_t __pyx_t_25;
-  Py_ssize_t __pyx_t_26;
-  Py_ssize_t __pyx_t_27;
+  PyObject *__pyx_t_16 = NULL;
   int __pyx_lineno = 0;
   const char *__pyx_filename = NULL;
   int __pyx_clineno = 0;
   __Pyx_RefNannySetupContext("_update", 0);
-  __pyx_pybuffer_grads_input_neg.pybuffer.buf = NULL;
-  __pyx_pybuffer_grads_input_neg.refcount = 0;
-  __pyx_pybuffernd_grads_input_neg.data = NULL;
-  __pyx_pybuffernd_grads_input_neg.rcbuffer = &__pyx_pybuffer_grads_input_neg;
-  __pyx_pybuffer_grads_input_pos.pybuffer.buf = NULL;
-  __pyx_pybuffer_grads_input_pos.refcount = 0;
-  __pyx_pybuffernd_grads_input_pos.data = NULL;
-  __pyx_pybuffernd_grads_input_pos.rcbuffer = &__pyx_pybuffer_grads_input_pos;
-  __pyx_pybuffer_token.pybuffer.buf = NULL;
-  __pyx_pybuffer_token.refcount = 0;
-  __pyx_pybuffernd_token.data = NULL;
-  __pyx_pybuffernd_token.rcbuffer = &__pyx_pybuffer_token;
-  __pyx_pybuffer_table.pybuffer.buf = NULL;
-  __pyx_pybuffer_table.refcount = 0;
-  __pyx_pybuffernd_table.data = NULL;
-  __pyx_pybuffernd_table.rcbuffer = &__pyx_pybuffer_table;
-  __pyx_pybuffer_deltas_neg.pybuffer.buf = NULL;
-  __pyx_pybuffer_deltas_neg.refcount = 0;
-  __pyx_pybuffernd_deltas_neg.data = NULL;
-  __pyx_pybuffernd_deltas_neg.rcbuffer = &__pyx_pybuffer_deltas_neg;
-  __pyx_pybuffer_deltas_pos.pybuffer.buf = NULL;
-  __pyx_pybuffer_deltas_pos.refcount = 0;
-  __pyx_pybuffernd_deltas_pos.data = NULL;
-  __pyx_pybuffernd_deltas_pos.rcbuffer = &__pyx_pybuffer_deltas_pos;
+  __pyx_pybuffer_deltas.pybuffer.buf = NULL;
+  __pyx_pybuffer_deltas.refcount = 0;
+  __pyx_pybuffernd_deltas.data = NULL;
+  __pyx_pybuffernd_deltas.rcbuffer = &__pyx_pybuffer_deltas;
   __pyx_pybuffer_example.pybuffer.buf = NULL;
   __pyx_pybuffer_example.refcount = 0;
   __pyx_pybuffernd_example.data = NULL;
@@ -5394,23 +5253,23 @@ static PyObject *__pyx_f_6deepnl_10sentiwords_16SentimentTrainer__update(struct 
   __pyx_pybuffernd_negative_token.rcbuffer = &__pyx_pybuffer_negative_token;
   {
     __Pyx_BufFmt_StackElem __pyx_stack[1];
-    if (unlikely(__Pyx_GetBufferAndValidate(&__pyx_pybuffernd_example.rcbuffer->pybuffer, (PyObject*)__pyx_v_example, &__Pyx_TypeInfo_nn___pyx_t_6deepnl_7trainer_INT_t, PyBUF_FORMAT| PyBUF_STRIDES, 2, 0, __pyx_stack) == -1)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 196; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+    if (unlikely(__Pyx_GetBufferAndValidate(&__pyx_pybuffernd_example.rcbuffer->pybuffer, (PyObject*)__pyx_v_example, &__Pyx_TypeInfo_nn___pyx_t_6deepnl_7trainer_INT_t, PyBUF_FORMAT| PyBUF_STRIDES, 2, 0, __pyx_stack) == -1)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 189; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   }
   __pyx_pybuffernd_example.diminfo[0].strides = __pyx_pybuffernd_example.rcbuffer->pybuffer.strides[0]; __pyx_pybuffernd_example.diminfo[0].shape = __pyx_pybuffernd_example.rcbuffer->pybuffer.shape[0]; __pyx_pybuffernd_example.diminfo[1].strides = __pyx_pybuffernd_example.rcbuffer->pybuffer.strides[1]; __pyx_pybuffernd_example.diminfo[1].shape = __pyx_pybuffernd_example.rcbuffer->pybuffer.shape[1];
   {
     __Pyx_BufFmt_StackElem __pyx_stack[1];
-    if (unlikely(__Pyx_GetBufferAndValidate(&__pyx_pybuffernd_middle_token.rcbuffer->pybuffer, (PyObject*)__pyx_v_middle_token, &__Pyx_TypeInfo_nn___pyx_t_6deepnl_7trainer_INT_t, PyBUF_FORMAT| PyBUF_STRIDES, 1, 0, __pyx_stack) == -1)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 196; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+    if (unlikely(__Pyx_GetBufferAndValidate(&__pyx_pybuffernd_middle_token.rcbuffer->pybuffer, (PyObject*)__pyx_v_middle_token, &__Pyx_TypeInfo_nn___pyx_t_6deepnl_7trainer_INT_t, PyBUF_FORMAT| PyBUF_STRIDES, 1, 0, __pyx_stack) == -1)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 189; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   }
   __pyx_pybuffernd_middle_token.diminfo[0].strides = __pyx_pybuffernd_middle_token.rcbuffer->pybuffer.strides[0]; __pyx_pybuffernd_middle_token.diminfo[0].shape = __pyx_pybuffernd_middle_token.rcbuffer->pybuffer.shape[0];
   {
     __Pyx_BufFmt_StackElem __pyx_stack[1];
-    if (unlikely(__Pyx_GetBufferAndValidate(&__pyx_pybuffernd_negative_token.rcbuffer->pybuffer, (PyObject*)__pyx_v_negative_token, &__Pyx_TypeInfo_nn___pyx_t_6deepnl_7trainer_INT_t, PyBUF_FORMAT| PyBUF_STRIDES, 1, 0, __pyx_stack) == -1)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 196; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+    if (unlikely(__Pyx_GetBufferAndValidate(&__pyx_pybuffernd_negative_token.rcbuffer->pybuffer, (PyObject*)__pyx_v_negative_token, &__Pyx_TypeInfo_nn___pyx_t_6deepnl_7trainer_INT_t, PyBUF_FORMAT| PyBUF_STRIDES, 1, 0, __pyx_stack) == -1)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 189; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   }
   __pyx_pybuffernd_negative_token.diminfo[0].strides = __pyx_pybuffernd_negative_token.rcbuffer->pybuffer.strides[0]; __pyx_pybuffernd_negative_token.diminfo[0].shape = __pyx_pybuffernd_negative_token.rcbuffer->pybuffer.shape[0];
 
-  /* "deepnl/sentiwords.pyx":205
+  /* "deepnl/sentiwords.pyx":197
+ *         """
  *         #cdef float LR_0 = max(0.001, self.learning_rate * remaining)
- *         # AdaGrad
  *         cdef float LR_0 = self.learning_rate             # <<<<<<<<<<<<<<
  *         cdef float LR_1 = max(0.001, self.learning_rate / self.nn.input_size * remaining)
  *         cdef float LR_2 = max(0.001, self.learning_rate / self.nn.hidden_size * remaining)
@@ -5418,8 +5277,8 @@ static PyObject *__pyx_f_6deepnl_10sentiwords_16SentimentTrainer__update(struct 
   __pyx_t_1 = __pyx_v_self->__pyx_base.__pyx_base.learning_rate;
   __pyx_v_LR_0 = __pyx_t_1;
 
-  /* "deepnl/sentiwords.pyx":206
- *         # AdaGrad
+  /* "deepnl/sentiwords.pyx":198
+ *         #cdef float LR_0 = max(0.001, self.learning_rate * remaining)
  *         cdef float LR_0 = self.learning_rate
  *         cdef float LR_1 = max(0.001, self.learning_rate / self.nn.input_size * remaining)             # <<<<<<<<<<<<<<
  *         cdef float LR_2 = max(0.001, self.learning_rate / self.nn.hidden_size * remaining)
@@ -5427,7 +5286,7 @@ static PyObject *__pyx_f_6deepnl_10sentiwords_16SentimentTrainer__update(struct 
  */
   if (unlikely(__pyx_v_self->__pyx_base.__pyx_base.nn->input_size == 0)) {
     PyErr_SetString(PyExc_ZeroDivisionError, "float division");
-    {__pyx_filename = __pyx_f[0]; __pyx_lineno = 206; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+    {__pyx_filename = __pyx_f[0]; __pyx_lineno = 198; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   }
   __pyx_t_1 = ((__pyx_v_self->__pyx_base.__pyx_base.learning_rate / __pyx_v_self->__pyx_base.__pyx_base.nn->input_size) * __pyx_v_remaining);
   __pyx_t_2 = 0.001;
@@ -5438,7 +5297,7 @@ static PyObject *__pyx_f_6deepnl_10sentiwords_16SentimentTrainer__update(struct 
   }
   __pyx_v_LR_1 = __pyx_t_3;
 
-  /* "deepnl/sentiwords.pyx":207
+  /* "deepnl/sentiwords.pyx":199
  *         cdef float LR_0 = self.learning_rate
  *         cdef float LR_1 = max(0.001, self.learning_rate / self.nn.input_size * remaining)
  *         cdef float LR_2 = max(0.001, self.learning_rate / self.nn.hidden_size * remaining)             # <<<<<<<<<<<<<<
@@ -5447,7 +5306,7 @@ static PyObject *__pyx_f_6deepnl_10sentiwords_16SentimentTrainer__update(struct 
  */
   if (unlikely(__pyx_v_self->__pyx_base.__pyx_base.nn->hidden_size == 0)) {
     PyErr_SetString(PyExc_ZeroDivisionError, "float division");
-    {__pyx_filename = __pyx_f[0]; __pyx_lineno = 207; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+    {__pyx_filename = __pyx_f[0]; __pyx_lineno = 199; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   }
   __pyx_t_1 = ((__pyx_v_self->__pyx_base.__pyx_base.learning_rate / __pyx_v_self->__pyx_base.__pyx_base.nn->hidden_size) * __pyx_v_remaining);
   __pyx_t_3 = 0.001;
@@ -5458,7 +5317,7 @@ static PyObject *__pyx_f_6deepnl_10sentiwords_16SentimentTrainer__update(struct 
   }
   __pyx_v_LR_2 = __pyx_t_2;
 
-  /* "deepnl/sentiwords.pyx":209
+  /* "deepnl/sentiwords.pyx":201
  *         cdef float LR_2 = max(0.001, self.learning_rate / self.nn.hidden_size * remaining)
  * 
  *         cdef Network nn = self.nn             # <<<<<<<<<<<<<<
@@ -5470,7 +5329,7 @@ static PyObject *__pyx_f_6deepnl_10sentiwords_16SentimentTrainer__update(struct 
   __pyx_v_nn = ((struct __pyx_obj_6deepnl_7network_Network *)__pyx_t_4);
   __pyx_t_4 = 0;
 
-  /* "deepnl/sentiwords.pyx":210
+  /* "deepnl/sentiwords.pyx":202
  * 
  *         cdef Network nn = self.nn
  *         cdef Parameters p = nn.p             # <<<<<<<<<<<<<<
@@ -5482,696 +5341,291 @@ static PyObject *__pyx_f_6deepnl_10sentiwords_16SentimentTrainer__update(struct 
   __pyx_v_p = ((struct __pyx_obj_6deepnl_7network_Parameters *)__pyx_t_4);
   __pyx_t_4 = 0;
 
-  /* "deepnl/sentiwords.pyx":211
+  /* "deepnl/sentiwords.pyx":203
  *         cdef Network nn = self.nn
  *         cdef Parameters p = nn.p
  *         cdef int left_context = len(self.pre_padding)             # <<<<<<<<<<<<<<
  * 
- *         p.output_weights += LR_2 * grads.output_weights
+ *         # FIXME: use AdaGrad here too:
  */
   __pyx_t_4 = ((PyObject *)__pyx_v_self->__pyx_base.__pyx_base.pre_padding);
   __Pyx_INCREF(__pyx_t_4);
-  __pyx_t_5 = PyObject_Length(__pyx_t_4); if (unlikely(__pyx_t_5 == -1)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 211; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_t_5 = PyObject_Length(__pyx_t_4); if (unlikely(__pyx_t_5 == -1)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 203; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
   __pyx_v_left_context = __pyx_t_5;
 
-  /* "deepnl/sentiwords.pyx":213
- *         cdef int left_context = len(self.pre_padding)
+  /* "deepnl/sentiwords.pyx":206
  * 
+ *         # FIXME: use AdaGrad here too:
  *         p.output_weights += LR_2 * grads.output_weights             # <<<<<<<<<<<<<<
  *         p.output_bias += LR_2 * grads.output_bias
  * 
  */
-  __pyx_t_4 = PyFloat_FromDouble(__pyx_v_LR_2); if (unlikely(!__pyx_t_4)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 213; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_t_4 = PyFloat_FromDouble(__pyx_v_LR_2); if (unlikely(!__pyx_t_4)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 206; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_GOTREF(__pyx_t_4);
-  __pyx_t_6 = PyNumber_Multiply(__pyx_t_4, ((PyObject *)__pyx_v_grads->__pyx_base.output_weights)); if (unlikely(!__pyx_t_6)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 213; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_t_6 = PyNumber_Multiply(__pyx_t_4, ((PyObject *)__pyx_v_grads->__pyx_base.output_weights)); if (unlikely(!__pyx_t_6)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 206; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_GOTREF(__pyx_t_6);
   __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
-  __pyx_t_4 = PyNumber_InPlaceAdd(((PyObject *)__pyx_v_p->output_weights), __pyx_t_6); if (unlikely(!__pyx_t_4)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 213; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_t_4 = PyNumber_InPlaceAdd(((PyObject *)__pyx_v_p->output_weights), __pyx_t_6); if (unlikely(!__pyx_t_4)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 206; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_GOTREF(__pyx_t_4);
   __Pyx_DECREF(__pyx_t_6); __pyx_t_6 = 0;
-  if (!(likely(((__pyx_t_4) == Py_None) || likely(__Pyx_TypeTest(__pyx_t_4, __pyx_ptype_5numpy_ndarray))))) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 213; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  if (!(likely(((__pyx_t_4) == Py_None) || likely(__Pyx_TypeTest(__pyx_t_4, __pyx_ptype_5numpy_ndarray))))) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 206; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_GIVEREF(__pyx_t_4);
   __Pyx_GOTREF(__pyx_v_p->output_weights);
   __Pyx_DECREF(((PyObject *)__pyx_v_p->output_weights));
   __pyx_v_p->output_weights = ((PyArrayObject *)__pyx_t_4);
   __pyx_t_4 = 0;
 
-  /* "deepnl/sentiwords.pyx":214
- * 
+  /* "deepnl/sentiwords.pyx":207
+ *         # FIXME: use AdaGrad here too:
  *         p.output_weights += LR_2 * grads.output_weights
  *         p.output_bias += LR_2 * grads.output_bias             # <<<<<<<<<<<<<<
  * 
  *         p.hidden_weights += LR_1 * grads.hidden_weights
  */
-  __pyx_t_4 = PyFloat_FromDouble(__pyx_v_LR_2); if (unlikely(!__pyx_t_4)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 214; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_t_4 = PyFloat_FromDouble(__pyx_v_LR_2); if (unlikely(!__pyx_t_4)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 207; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_GOTREF(__pyx_t_4);
-  __pyx_t_6 = PyNumber_Multiply(__pyx_t_4, ((PyObject *)__pyx_v_grads->__pyx_base.output_bias)); if (unlikely(!__pyx_t_6)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 214; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_t_6 = PyNumber_Multiply(__pyx_t_4, ((PyObject *)__pyx_v_grads->__pyx_base.output_bias)); if (unlikely(!__pyx_t_6)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 207; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_GOTREF(__pyx_t_6);
   __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
-  __pyx_t_4 = PyNumber_InPlaceAdd(((PyObject *)__pyx_v_p->output_bias), __pyx_t_6); if (unlikely(!__pyx_t_4)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 214; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_t_4 = PyNumber_InPlaceAdd(((PyObject *)__pyx_v_p->output_bias), __pyx_t_6); if (unlikely(!__pyx_t_4)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 207; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_GOTREF(__pyx_t_4);
   __Pyx_DECREF(__pyx_t_6); __pyx_t_6 = 0;
-  if (!(likely(((__pyx_t_4) == Py_None) || likely(__Pyx_TypeTest(__pyx_t_4, __pyx_ptype_5numpy_ndarray))))) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 214; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  if (!(likely(((__pyx_t_4) == Py_None) || likely(__Pyx_TypeTest(__pyx_t_4, __pyx_ptype_5numpy_ndarray))))) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 207; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_GIVEREF(__pyx_t_4);
   __Pyx_GOTREF(__pyx_v_p->output_bias);
   __Pyx_DECREF(((PyObject *)__pyx_v_p->output_bias));
   __pyx_v_p->output_bias = ((PyArrayObject *)__pyx_t_4);
   __pyx_t_4 = 0;
 
-  /* "deepnl/sentiwords.pyx":216
+  /* "deepnl/sentiwords.pyx":209
  *         p.output_bias += LR_2 * grads.output_bias
  * 
  *         p.hidden_weights += LR_1 * grads.hidden_weights             # <<<<<<<<<<<<<<
  *         p.hidden_bias += LR_1 * grads.hidden_bias
  * 
  */
-  __pyx_t_4 = PyFloat_FromDouble(__pyx_v_LR_1); if (unlikely(!__pyx_t_4)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 216; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_t_4 = PyFloat_FromDouble(__pyx_v_LR_1); if (unlikely(!__pyx_t_4)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 209; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_GOTREF(__pyx_t_4);
-  __pyx_t_6 = PyNumber_Multiply(__pyx_t_4, ((PyObject *)__pyx_v_grads->__pyx_base.hidden_weights)); if (unlikely(!__pyx_t_6)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 216; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_t_6 = PyNumber_Multiply(__pyx_t_4, ((PyObject *)__pyx_v_grads->__pyx_base.hidden_weights)); if (unlikely(!__pyx_t_6)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 209; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_GOTREF(__pyx_t_6);
   __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
-  __pyx_t_4 = PyNumber_InPlaceAdd(((PyObject *)__pyx_v_p->hidden_weights), __pyx_t_6); if (unlikely(!__pyx_t_4)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 216; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_t_4 = PyNumber_InPlaceAdd(((PyObject *)__pyx_v_p->hidden_weights), __pyx_t_6); if (unlikely(!__pyx_t_4)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 209; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_GOTREF(__pyx_t_4);
   __Pyx_DECREF(__pyx_t_6); __pyx_t_6 = 0;
-  if (!(likely(((__pyx_t_4) == Py_None) || likely(__Pyx_TypeTest(__pyx_t_4, __pyx_ptype_5numpy_ndarray))))) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 216; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  if (!(likely(((__pyx_t_4) == Py_None) || likely(__Pyx_TypeTest(__pyx_t_4, __pyx_ptype_5numpy_ndarray))))) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 209; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_GIVEREF(__pyx_t_4);
   __Pyx_GOTREF(__pyx_v_p->hidden_weights);
   __Pyx_DECREF(((PyObject *)__pyx_v_p->hidden_weights));
   __pyx_v_p->hidden_weights = ((PyArrayObject *)__pyx_t_4);
   __pyx_t_4 = 0;
 
-  /* "deepnl/sentiwords.pyx":217
+  /* "deepnl/sentiwords.pyx":210
  * 
  *         p.hidden_weights += LR_1 * grads.hidden_weights
  *         p.hidden_bias += LR_1 * grads.hidden_bias             # <<<<<<<<<<<<<<
  * 
- *         cdef np.ndarray[FLOAT_t,ndim=1] grads_input_neg, grads_input_pos
+ *         # tokens where changes apply
  */
-  __pyx_t_4 = PyFloat_FromDouble(__pyx_v_LR_1); if (unlikely(!__pyx_t_4)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 217; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_t_4 = PyFloat_FromDouble(__pyx_v_LR_1); if (unlikely(!__pyx_t_4)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 210; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_GOTREF(__pyx_t_4);
-  __pyx_t_6 = PyNumber_Multiply(__pyx_t_4, ((PyObject *)__pyx_v_grads->__pyx_base.hidden_bias)); if (unlikely(!__pyx_t_6)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 217; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_t_6 = PyNumber_Multiply(__pyx_t_4, ((PyObject *)__pyx_v_grads->__pyx_base.hidden_bias)); if (unlikely(!__pyx_t_6)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 210; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_GOTREF(__pyx_t_6);
   __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
-  __pyx_t_4 = PyNumber_InPlaceAdd(((PyObject *)__pyx_v_p->hidden_bias), __pyx_t_6); if (unlikely(!__pyx_t_4)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 217; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_t_4 = PyNumber_InPlaceAdd(((PyObject *)__pyx_v_p->hidden_bias), __pyx_t_6); if (unlikely(!__pyx_t_4)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 210; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_GOTREF(__pyx_t_4);
   __Pyx_DECREF(__pyx_t_6); __pyx_t_6 = 0;
-  if (!(likely(((__pyx_t_4) == Py_None) || likely(__Pyx_TypeTest(__pyx_t_4, __pyx_ptype_5numpy_ndarray))))) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 217; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  if (!(likely(((__pyx_t_4) == Py_None) || likely(__Pyx_TypeTest(__pyx_t_4, __pyx_ptype_5numpy_ndarray))))) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 210; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_GIVEREF(__pyx_t_4);
   __Pyx_GOTREF(__pyx_v_p->hidden_bias);
   __Pyx_DECREF(((PyObject *)__pyx_v_p->hidden_bias));
   __pyx_v_p->hidden_bias = ((PyArrayObject *)__pyx_t_4);
   __pyx_t_4 = 0;
 
-  /* "deepnl/sentiwords.pyx":229
- *         # p -= LR * g / sqrt(G + eps)
- *         global adaEps
- *         self.input_adagrads_pos += np.power(grads.input, 2)             # <<<<<<<<<<<<<<
- *         self.input_adagrads_neg += np.power(grads.input_neg, 2)
- *         grads_input_pos = LR_0 * grads.input / np.sqrt(self.input_adagrads_pos + adaEps)
+  /* "deepnl/sentiwords.pyx":213
+ * 
+ *         # tokens where changes apply
+ *         cdef np.ndarray tokens = np.vstack((example, negative_token))             # <<<<<<<<<<<<<<
+ *         # both changes apply to all tokens except the middle
+ *         cdef np.ndarray[FLOAT_t,ndim=1] deltas = grads.input + grads.input_neg
  */
-  __pyx_t_6 = __Pyx_GetModuleGlobalName(__pyx_n_s_np); if (unlikely(!__pyx_t_6)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 229; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_t_6 = __Pyx_GetModuleGlobalName(__pyx_n_s_np); if (unlikely(!__pyx_t_6)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 213; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_GOTREF(__pyx_t_6);
-  __pyx_t_7 = __Pyx_PyObject_GetAttrStr(__pyx_t_6, __pyx_n_s_power); if (unlikely(!__pyx_t_7)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 229; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_t_7 = __Pyx_PyObject_GetAttrStr(__pyx_t_6, __pyx_n_s_vstack); if (unlikely(!__pyx_t_7)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 213; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_GOTREF(__pyx_t_7);
   __Pyx_DECREF(__pyx_t_6); __pyx_t_6 = 0;
-  __pyx_t_6 = NULL;
-  __pyx_t_5 = 0;
+  __pyx_t_6 = PyTuple_New(2); if (unlikely(!__pyx_t_6)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 213; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __Pyx_GOTREF(__pyx_t_6);
+  __Pyx_INCREF(((PyObject *)__pyx_v_example));
+  __Pyx_GIVEREF(((PyObject *)__pyx_v_example));
+  PyTuple_SET_ITEM(__pyx_t_6, 0, ((PyObject *)__pyx_v_example));
+  __Pyx_INCREF(((PyObject *)__pyx_v_negative_token));
+  __Pyx_GIVEREF(((PyObject *)__pyx_v_negative_token));
+  PyTuple_SET_ITEM(__pyx_t_6, 1, ((PyObject *)__pyx_v_negative_token));
+  __pyx_t_8 = NULL;
   if (CYTHON_COMPILING_IN_CPYTHON && unlikely(PyMethod_Check(__pyx_t_7))) {
-    __pyx_t_6 = PyMethod_GET_SELF(__pyx_t_7);
-    if (likely(__pyx_t_6)) {
+    __pyx_t_8 = PyMethod_GET_SELF(__pyx_t_7);
+    if (likely(__pyx_t_8)) {
       PyObject* function = PyMethod_GET_FUNCTION(__pyx_t_7);
-      __Pyx_INCREF(__pyx_t_6);
+      __Pyx_INCREF(__pyx_t_8);
       __Pyx_INCREF(function);
       __Pyx_DECREF_SET(__pyx_t_7, function);
-      __pyx_t_5 = 1;
     }
   }
-  __pyx_t_8 = PyTuple_New(2+__pyx_t_5); if (unlikely(!__pyx_t_8)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 229; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
-  __Pyx_GOTREF(__pyx_t_8);
-  if (__pyx_t_6) {
-    __Pyx_GIVEREF(__pyx_t_6); PyTuple_SET_ITEM(__pyx_t_8, 0, __pyx_t_6); __pyx_t_6 = NULL;
-  }
-  __Pyx_INCREF(((PyObject *)__pyx_v_grads->input));
-  __Pyx_GIVEREF(((PyObject *)__pyx_v_grads->input));
-  PyTuple_SET_ITEM(__pyx_t_8, 0+__pyx_t_5, ((PyObject *)__pyx_v_grads->input));
-  __Pyx_INCREF(__pyx_int_2);
-  __Pyx_GIVEREF(__pyx_int_2);
-  PyTuple_SET_ITEM(__pyx_t_8, 1+__pyx_t_5, __pyx_int_2);
-  __pyx_t_4 = __Pyx_PyObject_Call(__pyx_t_7, __pyx_t_8, NULL); if (unlikely(!__pyx_t_4)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 229; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
-  __Pyx_GOTREF(__pyx_t_4);
-  __Pyx_DECREF(__pyx_t_8); __pyx_t_8 = 0;
-  __Pyx_DECREF(__pyx_t_7); __pyx_t_7 = 0;
-  __pyx_t_7 = PyNumber_InPlaceAdd(((PyObject *)__pyx_v_self->input_adagrads_pos), __pyx_t_4); if (unlikely(!__pyx_t_7)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 229; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
-  __Pyx_GOTREF(__pyx_t_7);
-  __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
-  if (!(likely(((__pyx_t_7) == Py_None) || likely(__Pyx_TypeTest(__pyx_t_7, __pyx_ptype_5numpy_ndarray))))) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 229; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
-  __Pyx_GIVEREF(__pyx_t_7);
-  __Pyx_GOTREF(__pyx_v_self->input_adagrads_pos);
-  __Pyx_DECREF(((PyObject *)__pyx_v_self->input_adagrads_pos));
-  __pyx_v_self->input_adagrads_pos = ((PyArrayObject *)__pyx_t_7);
-  __pyx_t_7 = 0;
-
-  /* "deepnl/sentiwords.pyx":230
- *         global adaEps
- *         self.input_adagrads_pos += np.power(grads.input, 2)
- *         self.input_adagrads_neg += np.power(grads.input_neg, 2)             # <<<<<<<<<<<<<<
- *         grads_input_pos = LR_0 * grads.input / np.sqrt(self.input_adagrads_pos + adaEps)
- *         grads_input_neg = LR_0 * grads.input_neg / np.sqrt(self.input_adagrads_neg + adaEps)
- */
-  __pyx_t_4 = __Pyx_GetModuleGlobalName(__pyx_n_s_np); if (unlikely(!__pyx_t_4)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 230; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
-  __Pyx_GOTREF(__pyx_t_4);
-  __pyx_t_8 = __Pyx_PyObject_GetAttrStr(__pyx_t_4, __pyx_n_s_power); if (unlikely(!__pyx_t_8)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 230; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
-  __Pyx_GOTREF(__pyx_t_8);
-  __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
-  __pyx_t_4 = __Pyx_PyObject_GetAttrStr(((PyObject *)__pyx_v_grads), __pyx_n_s_input_neg); if (unlikely(!__pyx_t_4)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 230; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
-  __Pyx_GOTREF(__pyx_t_4);
-  __pyx_t_6 = NULL;
-  __pyx_t_5 = 0;
-  if (CYTHON_COMPILING_IN_CPYTHON && unlikely(PyMethod_Check(__pyx_t_8))) {
-    __pyx_t_6 = PyMethod_GET_SELF(__pyx_t_8);
-    if (likely(__pyx_t_6)) {
-      PyObject* function = PyMethod_GET_FUNCTION(__pyx_t_8);
-      __Pyx_INCREF(__pyx_t_6);
-      __Pyx_INCREF(function);
-      __Pyx_DECREF_SET(__pyx_t_8, function);
-      __pyx_t_5 = 1;
-    }
-  }
-  __pyx_t_9 = PyTuple_New(2+__pyx_t_5); if (unlikely(!__pyx_t_9)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 230; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
-  __Pyx_GOTREF(__pyx_t_9);
-  if (__pyx_t_6) {
-    __Pyx_GIVEREF(__pyx_t_6); PyTuple_SET_ITEM(__pyx_t_9, 0, __pyx_t_6); __pyx_t_6 = NULL;
-  }
-  __Pyx_GIVEREF(__pyx_t_4);
-  PyTuple_SET_ITEM(__pyx_t_9, 0+__pyx_t_5, __pyx_t_4);
-  __Pyx_INCREF(__pyx_int_2);
-  __Pyx_GIVEREF(__pyx_int_2);
-  PyTuple_SET_ITEM(__pyx_t_9, 1+__pyx_t_5, __pyx_int_2);
-  __pyx_t_4 = 0;
-  __pyx_t_7 = __Pyx_PyObject_Call(__pyx_t_8, __pyx_t_9, NULL); if (unlikely(!__pyx_t_7)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 230; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
-  __Pyx_GOTREF(__pyx_t_7);
-  __Pyx_DECREF(__pyx_t_9); __pyx_t_9 = 0;
-  __Pyx_DECREF(__pyx_t_8); __pyx_t_8 = 0;
-  __pyx_t_8 = PyNumber_InPlaceAdd(((PyObject *)__pyx_v_self->input_adagrads_neg), __pyx_t_7); if (unlikely(!__pyx_t_8)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 230; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
-  __Pyx_GOTREF(__pyx_t_8);
-  __Pyx_DECREF(__pyx_t_7); __pyx_t_7 = 0;
-  if (!(likely(((__pyx_t_8) == Py_None) || likely(__Pyx_TypeTest(__pyx_t_8, __pyx_ptype_5numpy_ndarray))))) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 230; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
-  __Pyx_GIVEREF(__pyx_t_8);
-  __Pyx_GOTREF(__pyx_v_self->input_adagrads_neg);
-  __Pyx_DECREF(((PyObject *)__pyx_v_self->input_adagrads_neg));
-  __pyx_v_self->input_adagrads_neg = ((PyArrayObject *)__pyx_t_8);
-  __pyx_t_8 = 0;
-
-  /* "deepnl/sentiwords.pyx":231
- *         self.input_adagrads_pos += np.power(grads.input, 2)
- *         self.input_adagrads_neg += np.power(grads.input_neg, 2)
- *         grads_input_pos = LR_0 * grads.input / np.sqrt(self.input_adagrads_pos + adaEps)             # <<<<<<<<<<<<<<
- *         grads_input_neg = LR_0 * grads.input_neg / np.sqrt(self.input_adagrads_neg + adaEps)
- *         #grads_input_pos = LR_0 * grads.input # DEBUG
- */
-  __pyx_t_8 = PyFloat_FromDouble(__pyx_v_LR_0); if (unlikely(!__pyx_t_8)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 231; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
-  __Pyx_GOTREF(__pyx_t_8);
-  __pyx_t_7 = PyNumber_Multiply(__pyx_t_8, ((PyObject *)__pyx_v_grads->input)); if (unlikely(!__pyx_t_7)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 231; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
-  __Pyx_GOTREF(__pyx_t_7);
-  __Pyx_DECREF(__pyx_t_8); __pyx_t_8 = 0;
-  __pyx_t_9 = __Pyx_GetModuleGlobalName(__pyx_n_s_np); if (unlikely(!__pyx_t_9)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 231; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
-  __Pyx_GOTREF(__pyx_t_9);
-  __pyx_t_4 = __Pyx_PyObject_GetAttrStr(__pyx_t_9, __pyx_n_s_sqrt); if (unlikely(!__pyx_t_4)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 231; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
-  __Pyx_GOTREF(__pyx_t_4);
-  __Pyx_DECREF(__pyx_t_9); __pyx_t_9 = 0;
-  __pyx_t_9 = PyFloat_FromDouble(__pyx_v_6deepnl_7network_adaEps); if (unlikely(!__pyx_t_9)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 231; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
-  __Pyx_GOTREF(__pyx_t_9);
-  __pyx_t_6 = PyNumber_Add(((PyObject *)__pyx_v_self->input_adagrads_pos), __pyx_t_9); if (unlikely(!__pyx_t_6)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 231; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
-  __Pyx_GOTREF(__pyx_t_6);
-  __Pyx_DECREF(__pyx_t_9); __pyx_t_9 = 0;
-  __pyx_t_9 = NULL;
-  if (CYTHON_COMPILING_IN_CPYTHON && unlikely(PyMethod_Check(__pyx_t_4))) {
-    __pyx_t_9 = PyMethod_GET_SELF(__pyx_t_4);
-    if (likely(__pyx_t_9)) {
-      PyObject* function = PyMethod_GET_FUNCTION(__pyx_t_4);
-      __Pyx_INCREF(__pyx_t_9);
-      __Pyx_INCREF(function);
-      __Pyx_DECREF_SET(__pyx_t_4, function);
-    }
-  }
-  if (!__pyx_t_9) {
-    __pyx_t_8 = __Pyx_PyObject_CallOneArg(__pyx_t_4, __pyx_t_6); if (unlikely(!__pyx_t_8)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 231; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  if (!__pyx_t_8) {
+    __pyx_t_4 = __Pyx_PyObject_CallOneArg(__pyx_t_7, __pyx_t_6); if (unlikely(!__pyx_t_4)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 213; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
     __Pyx_DECREF(__pyx_t_6); __pyx_t_6 = 0;
-    __Pyx_GOTREF(__pyx_t_8);
+    __Pyx_GOTREF(__pyx_t_4);
   } else {
-    __pyx_t_10 = PyTuple_New(1+1); if (unlikely(!__pyx_t_10)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 231; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
-    __Pyx_GOTREF(__pyx_t_10);
-    __Pyx_GIVEREF(__pyx_t_9); PyTuple_SET_ITEM(__pyx_t_10, 0, __pyx_t_9); __pyx_t_9 = NULL;
-    __Pyx_GIVEREF(__pyx_t_6);
-    PyTuple_SET_ITEM(__pyx_t_10, 0+1, __pyx_t_6);
-    __pyx_t_6 = 0;
-    __pyx_t_8 = __Pyx_PyObject_Call(__pyx_t_4, __pyx_t_10, NULL); if (unlikely(!__pyx_t_8)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 231; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
-    __Pyx_GOTREF(__pyx_t_8);
-    __Pyx_DECREF(__pyx_t_10); __pyx_t_10 = 0;
-  }
-  __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
-  __pyx_t_4 = __Pyx_PyNumber_Divide(__pyx_t_7, __pyx_t_8); if (unlikely(!__pyx_t_4)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 231; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
-  __Pyx_GOTREF(__pyx_t_4);
-  __Pyx_DECREF(__pyx_t_7); __pyx_t_7 = 0;
-  __Pyx_DECREF(__pyx_t_8); __pyx_t_8 = 0;
-  if (!(likely(((__pyx_t_4) == Py_None) || likely(__Pyx_TypeTest(__pyx_t_4, __pyx_ptype_5numpy_ndarray))))) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 231; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
-  __pyx_t_11 = ((PyArrayObject *)__pyx_t_4);
-  {
-    __Pyx_BufFmt_StackElem __pyx_stack[1];
-    __Pyx_SafeReleaseBuffer(&__pyx_pybuffernd_grads_input_pos.rcbuffer->pybuffer);
-    __pyx_t_12 = __Pyx_GetBufferAndValidate(&__pyx_pybuffernd_grads_input_pos.rcbuffer->pybuffer, (PyObject*)__pyx_t_11, &__Pyx_TypeInfo_nn___pyx_t_6deepnl_10extractors_FLOAT_t, PyBUF_FORMAT| PyBUF_STRIDES, 1, 0, __pyx_stack);
-    if (unlikely(__pyx_t_12 < 0)) {
-      PyErr_Fetch(&__pyx_t_13, &__pyx_t_14, &__pyx_t_15);
-      if (unlikely(__Pyx_GetBufferAndValidate(&__pyx_pybuffernd_grads_input_pos.rcbuffer->pybuffer, (PyObject*)__pyx_v_grads_input_pos, &__Pyx_TypeInfo_nn___pyx_t_6deepnl_10extractors_FLOAT_t, PyBUF_FORMAT| PyBUF_STRIDES, 1, 0, __pyx_stack) == -1)) {
-        Py_XDECREF(__pyx_t_13); Py_XDECREF(__pyx_t_14); Py_XDECREF(__pyx_t_15);
-        __Pyx_RaiseBufferFallbackError();
-      } else {
-        PyErr_Restore(__pyx_t_13, __pyx_t_14, __pyx_t_15);
-      }
-    }
-    __pyx_pybuffernd_grads_input_pos.diminfo[0].strides = __pyx_pybuffernd_grads_input_pos.rcbuffer->pybuffer.strides[0]; __pyx_pybuffernd_grads_input_pos.diminfo[0].shape = __pyx_pybuffernd_grads_input_pos.rcbuffer->pybuffer.shape[0];
-    if (unlikely(__pyx_t_12 < 0)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 231; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
-  }
-  __pyx_t_11 = 0;
-  __pyx_v_grads_input_pos = ((PyArrayObject *)__pyx_t_4);
-  __pyx_t_4 = 0;
-
-  /* "deepnl/sentiwords.pyx":232
- *         self.input_adagrads_neg += np.power(grads.input_neg, 2)
- *         grads_input_pos = LR_0 * grads.input / np.sqrt(self.input_adagrads_pos + adaEps)
- *         grads_input_neg = LR_0 * grads.input_neg / np.sqrt(self.input_adagrads_neg + adaEps)             # <<<<<<<<<<<<<<
- *         #grads_input_pos = LR_0 * grads.input # DEBUG
- *         #grads_input_neg = LR_0 * grads.input_neg # DEBUG
- */
-  __pyx_t_4 = PyFloat_FromDouble(__pyx_v_LR_0); if (unlikely(!__pyx_t_4)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 232; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
-  __Pyx_GOTREF(__pyx_t_4);
-  __pyx_t_8 = __Pyx_PyObject_GetAttrStr(((PyObject *)__pyx_v_grads), __pyx_n_s_input_neg); if (unlikely(!__pyx_t_8)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 232; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
-  __Pyx_GOTREF(__pyx_t_8);
-  __pyx_t_7 = PyNumber_Multiply(__pyx_t_4, __pyx_t_8); if (unlikely(!__pyx_t_7)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 232; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
-  __Pyx_GOTREF(__pyx_t_7);
-  __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
-  __Pyx_DECREF(__pyx_t_8); __pyx_t_8 = 0;
-  __pyx_t_4 = __Pyx_GetModuleGlobalName(__pyx_n_s_np); if (unlikely(!__pyx_t_4)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 232; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
-  __Pyx_GOTREF(__pyx_t_4);
-  __pyx_t_10 = __Pyx_PyObject_GetAttrStr(__pyx_t_4, __pyx_n_s_sqrt); if (unlikely(!__pyx_t_10)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 232; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
-  __Pyx_GOTREF(__pyx_t_10);
-  __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
-  __pyx_t_4 = PyFloat_FromDouble(__pyx_v_6deepnl_7network_adaEps); if (unlikely(!__pyx_t_4)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 232; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
-  __Pyx_GOTREF(__pyx_t_4);
-  __pyx_t_6 = PyNumber_Add(((PyObject *)__pyx_v_self->input_adagrads_neg), __pyx_t_4); if (unlikely(!__pyx_t_6)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 232; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
-  __Pyx_GOTREF(__pyx_t_6);
-  __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
-  __pyx_t_4 = NULL;
-  if (CYTHON_COMPILING_IN_CPYTHON && unlikely(PyMethod_Check(__pyx_t_10))) {
-    __pyx_t_4 = PyMethod_GET_SELF(__pyx_t_10);
-    if (likely(__pyx_t_4)) {
-      PyObject* function = PyMethod_GET_FUNCTION(__pyx_t_10);
-      __Pyx_INCREF(__pyx_t_4);
-      __Pyx_INCREF(function);
-      __Pyx_DECREF_SET(__pyx_t_10, function);
-    }
-  }
-  if (!__pyx_t_4) {
-    __pyx_t_8 = __Pyx_PyObject_CallOneArg(__pyx_t_10, __pyx_t_6); if (unlikely(!__pyx_t_8)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 232; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
-    __Pyx_DECREF(__pyx_t_6); __pyx_t_6 = 0;
-    __Pyx_GOTREF(__pyx_t_8);
-  } else {
-    __pyx_t_9 = PyTuple_New(1+1); if (unlikely(!__pyx_t_9)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 232; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+    __pyx_t_9 = PyTuple_New(1+1); if (unlikely(!__pyx_t_9)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 213; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
     __Pyx_GOTREF(__pyx_t_9);
-    __Pyx_GIVEREF(__pyx_t_4); PyTuple_SET_ITEM(__pyx_t_9, 0, __pyx_t_4); __pyx_t_4 = NULL;
+    __Pyx_GIVEREF(__pyx_t_8); PyTuple_SET_ITEM(__pyx_t_9, 0, __pyx_t_8); __pyx_t_8 = NULL;
     __Pyx_GIVEREF(__pyx_t_6);
     PyTuple_SET_ITEM(__pyx_t_9, 0+1, __pyx_t_6);
     __pyx_t_6 = 0;
-    __pyx_t_8 = __Pyx_PyObject_Call(__pyx_t_10, __pyx_t_9, NULL); if (unlikely(!__pyx_t_8)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 232; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
-    __Pyx_GOTREF(__pyx_t_8);
+    __pyx_t_4 = __Pyx_PyObject_Call(__pyx_t_7, __pyx_t_9, NULL); if (unlikely(!__pyx_t_4)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 213; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+    __Pyx_GOTREF(__pyx_t_4);
     __Pyx_DECREF(__pyx_t_9); __pyx_t_9 = 0;
   }
-  __Pyx_DECREF(__pyx_t_10); __pyx_t_10 = 0;
-  __pyx_t_10 = __Pyx_PyNumber_Divide(__pyx_t_7, __pyx_t_8); if (unlikely(!__pyx_t_10)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 232; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
-  __Pyx_GOTREF(__pyx_t_10);
   __Pyx_DECREF(__pyx_t_7); __pyx_t_7 = 0;
-  __Pyx_DECREF(__pyx_t_8); __pyx_t_8 = 0;
-  if (!(likely(((__pyx_t_10) == Py_None) || likely(__Pyx_TypeTest(__pyx_t_10, __pyx_ptype_5numpy_ndarray))))) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 232; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
-  __pyx_t_11 = ((PyArrayObject *)__pyx_t_10);
+  if (!(likely(((__pyx_t_4) == Py_None) || likely(__Pyx_TypeTest(__pyx_t_4, __pyx_ptype_5numpy_ndarray))))) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 213; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_v_tokens = ((PyArrayObject *)__pyx_t_4);
+  __pyx_t_4 = 0;
+
+  /* "deepnl/sentiwords.pyx":215
+ *         cdef np.ndarray tokens = np.vstack((example, negative_token))
+ *         # both changes apply to all tokens except the middle
+ *         cdef np.ndarray[FLOAT_t,ndim=1] deltas = grads.input + grads.input_neg             # <<<<<<<<<<<<<<
+ *         deltas[left_context] = grads.input[left_context] # positive token
+ *         deltas = np.vstack((deltas, grads.input_neg[left_context])) # negative token
+ */
+  __pyx_t_4 = __Pyx_PyObject_GetAttrStr(((PyObject *)__pyx_v_grads), __pyx_n_s_input_neg); if (unlikely(!__pyx_t_4)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 215; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __Pyx_GOTREF(__pyx_t_4);
+  __pyx_t_7 = PyNumber_Add(((PyObject *)__pyx_v_grads->input), __pyx_t_4); if (unlikely(!__pyx_t_7)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 215; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __Pyx_GOTREF(__pyx_t_7);
+  __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
+  if (!(likely(((__pyx_t_7) == Py_None) || likely(__Pyx_TypeTest(__pyx_t_7, __pyx_ptype_5numpy_ndarray))))) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 215; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_t_10 = ((PyArrayObject *)__pyx_t_7);
   {
     __Pyx_BufFmt_StackElem __pyx_stack[1];
-    __Pyx_SafeReleaseBuffer(&__pyx_pybuffernd_grads_input_neg.rcbuffer->pybuffer);
-    __pyx_t_12 = __Pyx_GetBufferAndValidate(&__pyx_pybuffernd_grads_input_neg.rcbuffer->pybuffer, (PyObject*)__pyx_t_11, &__Pyx_TypeInfo_nn___pyx_t_6deepnl_10extractors_FLOAT_t, PyBUF_FORMAT| PyBUF_STRIDES, 1, 0, __pyx_stack);
-    if (unlikely(__pyx_t_12 < 0)) {
-      PyErr_Fetch(&__pyx_t_15, &__pyx_t_14, &__pyx_t_13);
-      if (unlikely(__Pyx_GetBufferAndValidate(&__pyx_pybuffernd_grads_input_neg.rcbuffer->pybuffer, (PyObject*)__pyx_v_grads_input_neg, &__Pyx_TypeInfo_nn___pyx_t_6deepnl_10extractors_FLOAT_t, PyBUF_FORMAT| PyBUF_STRIDES, 1, 0, __pyx_stack) == -1)) {
-        Py_XDECREF(__pyx_t_15); Py_XDECREF(__pyx_t_14); Py_XDECREF(__pyx_t_13);
+    if (unlikely(__Pyx_GetBufferAndValidate(&__pyx_pybuffernd_deltas.rcbuffer->pybuffer, (PyObject*)__pyx_t_10, &__Pyx_TypeInfo_nn___pyx_t_6deepnl_10extractors_FLOAT_t, PyBUF_FORMAT| PyBUF_STRIDES| PyBUF_WRITABLE, 1, 0, __pyx_stack) == -1)) {
+      __pyx_v_deltas = ((PyArrayObject *)Py_None); __Pyx_INCREF(Py_None); __pyx_pybuffernd_deltas.rcbuffer->pybuffer.buf = NULL;
+      {__pyx_filename = __pyx_f[0]; __pyx_lineno = 215; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+    } else {__pyx_pybuffernd_deltas.diminfo[0].strides = __pyx_pybuffernd_deltas.rcbuffer->pybuffer.strides[0]; __pyx_pybuffernd_deltas.diminfo[0].shape = __pyx_pybuffernd_deltas.rcbuffer->pybuffer.shape[0];
+    }
+  }
+  __pyx_t_10 = 0;
+  __pyx_v_deltas = ((PyArrayObject *)__pyx_t_7);
+  __pyx_t_7 = 0;
+
+  /* "deepnl/sentiwords.pyx":216
+ *         # both changes apply to all tokens except the middle
+ *         cdef np.ndarray[FLOAT_t,ndim=1] deltas = grads.input + grads.input_neg
+ *         deltas[left_context] = grads.input[left_context] # positive token             # <<<<<<<<<<<<<<
+ *         deltas = np.vstack((deltas, grads.input_neg[left_context])) # negative token
+ * 
+ */
+  __pyx_t_7 = __Pyx_GetItemInt(((PyObject *)__pyx_v_grads->input), __pyx_v_left_context, int, 1, __Pyx_PyInt_From_int, 0, 1, 1); if (unlikely(__pyx_t_7 == NULL)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 216; __pyx_clineno = __LINE__; goto __pyx_L1_error;};
+  __Pyx_GOTREF(__pyx_t_7);
+  __pyx_t_11 = __pyx_PyFloat_AsDouble(__pyx_t_7); if (unlikely((__pyx_t_11 == (npy_double)-1) && PyErr_Occurred())) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 216; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __Pyx_DECREF(__pyx_t_7); __pyx_t_7 = 0;
+  __pyx_t_12 = __pyx_v_left_context;
+  __pyx_t_13 = -1;
+  if (__pyx_t_12 < 0) {
+    __pyx_t_12 += __pyx_pybuffernd_deltas.diminfo[0].shape;
+    if (unlikely(__pyx_t_12 < 0)) __pyx_t_13 = 0;
+  } else if (unlikely(__pyx_t_12 >= __pyx_pybuffernd_deltas.diminfo[0].shape)) __pyx_t_13 = 0;
+  if (unlikely(__pyx_t_13 != -1)) {
+    __Pyx_RaiseBufferIndexError(__pyx_t_13);
+    {__pyx_filename = __pyx_f[0]; __pyx_lineno = 216; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  }
+  *__Pyx_BufPtrStrided1d(__pyx_t_6deepnl_10extractors_FLOAT_t *, __pyx_pybuffernd_deltas.rcbuffer->pybuffer.buf, __pyx_t_12, __pyx_pybuffernd_deltas.diminfo[0].strides) = __pyx_t_11;
+
+  /* "deepnl/sentiwords.pyx":217
+ *         cdef np.ndarray[FLOAT_t,ndim=1] deltas = grads.input + grads.input_neg
+ *         deltas[left_context] = grads.input[left_context] # positive token
+ *         deltas = np.vstack((deltas, grads.input_neg[left_context])) # negative token             # <<<<<<<<<<<<<<
+ * 
+ *         self.converter.update(deltas, self.learning_rate, tokens)
+ */
+  __pyx_t_4 = __Pyx_GetModuleGlobalName(__pyx_n_s_np); if (unlikely(!__pyx_t_4)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 217; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __Pyx_GOTREF(__pyx_t_4);
+  __pyx_t_9 = __Pyx_PyObject_GetAttrStr(__pyx_t_4, __pyx_n_s_vstack); if (unlikely(!__pyx_t_9)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 217; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __Pyx_GOTREF(__pyx_t_9);
+  __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
+  __pyx_t_4 = __Pyx_PyObject_GetAttrStr(((PyObject *)__pyx_v_grads), __pyx_n_s_input_neg); if (unlikely(!__pyx_t_4)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 217; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __Pyx_GOTREF(__pyx_t_4);
+  __pyx_t_6 = __Pyx_GetItemInt(__pyx_t_4, __pyx_v_left_context, int, 1, __Pyx_PyInt_From_int, 0, 1, 1); if (unlikely(__pyx_t_6 == NULL)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 217; __pyx_clineno = __LINE__; goto __pyx_L1_error;};
+  __Pyx_GOTREF(__pyx_t_6);
+  __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
+  __pyx_t_4 = PyTuple_New(2); if (unlikely(!__pyx_t_4)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 217; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __Pyx_GOTREF(__pyx_t_4);
+  __Pyx_INCREF(((PyObject *)__pyx_v_deltas));
+  __Pyx_GIVEREF(((PyObject *)__pyx_v_deltas));
+  PyTuple_SET_ITEM(__pyx_t_4, 0, ((PyObject *)__pyx_v_deltas));
+  __Pyx_GIVEREF(__pyx_t_6);
+  PyTuple_SET_ITEM(__pyx_t_4, 1, __pyx_t_6);
+  __pyx_t_6 = 0;
+  __pyx_t_6 = NULL;
+  if (CYTHON_COMPILING_IN_CPYTHON && unlikely(PyMethod_Check(__pyx_t_9))) {
+    __pyx_t_6 = PyMethod_GET_SELF(__pyx_t_9);
+    if (likely(__pyx_t_6)) {
+      PyObject* function = PyMethod_GET_FUNCTION(__pyx_t_9);
+      __Pyx_INCREF(__pyx_t_6);
+      __Pyx_INCREF(function);
+      __Pyx_DECREF_SET(__pyx_t_9, function);
+    }
+  }
+  if (!__pyx_t_6) {
+    __pyx_t_7 = __Pyx_PyObject_CallOneArg(__pyx_t_9, __pyx_t_4); if (unlikely(!__pyx_t_7)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 217; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+    __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
+    __Pyx_GOTREF(__pyx_t_7);
+  } else {
+    __pyx_t_8 = PyTuple_New(1+1); if (unlikely(!__pyx_t_8)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 217; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+    __Pyx_GOTREF(__pyx_t_8);
+    __Pyx_GIVEREF(__pyx_t_6); PyTuple_SET_ITEM(__pyx_t_8, 0, __pyx_t_6); __pyx_t_6 = NULL;
+    __Pyx_GIVEREF(__pyx_t_4);
+    PyTuple_SET_ITEM(__pyx_t_8, 0+1, __pyx_t_4);
+    __pyx_t_4 = 0;
+    __pyx_t_7 = __Pyx_PyObject_Call(__pyx_t_9, __pyx_t_8, NULL); if (unlikely(!__pyx_t_7)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 217; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+    __Pyx_GOTREF(__pyx_t_7);
+    __Pyx_DECREF(__pyx_t_8); __pyx_t_8 = 0;
+  }
+  __Pyx_DECREF(__pyx_t_9); __pyx_t_9 = 0;
+  if (!(likely(((__pyx_t_7) == Py_None) || likely(__Pyx_TypeTest(__pyx_t_7, __pyx_ptype_5numpy_ndarray))))) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 217; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_t_10 = ((PyArrayObject *)__pyx_t_7);
+  {
+    __Pyx_BufFmt_StackElem __pyx_stack[1];
+    __Pyx_SafeReleaseBuffer(&__pyx_pybuffernd_deltas.rcbuffer->pybuffer);
+    __pyx_t_13 = __Pyx_GetBufferAndValidate(&__pyx_pybuffernd_deltas.rcbuffer->pybuffer, (PyObject*)__pyx_t_10, &__Pyx_TypeInfo_nn___pyx_t_6deepnl_10extractors_FLOAT_t, PyBUF_FORMAT| PyBUF_STRIDES| PyBUF_WRITABLE, 1, 0, __pyx_stack);
+    if (unlikely(__pyx_t_13 < 0)) {
+      PyErr_Fetch(&__pyx_t_14, &__pyx_t_15, &__pyx_t_16);
+      if (unlikely(__Pyx_GetBufferAndValidate(&__pyx_pybuffernd_deltas.rcbuffer->pybuffer, (PyObject*)__pyx_v_deltas, &__Pyx_TypeInfo_nn___pyx_t_6deepnl_10extractors_FLOAT_t, PyBUF_FORMAT| PyBUF_STRIDES| PyBUF_WRITABLE, 1, 0, __pyx_stack) == -1)) {
+        Py_XDECREF(__pyx_t_14); Py_XDECREF(__pyx_t_15); Py_XDECREF(__pyx_t_16);
         __Pyx_RaiseBufferFallbackError();
       } else {
-        PyErr_Restore(__pyx_t_15, __pyx_t_14, __pyx_t_13);
+        PyErr_Restore(__pyx_t_14, __pyx_t_15, __pyx_t_16);
       }
     }
-    __pyx_pybuffernd_grads_input_neg.diminfo[0].strides = __pyx_pybuffernd_grads_input_neg.rcbuffer->pybuffer.strides[0]; __pyx_pybuffernd_grads_input_neg.diminfo[0].shape = __pyx_pybuffernd_grads_input_neg.rcbuffer->pybuffer.shape[0];
-    if (unlikely(__pyx_t_12 < 0)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 232; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+    __pyx_pybuffernd_deltas.diminfo[0].strides = __pyx_pybuffernd_deltas.rcbuffer->pybuffer.strides[0]; __pyx_pybuffernd_deltas.diminfo[0].shape = __pyx_pybuffernd_deltas.rcbuffer->pybuffer.shape[0];
+    if (unlikely(__pyx_t_13 < 0)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 217; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   }
-  __pyx_t_11 = 0;
-  __pyx_v_grads_input_neg = ((PyArrayObject *)__pyx_t_10);
   __pyx_t_10 = 0;
+  __Pyx_DECREF_SET(__pyx_v_deltas, ((PyArrayObject *)__pyx_t_7));
+  __pyx_t_7 = 0;
 
-  /* "deepnl/sentiwords.pyx":242
+  /* "deepnl/sentiwords.pyx":219
+ *         deltas = np.vstack((deltas, grads.input_neg[left_context])) # negative token
  * 
- *         # this tracks where the deltas for the next table begins
- *         cdef int offset = 0             # <<<<<<<<<<<<<<
- *         for i, token in enumerate(example):
- *             for j, e in enumerate(self.converter.extractors): # just one table
- */
-  __pyx_v_offset = 0;
-
-  /* "deepnl/sentiwords.pyx":243
- *         # this tracks where the deltas for the next table begins
- *         cdef int offset = 0
- *         for i, token in enumerate(example):             # <<<<<<<<<<<<<<
- *             for j, e in enumerate(self.converter.extractors): # just one table
- *                 table = e.table
- */
-  __pyx_t_12 = 0;
-  if (likely(PyList_CheckExact(((PyObject *)__pyx_v_example))) || PyTuple_CheckExact(((PyObject *)__pyx_v_example))) {
-    __pyx_t_10 = ((PyObject *)__pyx_v_example); __Pyx_INCREF(__pyx_t_10); __pyx_t_5 = 0;
-    __pyx_t_16 = NULL;
-  } else {
-    __pyx_t_5 = -1; __pyx_t_10 = PyObject_GetIter(((PyObject *)__pyx_v_example)); if (unlikely(!__pyx_t_10)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 243; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
-    __Pyx_GOTREF(__pyx_t_10);
-    __pyx_t_16 = Py_TYPE(__pyx_t_10)->tp_iternext; if (unlikely(!__pyx_t_16)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 243; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
-  }
-  for (;;) {
-    if (likely(!__pyx_t_16)) {
-      if (likely(PyList_CheckExact(__pyx_t_10))) {
-        if (__pyx_t_5 >= PyList_GET_SIZE(__pyx_t_10)) break;
-        #if CYTHON_COMPILING_IN_CPYTHON
-        __pyx_t_8 = PyList_GET_ITEM(__pyx_t_10, __pyx_t_5); __Pyx_INCREF(__pyx_t_8); __pyx_t_5++; if (unlikely(0 < 0)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 243; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
-        #else
-        __pyx_t_8 = PySequence_ITEM(__pyx_t_10, __pyx_t_5); __pyx_t_5++; if (unlikely(!__pyx_t_8)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 243; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
-        __Pyx_GOTREF(__pyx_t_8);
-        #endif
-      } else {
-        if (__pyx_t_5 >= PyTuple_GET_SIZE(__pyx_t_10)) break;
-        #if CYTHON_COMPILING_IN_CPYTHON
-        __pyx_t_8 = PyTuple_GET_ITEM(__pyx_t_10, __pyx_t_5); __Pyx_INCREF(__pyx_t_8); __pyx_t_5++; if (unlikely(0 < 0)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 243; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
-        #else
-        __pyx_t_8 = PySequence_ITEM(__pyx_t_10, __pyx_t_5); __pyx_t_5++; if (unlikely(!__pyx_t_8)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 243; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
-        __Pyx_GOTREF(__pyx_t_8);
-        #endif
-      }
-    } else {
-      __pyx_t_8 = __pyx_t_16(__pyx_t_10);
-      if (unlikely(!__pyx_t_8)) {
-        PyObject* exc_type = PyErr_Occurred();
-        if (exc_type) {
-          if (likely(exc_type == PyExc_StopIteration || PyErr_GivenExceptionMatches(exc_type, PyExc_StopIteration))) PyErr_Clear();
-          else {__pyx_filename = __pyx_f[0]; __pyx_lineno = 243; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
-        }
-        break;
-      }
-      __Pyx_GOTREF(__pyx_t_8);
-    }
-    if (!(likely(((__pyx_t_8) == Py_None) || likely(__Pyx_TypeTest(__pyx_t_8, __pyx_ptype_5numpy_ndarray))))) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 243; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
-    __pyx_t_17 = ((PyArrayObject *)__pyx_t_8);
-    {
-      __Pyx_BufFmt_StackElem __pyx_stack[1];
-      __Pyx_SafeReleaseBuffer(&__pyx_pybuffernd_token.rcbuffer->pybuffer);
-      __pyx_t_18 = __Pyx_GetBufferAndValidate(&__pyx_pybuffernd_token.rcbuffer->pybuffer, (PyObject*)__pyx_t_17, &__Pyx_TypeInfo_nn___pyx_t_6deepnl_7trainer_INT_t, PyBUF_FORMAT| PyBUF_STRIDES, 1, 0, __pyx_stack);
-      if (unlikely(__pyx_t_18 < 0)) {
-        PyErr_Fetch(&__pyx_t_13, &__pyx_t_14, &__pyx_t_15);
-        if (unlikely(__Pyx_GetBufferAndValidate(&__pyx_pybuffernd_token.rcbuffer->pybuffer, (PyObject*)__pyx_v_token, &__Pyx_TypeInfo_nn___pyx_t_6deepnl_7trainer_INT_t, PyBUF_FORMAT| PyBUF_STRIDES, 1, 0, __pyx_stack) == -1)) {
-          Py_XDECREF(__pyx_t_13); Py_XDECREF(__pyx_t_14); Py_XDECREF(__pyx_t_15);
-          __Pyx_RaiseBufferFallbackError();
-        } else {
-          PyErr_Restore(__pyx_t_13, __pyx_t_14, __pyx_t_15);
-        }
-      }
-      __pyx_pybuffernd_token.diminfo[0].strides = __pyx_pybuffernd_token.rcbuffer->pybuffer.strides[0]; __pyx_pybuffernd_token.diminfo[0].shape = __pyx_pybuffernd_token.rcbuffer->pybuffer.shape[0];
-      if (unlikely(__pyx_t_18 < 0)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 243; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
-    }
-    __pyx_t_17 = 0;
-    __Pyx_XDECREF_SET(__pyx_v_token, ((PyArrayObject *)__pyx_t_8));
-    __pyx_t_8 = 0;
-    __pyx_v_i = __pyx_t_12;
-    __pyx_t_12 = (__pyx_t_12 + 1);
-
-    /* "deepnl/sentiwords.pyx":244
- *         cdef int offset = 0
- *         for i, token in enumerate(example):
- *             for j, e in enumerate(self.converter.extractors): # just one table             # <<<<<<<<<<<<<<
- *                 table = e.table
- *                 # i-th token in the window
- */
-    __pyx_t_18 = 0;
-    __pyx_t_8 = __pyx_v_self->__pyx_base.__pyx_base.converter->extractors; __Pyx_INCREF(__pyx_t_8); __pyx_t_19 = 0;
-    for (;;) {
-      if (__pyx_t_19 >= PyList_GET_SIZE(__pyx_t_8)) break;
-      #if CYTHON_COMPILING_IN_CPYTHON
-      __pyx_t_7 = PyList_GET_ITEM(__pyx_t_8, __pyx_t_19); __Pyx_INCREF(__pyx_t_7); __pyx_t_19++; if (unlikely(0 < 0)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 244; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
-      #else
-      __pyx_t_7 = PySequence_ITEM(__pyx_t_8, __pyx_t_19); __pyx_t_19++; if (unlikely(!__pyx_t_7)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 244; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
-      __Pyx_GOTREF(__pyx_t_7);
-      #endif
-      __Pyx_XDECREF_SET(__pyx_v_e, __pyx_t_7);
-      __pyx_t_7 = 0;
-      __pyx_v_j = __pyx_t_18;
-      __pyx_t_18 = (__pyx_t_18 + 1);
-
-      /* "deepnl/sentiwords.pyx":245
- *         for i, token in enumerate(example):
- *             for j, e in enumerate(self.converter.extractors): # just one table
- *                 table = e.table             # <<<<<<<<<<<<<<
- *                 # i-th token in the window
- *                 # j-th feature table (there is only one: j == 0)
- */
-      __pyx_t_7 = __Pyx_PyObject_GetAttrStr(__pyx_v_e, __pyx_n_s_table); if (unlikely(!__pyx_t_7)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 245; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
-      __Pyx_GOTREF(__pyx_t_7);
-      if (!(likely(((__pyx_t_7) == Py_None) || likely(__Pyx_TypeTest(__pyx_t_7, __pyx_ptype_5numpy_ndarray))))) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 245; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
-      __pyx_t_20 = ((PyArrayObject *)__pyx_t_7);
-      {
-        __Pyx_BufFmt_StackElem __pyx_stack[1];
-        __Pyx_SafeReleaseBuffer(&__pyx_pybuffernd_table.rcbuffer->pybuffer);
-        __pyx_t_21 = __Pyx_GetBufferAndValidate(&__pyx_pybuffernd_table.rcbuffer->pybuffer, (PyObject*)__pyx_t_20, &__Pyx_TypeInfo_nn___pyx_t_6deepnl_10extractors_FLOAT_t, PyBUF_FORMAT| PyBUF_STRIDES, 2, 0, __pyx_stack);
-        if (unlikely(__pyx_t_21 < 0)) {
-          PyErr_Fetch(&__pyx_t_15, &__pyx_t_14, &__pyx_t_13);
-          if (unlikely(__Pyx_GetBufferAndValidate(&__pyx_pybuffernd_table.rcbuffer->pybuffer, (PyObject*)__pyx_v_table, &__Pyx_TypeInfo_nn___pyx_t_6deepnl_10extractors_FLOAT_t, PyBUF_FORMAT| PyBUF_STRIDES, 2, 0, __pyx_stack) == -1)) {
-            Py_XDECREF(__pyx_t_15); Py_XDECREF(__pyx_t_14); Py_XDECREF(__pyx_t_13);
-            __Pyx_RaiseBufferFallbackError();
-          } else {
-            PyErr_Restore(__pyx_t_15, __pyx_t_14, __pyx_t_13);
-          }
-        }
-        __pyx_pybuffernd_table.diminfo[0].strides = __pyx_pybuffernd_table.rcbuffer->pybuffer.strides[0]; __pyx_pybuffernd_table.diminfo[0].shape = __pyx_pybuffernd_table.rcbuffer->pybuffer.shape[0]; __pyx_pybuffernd_table.diminfo[1].strides = __pyx_pybuffernd_table.rcbuffer->pybuffer.strides[1]; __pyx_pybuffernd_table.diminfo[1].shape = __pyx_pybuffernd_table.rcbuffer->pybuffer.shape[1];
-        if (unlikely(__pyx_t_21 < 0)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 245; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
-      }
-      __pyx_t_20 = 0;
-      __Pyx_XDECREF_SET(__pyx_v_table, ((PyArrayObject *)__pyx_t_7));
-      __pyx_t_7 = 0;
-
-      /* "deepnl/sentiwords.pyx":248
- *                 # i-th token in the window
- *                 # j-th feature table (there is only one: j == 0)
- *                 embeddings_size = table.shape[1]             # <<<<<<<<<<<<<<
- *                 deltas_neg = grads_input_neg[offset: offset + embeddings_size]
- *                 deltas_pos = grads_input_pos[offset: offset + embeddings_size]
- */
-      __pyx_v_embeddings_size = (__pyx_v_table->dimensions[1]);
-
-      /* "deepnl/sentiwords.pyx":249
- *                 # j-th feature table (there is only one: j == 0)
- *                 embeddings_size = table.shape[1]
- *                 deltas_neg = grads_input_neg[offset: offset + embeddings_size]             # <<<<<<<<<<<<<<
- *                 deltas_pos = grads_input_pos[offset: offset + embeddings_size]
- * 
- */
-      __pyx_t_7 = __Pyx_PyObject_GetSlice(((PyObject *)__pyx_v_grads_input_neg), __pyx_v_offset, (__pyx_v_offset + __pyx_v_embeddings_size), NULL, NULL, NULL, 1, 1, 1); if (unlikely(!__pyx_t_7)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 249; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
-      __Pyx_GOTREF(__pyx_t_7);
-      if (!(likely(((__pyx_t_7) == Py_None) || likely(__Pyx_TypeTest(__pyx_t_7, __pyx_ptype_5numpy_ndarray))))) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 249; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
-      __pyx_t_22 = ((PyArrayObject *)__pyx_t_7);
-      {
-        __Pyx_BufFmt_StackElem __pyx_stack[1];
-        __Pyx_SafeReleaseBuffer(&__pyx_pybuffernd_deltas_neg.rcbuffer->pybuffer);
-        __pyx_t_21 = __Pyx_GetBufferAndValidate(&__pyx_pybuffernd_deltas_neg.rcbuffer->pybuffer, (PyObject*)__pyx_t_22, &__Pyx_TypeInfo_nn___pyx_t_6deepnl_10extractors_FLOAT_t, PyBUF_FORMAT| PyBUF_STRIDES, 1, 0, __pyx_stack);
-        if (unlikely(__pyx_t_21 < 0)) {
-          PyErr_Fetch(&__pyx_t_13, &__pyx_t_14, &__pyx_t_15);
-          if (unlikely(__Pyx_GetBufferAndValidate(&__pyx_pybuffernd_deltas_neg.rcbuffer->pybuffer, (PyObject*)__pyx_v_deltas_neg, &__Pyx_TypeInfo_nn___pyx_t_6deepnl_10extractors_FLOAT_t, PyBUF_FORMAT| PyBUF_STRIDES, 1, 0, __pyx_stack) == -1)) {
-            Py_XDECREF(__pyx_t_13); Py_XDECREF(__pyx_t_14); Py_XDECREF(__pyx_t_15);
-            __Pyx_RaiseBufferFallbackError();
-          } else {
-            PyErr_Restore(__pyx_t_13, __pyx_t_14, __pyx_t_15);
-          }
-        }
-        __pyx_pybuffernd_deltas_neg.diminfo[0].strides = __pyx_pybuffernd_deltas_neg.rcbuffer->pybuffer.strides[0]; __pyx_pybuffernd_deltas_neg.diminfo[0].shape = __pyx_pybuffernd_deltas_neg.rcbuffer->pybuffer.shape[0];
-        if (unlikely(__pyx_t_21 < 0)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 249; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
-      }
-      __pyx_t_22 = 0;
-      __Pyx_XDECREF_SET(__pyx_v_deltas_neg, ((PyArrayObject *)__pyx_t_7));
-      __pyx_t_7 = 0;
-
-      /* "deepnl/sentiwords.pyx":250
- *                 embeddings_size = table.shape[1]
- *                 deltas_neg = grads_input_neg[offset: offset + embeddings_size]
- *                 deltas_pos = grads_input_pos[offset: offset + embeddings_size]             # <<<<<<<<<<<<<<
- * 
- *                 if i == left_context:
- */
-      __pyx_t_7 = __Pyx_PyObject_GetSlice(((PyObject *)__pyx_v_grads_input_pos), __pyx_v_offset, (__pyx_v_offset + __pyx_v_embeddings_size), NULL, NULL, NULL, 1, 1, 1); if (unlikely(!__pyx_t_7)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 250; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
-      __Pyx_GOTREF(__pyx_t_7);
-      if (!(likely(((__pyx_t_7) == Py_None) || likely(__Pyx_TypeTest(__pyx_t_7, __pyx_ptype_5numpy_ndarray))))) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 250; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
-      __pyx_t_22 = ((PyArrayObject *)__pyx_t_7);
-      {
-        __Pyx_BufFmt_StackElem __pyx_stack[1];
-        __Pyx_SafeReleaseBuffer(&__pyx_pybuffernd_deltas_pos.rcbuffer->pybuffer);
-        __pyx_t_21 = __Pyx_GetBufferAndValidate(&__pyx_pybuffernd_deltas_pos.rcbuffer->pybuffer, (PyObject*)__pyx_t_22, &__Pyx_TypeInfo_nn___pyx_t_6deepnl_10extractors_FLOAT_t, PyBUF_FORMAT| PyBUF_STRIDES, 1, 0, __pyx_stack);
-        if (unlikely(__pyx_t_21 < 0)) {
-          PyErr_Fetch(&__pyx_t_15, &__pyx_t_14, &__pyx_t_13);
-          if (unlikely(__Pyx_GetBufferAndValidate(&__pyx_pybuffernd_deltas_pos.rcbuffer->pybuffer, (PyObject*)__pyx_v_deltas_pos, &__Pyx_TypeInfo_nn___pyx_t_6deepnl_10extractors_FLOAT_t, PyBUF_FORMAT| PyBUF_STRIDES, 1, 0, __pyx_stack) == -1)) {
-            Py_XDECREF(__pyx_t_15); Py_XDECREF(__pyx_t_14); Py_XDECREF(__pyx_t_13);
-            __Pyx_RaiseBufferFallbackError();
-          } else {
-            PyErr_Restore(__pyx_t_15, __pyx_t_14, __pyx_t_13);
-          }
-        }
-        __pyx_pybuffernd_deltas_pos.diminfo[0].strides = __pyx_pybuffernd_deltas_pos.rcbuffer->pybuffer.strides[0]; __pyx_pybuffernd_deltas_pos.diminfo[0].shape = __pyx_pybuffernd_deltas_pos.rcbuffer->pybuffer.shape[0];
-        if (unlikely(__pyx_t_21 < 0)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 250; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
-      }
-      __pyx_t_22 = 0;
-      __Pyx_XDECREF_SET(__pyx_v_deltas_pos, ((PyArrayObject *)__pyx_t_7));
-      __pyx_t_7 = 0;
-
-      /* "deepnl/sentiwords.pyx":252
- *                 deltas_pos = grads_input_pos[offset: offset + embeddings_size]
- * 
- *                 if i == left_context:             # <<<<<<<<<<<<<<
- *                     # this is the middle position.
- *                     # apply negative and positive deltas to different tokens
- */
-      __pyx_t_23 = ((__pyx_v_i == __pyx_v_left_context) != 0);
-      if (__pyx_t_23) {
-
-        /* "deepnl/sentiwords.pyx":255
- *                     # this is the middle position.
- *                     # apply negative and positive deltas to different tokens
- *                     table[negative_token[j]] += deltas_neg             # <<<<<<<<<<<<<<
- *                     table[middle_token[j]] += deltas_pos
- *                 else:
- */
-        __pyx_t_24 = __pyx_v_j;
-        __pyx_t_21 = -1;
-        if (__pyx_t_24 < 0) {
-          __pyx_t_24 += __pyx_pybuffernd_negative_token.diminfo[0].shape;
-          if (unlikely(__pyx_t_24 < 0)) __pyx_t_21 = 0;
-        } else if (unlikely(__pyx_t_24 >= __pyx_pybuffernd_negative_token.diminfo[0].shape)) __pyx_t_21 = 0;
-        if (unlikely(__pyx_t_21 != -1)) {
-          __Pyx_RaiseBufferIndexError(__pyx_t_21);
-          {__pyx_filename = __pyx_f[0]; __pyx_lineno = 255; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
-        }
-        __pyx_t_25 = (*__Pyx_BufPtrStrided1d(__pyx_t_6deepnl_7trainer_INT_t *, __pyx_pybuffernd_negative_token.rcbuffer->pybuffer.buf, __pyx_t_24, __pyx_pybuffernd_negative_token.diminfo[0].strides));
-        __pyx_t_7 = __Pyx_GetItemInt(((PyObject *)__pyx_v_table), __pyx_t_25, __pyx_t_6deepnl_7trainer_INT_t, 1, __Pyx_PyInt_From_npy_long, 0, 1, 1); if (unlikely(__pyx_t_7 == NULL)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 255; __pyx_clineno = __LINE__; goto __pyx_L1_error;};
-        __Pyx_GOTREF(__pyx_t_7);
-        __pyx_t_9 = PyNumber_InPlaceAdd(__pyx_t_7, ((PyObject *)__pyx_v_deltas_neg)); if (unlikely(!__pyx_t_9)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 255; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
-        __Pyx_GOTREF(__pyx_t_9);
-        __Pyx_DECREF(__pyx_t_7); __pyx_t_7 = 0;
-        if (unlikely(__Pyx_SetItemInt(((PyObject *)__pyx_v_table), __pyx_t_25, __pyx_t_9, __pyx_t_6deepnl_7trainer_INT_t, 1, __Pyx_PyInt_From_npy_long, 0, 1, 1) < 0)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 255; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
-        __Pyx_DECREF(__pyx_t_9); __pyx_t_9 = 0;
-
-        /* "deepnl/sentiwords.pyx":256
- *                     # apply negative and positive deltas to different tokens
- *                     table[negative_token[j]] += deltas_neg
- *                     table[middle_token[j]] += deltas_pos             # <<<<<<<<<<<<<<
- *                 else:
- *                     # this is not the middle position. both deltas apply.
- */
-        __pyx_t_26 = __pyx_v_j;
-        __pyx_t_21 = -1;
-        if (__pyx_t_26 < 0) {
-          __pyx_t_26 += __pyx_pybuffernd_middle_token.diminfo[0].shape;
-          if (unlikely(__pyx_t_26 < 0)) __pyx_t_21 = 0;
-        } else if (unlikely(__pyx_t_26 >= __pyx_pybuffernd_middle_token.diminfo[0].shape)) __pyx_t_21 = 0;
-        if (unlikely(__pyx_t_21 != -1)) {
-          __Pyx_RaiseBufferIndexError(__pyx_t_21);
-          {__pyx_filename = __pyx_f[0]; __pyx_lineno = 256; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
-        }
-        __pyx_t_25 = (*__Pyx_BufPtrStrided1d(__pyx_t_6deepnl_7trainer_INT_t *, __pyx_pybuffernd_middle_token.rcbuffer->pybuffer.buf, __pyx_t_26, __pyx_pybuffernd_middle_token.diminfo[0].strides));
-        __pyx_t_9 = __Pyx_GetItemInt(((PyObject *)__pyx_v_table), __pyx_t_25, __pyx_t_6deepnl_7trainer_INT_t, 1, __Pyx_PyInt_From_npy_long, 0, 1, 1); if (unlikely(__pyx_t_9 == NULL)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 256; __pyx_clineno = __LINE__; goto __pyx_L1_error;};
-        __Pyx_GOTREF(__pyx_t_9);
-        __pyx_t_7 = PyNumber_InPlaceAdd(__pyx_t_9, ((PyObject *)__pyx_v_deltas_pos)); if (unlikely(!__pyx_t_7)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 256; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
-        __Pyx_GOTREF(__pyx_t_7);
-        __Pyx_DECREF(__pyx_t_9); __pyx_t_9 = 0;
-        if (unlikely(__Pyx_SetItemInt(((PyObject *)__pyx_v_table), __pyx_t_25, __pyx_t_7, __pyx_t_6deepnl_7trainer_INT_t, 1, __Pyx_PyInt_From_npy_long, 0, 1, 1) < 0)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 256; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
-        __Pyx_DECREF(__pyx_t_7); __pyx_t_7 = 0;
-
-        /* "deepnl/sentiwords.pyx":252
- *                 deltas_pos = grads_input_pos[offset: offset + embeddings_size]
- * 
- *                 if i == left_context:             # <<<<<<<<<<<<<<
- *                     # this is the middle position.
- *                     # apply negative and positive deltas to different tokens
- */
-        goto __pyx_L7;
-      }
-
-      /* "deepnl/sentiwords.pyx":260
- *                     # this is not the middle position. both deltas apply.
- *                     #print >> sys.stderr, token[j], deltas_neg, deltas_pos # DEBUG
- *                     table[token[j]] += deltas_neg + deltas_pos             # <<<<<<<<<<<<<<
- * 
- *                 offset += embeddings_size
- */
-      /*else*/ {
-        __pyx_t_27 = __pyx_v_j;
-        __pyx_t_21 = -1;
-        if (__pyx_t_27 < 0) {
-          __pyx_t_27 += __pyx_pybuffernd_token.diminfo[0].shape;
-          if (unlikely(__pyx_t_27 < 0)) __pyx_t_21 = 0;
-        } else if (unlikely(__pyx_t_27 >= __pyx_pybuffernd_token.diminfo[0].shape)) __pyx_t_21 = 0;
-        if (unlikely(__pyx_t_21 != -1)) {
-          __Pyx_RaiseBufferIndexError(__pyx_t_21);
-          {__pyx_filename = __pyx_f[0]; __pyx_lineno = 260; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
-        }
-        __pyx_t_25 = (*__Pyx_BufPtrStrided1d(__pyx_t_6deepnl_7trainer_INT_t *, __pyx_pybuffernd_token.rcbuffer->pybuffer.buf, __pyx_t_27, __pyx_pybuffernd_token.diminfo[0].strides));
-        __pyx_t_7 = __Pyx_GetItemInt(((PyObject *)__pyx_v_table), __pyx_t_25, __pyx_t_6deepnl_7trainer_INT_t, 1, __Pyx_PyInt_From_npy_long, 0, 1, 1); if (unlikely(__pyx_t_7 == NULL)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 260; __pyx_clineno = __LINE__; goto __pyx_L1_error;};
-        __Pyx_GOTREF(__pyx_t_7);
-        __pyx_t_9 = PyNumber_Add(((PyObject *)__pyx_v_deltas_neg), ((PyObject *)__pyx_v_deltas_pos)); if (unlikely(!__pyx_t_9)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 260; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
-        __Pyx_GOTREF(__pyx_t_9);
-        __pyx_t_6 = PyNumber_InPlaceAdd(__pyx_t_7, __pyx_t_9); if (unlikely(!__pyx_t_6)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 260; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
-        __Pyx_GOTREF(__pyx_t_6);
-        __Pyx_DECREF(__pyx_t_7); __pyx_t_7 = 0;
-        __Pyx_DECREF(__pyx_t_9); __pyx_t_9 = 0;
-        if (unlikely(__Pyx_SetItemInt(((PyObject *)__pyx_v_table), __pyx_t_25, __pyx_t_6, __pyx_t_6deepnl_7trainer_INT_t, 1, __Pyx_PyInt_From_npy_long, 0, 1, 1) < 0)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 260; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
-        __Pyx_DECREF(__pyx_t_6); __pyx_t_6 = 0;
-      }
-      __pyx_L7:;
-
-      /* "deepnl/sentiwords.pyx":262
- *                     table[token[j]] += deltas_neg + deltas_pos
- * 
- *                 offset += embeddings_size             # <<<<<<<<<<<<<<
+ *         self.converter.update(deltas, self.learning_rate, tokens)             # <<<<<<<<<<<<<<
  * 
  *     def train(self, Iterable sentences, list polarities, trie,
  */
-      __pyx_v_offset = (__pyx_v_offset + __pyx_v_embeddings_size);
+  __pyx_t_7 = ((struct __pyx_vtabstruct_6deepnl_10extractors_Converter *)__pyx_v_self->__pyx_base.__pyx_base.converter->__pyx_vtab)->update(__pyx_v_self->__pyx_base.__pyx_base.converter, ((PyArrayObject *)__pyx_v_deltas), __pyx_v_self->__pyx_base.__pyx_base.learning_rate, ((PyArrayObject *)__pyx_v_tokens), 0); if (unlikely(!__pyx_t_7)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 219; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __Pyx_GOTREF(__pyx_t_7);
+  __Pyx_DECREF(__pyx_t_7); __pyx_t_7 = 0;
 
-      /* "deepnl/sentiwords.pyx":244
- *         cdef int offset = 0
- *         for i, token in enumerate(example):
- *             for j, e in enumerate(self.converter.extractors): # just one table             # <<<<<<<<<<<<<<
- *                 table = e.table
- *                 # i-th token in the window
- */
-    }
-    __Pyx_DECREF(__pyx_t_8); __pyx_t_8 = 0;
-
-    /* "deepnl/sentiwords.pyx":243
- *         # this tracks where the deltas for the next table begins
- *         cdef int offset = 0
- *         for i, token in enumerate(example):             # <<<<<<<<<<<<<<
- *             for j, e in enumerate(self.converter.extractors): # just one table
- *                 table = e.table
- */
-  }
-  __Pyx_DECREF(__pyx_t_10); __pyx_t_10 = 0;
-
-  /* "deepnl/sentiwords.pyx":196
+  /* "deepnl/sentiwords.pyx":189
  *         return error, variant
  * 
  *     cdef _update(self, Gradients grads, float remaining,             # <<<<<<<<<<<<<<
@@ -6188,49 +5642,32 @@ static PyObject *__pyx_f_6deepnl_10sentiwords_16SentimentTrainer__update(struct 
   __Pyx_XDECREF(__pyx_t_7);
   __Pyx_XDECREF(__pyx_t_8);
   __Pyx_XDECREF(__pyx_t_9);
-  __Pyx_XDECREF(__pyx_t_10);
   { PyObject *__pyx_type, *__pyx_value, *__pyx_tb;
     __Pyx_ErrFetch(&__pyx_type, &__pyx_value, &__pyx_tb);
-    __Pyx_SafeReleaseBuffer(&__pyx_pybuffernd_deltas_neg.rcbuffer->pybuffer);
-    __Pyx_SafeReleaseBuffer(&__pyx_pybuffernd_deltas_pos.rcbuffer->pybuffer);
+    __Pyx_SafeReleaseBuffer(&__pyx_pybuffernd_deltas.rcbuffer->pybuffer);
     __Pyx_SafeReleaseBuffer(&__pyx_pybuffernd_example.rcbuffer->pybuffer);
-    __Pyx_SafeReleaseBuffer(&__pyx_pybuffernd_grads_input_neg.rcbuffer->pybuffer);
-    __Pyx_SafeReleaseBuffer(&__pyx_pybuffernd_grads_input_pos.rcbuffer->pybuffer);
     __Pyx_SafeReleaseBuffer(&__pyx_pybuffernd_middle_token.rcbuffer->pybuffer);
     __Pyx_SafeReleaseBuffer(&__pyx_pybuffernd_negative_token.rcbuffer->pybuffer);
-    __Pyx_SafeReleaseBuffer(&__pyx_pybuffernd_table.rcbuffer->pybuffer);
-    __Pyx_SafeReleaseBuffer(&__pyx_pybuffernd_token.rcbuffer->pybuffer);
   __Pyx_ErrRestore(__pyx_type, __pyx_value, __pyx_tb);}
   __Pyx_AddTraceback("deepnl.sentiwords.SentimentTrainer._update", __pyx_clineno, __pyx_lineno, __pyx_filename);
   __pyx_r = 0;
   goto __pyx_L2;
   __pyx_L0:;
-  __Pyx_SafeReleaseBuffer(&__pyx_pybuffernd_deltas_neg.rcbuffer->pybuffer);
-  __Pyx_SafeReleaseBuffer(&__pyx_pybuffernd_deltas_pos.rcbuffer->pybuffer);
+  __Pyx_SafeReleaseBuffer(&__pyx_pybuffernd_deltas.rcbuffer->pybuffer);
   __Pyx_SafeReleaseBuffer(&__pyx_pybuffernd_example.rcbuffer->pybuffer);
-  __Pyx_SafeReleaseBuffer(&__pyx_pybuffernd_grads_input_neg.rcbuffer->pybuffer);
-  __Pyx_SafeReleaseBuffer(&__pyx_pybuffernd_grads_input_pos.rcbuffer->pybuffer);
-  __Pyx_SafeReleaseBuffer(&__pyx_pybuffernd_middle_token.rcbuffer->pybuffer);
   __Pyx_SafeReleaseBuffer(&__pyx_pybuffernd_negative_token.rcbuffer->pybuffer);
-  __Pyx_SafeReleaseBuffer(&__pyx_pybuffernd_table.rcbuffer->pybuffer);
-  __Pyx_SafeReleaseBuffer(&__pyx_pybuffernd_token.rcbuffer->pybuffer);
   __pyx_L2:;
   __Pyx_XDECREF((PyObject *)__pyx_v_nn);
   __Pyx_XDECREF((PyObject *)__pyx_v_p);
-  __Pyx_XDECREF((PyObject *)__pyx_v_grads_input_neg);
-  __Pyx_XDECREF((PyObject *)__pyx_v_grads_input_pos);
-  __Pyx_XDECREF((PyObject *)__pyx_v_token);
-  __Pyx_XDECREF((PyObject *)__pyx_v_table);
-  __Pyx_XDECREF((PyObject *)__pyx_v_deltas_neg);
-  __Pyx_XDECREF((PyObject *)__pyx_v_deltas_pos);
-  __Pyx_XDECREF(__pyx_v_e);
+  __Pyx_XDECREF((PyObject *)__pyx_v_tokens);
+  __Pyx_XDECREF((PyObject *)__pyx_v_deltas);
   __Pyx_XGIVEREF(__pyx_r);
   __Pyx_RefNannyFinishContext();
   return __pyx_r;
 }
 
-/* "deepnl/sentiwords.pyx":264
- *                 offset += embeddings_size
+/* "deepnl/sentiwords.pyx":221
+ *         self.converter.update(deltas, self.learning_rate, tokens)
  * 
  *     def train(self, Iterable sentences, list polarities, trie,             # <<<<<<<<<<<<<<
  *               int epochs, int report_freq):
@@ -6275,26 +5712,26 @@ static PyObject *__pyx_pw_6deepnl_10sentiwords_16SentimentTrainer_3train(PyObjec
         case  1:
         if (likely((values[1] = PyDict_GetItem(__pyx_kwds, __pyx_n_s_polarities)) != 0)) kw_args--;
         else {
-          __Pyx_RaiseArgtupleInvalid("train", 1, 5, 5, 1); {__pyx_filename = __pyx_f[0]; __pyx_lineno = 264; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
+          __Pyx_RaiseArgtupleInvalid("train", 1, 5, 5, 1); {__pyx_filename = __pyx_f[0]; __pyx_lineno = 221; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
         }
         case  2:
         if (likely((values[2] = PyDict_GetItem(__pyx_kwds, __pyx_n_s_trie)) != 0)) kw_args--;
         else {
-          __Pyx_RaiseArgtupleInvalid("train", 1, 5, 5, 2); {__pyx_filename = __pyx_f[0]; __pyx_lineno = 264; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
+          __Pyx_RaiseArgtupleInvalid("train", 1, 5, 5, 2); {__pyx_filename = __pyx_f[0]; __pyx_lineno = 221; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
         }
         case  3:
         if (likely((values[3] = PyDict_GetItem(__pyx_kwds, __pyx_n_s_epochs)) != 0)) kw_args--;
         else {
-          __Pyx_RaiseArgtupleInvalid("train", 1, 5, 5, 3); {__pyx_filename = __pyx_f[0]; __pyx_lineno = 264; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
+          __Pyx_RaiseArgtupleInvalid("train", 1, 5, 5, 3); {__pyx_filename = __pyx_f[0]; __pyx_lineno = 221; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
         }
         case  4:
         if (likely((values[4] = PyDict_GetItem(__pyx_kwds, __pyx_n_s_report_freq)) != 0)) kw_args--;
         else {
-          __Pyx_RaiseArgtupleInvalid("train", 1, 5, 5, 4); {__pyx_filename = __pyx_f[0]; __pyx_lineno = 264; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
+          __Pyx_RaiseArgtupleInvalid("train", 1, 5, 5, 4); {__pyx_filename = __pyx_f[0]; __pyx_lineno = 221; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
         }
       }
       if (unlikely(kw_args > 0)) {
-        if (unlikely(__Pyx_ParseOptionalKeywords(__pyx_kwds, __pyx_pyargnames, 0, values, pos_args, "train") < 0)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 264; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
+        if (unlikely(__Pyx_ParseOptionalKeywords(__pyx_kwds, __pyx_pyargnames, 0, values, pos_args, "train") < 0)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 221; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
       }
     } else if (PyTuple_GET_SIZE(__pyx_args) != 5) {
       goto __pyx_L5_argtuple_error;
@@ -6308,19 +5745,19 @@ static PyObject *__pyx_pw_6deepnl_10sentiwords_16SentimentTrainer_3train(PyObjec
     __pyx_v_sentences = ((struct __pyx_obj_6deepnl_10extractors_Iterable *)values[0]);
     __pyx_v_polarities = ((PyObject*)values[1]);
     __pyx_v_trie = values[2];
-    __pyx_v_epochs = __Pyx_PyInt_As_int(values[3]); if (unlikely((__pyx_v_epochs == (int)-1) && PyErr_Occurred())) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 265; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
-    __pyx_v_report_freq = __Pyx_PyInt_As_int(values[4]); if (unlikely((__pyx_v_report_freq == (int)-1) && PyErr_Occurred())) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 265; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
+    __pyx_v_epochs = __Pyx_PyInt_As_int(values[3]); if (unlikely((__pyx_v_epochs == (int)-1) && PyErr_Occurred())) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 222; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
+    __pyx_v_report_freq = __Pyx_PyInt_As_int(values[4]); if (unlikely((__pyx_v_report_freq == (int)-1) && PyErr_Occurred())) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 222; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
   }
   goto __pyx_L4_argument_unpacking_done;
   __pyx_L5_argtuple_error:;
-  __Pyx_RaiseArgtupleInvalid("train", 1, 5, 5, PyTuple_GET_SIZE(__pyx_args)); {__pyx_filename = __pyx_f[0]; __pyx_lineno = 264; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
+  __Pyx_RaiseArgtupleInvalid("train", 1, 5, 5, PyTuple_GET_SIZE(__pyx_args)); {__pyx_filename = __pyx_f[0]; __pyx_lineno = 221; __pyx_clineno = __LINE__; goto __pyx_L3_error;}
   __pyx_L3_error:;
   __Pyx_AddTraceback("deepnl.sentiwords.SentimentTrainer.train", __pyx_clineno, __pyx_lineno, __pyx_filename);
   __Pyx_RefNannyFinishContext();
   return NULL;
   __pyx_L4_argument_unpacking_done:;
-  if (unlikely(!__Pyx_ArgTypeTest(((PyObject *)__pyx_v_sentences), __pyx_ptype_6deepnl_10extractors_Iterable, 1, "sentences", 0))) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 264; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
-  if (unlikely(!__Pyx_ArgTypeTest(((PyObject *)__pyx_v_polarities), (&PyList_Type), 1, "polarities", 1))) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 264; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  if (unlikely(!__Pyx_ArgTypeTest(((PyObject *)__pyx_v_sentences), __pyx_ptype_6deepnl_10extractors_Iterable, 1, "sentences", 0))) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 221; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  if (unlikely(!__Pyx_ArgTypeTest(((PyObject *)__pyx_v_polarities), (&PyList_Type), 1, "polarities", 1))) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 221; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __pyx_r = __pyx_pf_6deepnl_10sentiwords_16SentimentTrainer_2train(((struct __pyx_obj_6deepnl_10sentiwords_SentimentTrainer *)__pyx_v_self), __pyx_v_sentences, __pyx_v_polarities, __pyx_v_trie, __pyx_v_epochs, __pyx_v_report_freq);
 
   /* function exit code */
@@ -6358,8 +5795,8 @@ static PyObject *__pyx_pf_6deepnl_10sentiwords_16SentimentTrainer_2train(struct 
   __Pyx_RefNannyDeclarations
   PyObject *__pyx_t_1 = NULL;
   PyObject *__pyx_t_2 = NULL;
-  Py_ssize_t __pyx_t_3;
-  PyObject *__pyx_t_4 = NULL;
+  PyObject *__pyx_t_3 = NULL;
+  Py_ssize_t __pyx_t_4;
   PyObject *__pyx_t_5 = NULL;
   PyObject *(*__pyx_t_6)(PyObject *);
   Py_ssize_t __pyx_t_7;
@@ -6388,74 +5825,103 @@ static PyObject *__pyx_pf_6deepnl_10sentiwords_16SentimentTrainer_2train(struct 
   int __pyx_clineno = 0;
   __Pyx_RefNannySetupContext("train", 0);
 
-  /* "deepnl/sentiwords.pyx":278
+  /* "deepnl/sentiwords.pyx":233
+ * 
+ *         # prepare for AdaGrad
+ *         self.converter.clearAdaGrad()             # <<<<<<<<<<<<<<
+ * 
+ *         # generate 1000 random indices at a time to save time
+ */
+  __pyx_t_2 = __Pyx_PyObject_GetAttrStr(((PyObject *)__pyx_v_self->__pyx_base.__pyx_base.converter), __pyx_n_s_clearAdaGrad); if (unlikely(!__pyx_t_2)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 233; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __Pyx_GOTREF(__pyx_t_2);
+  __pyx_t_3 = NULL;
+  if (CYTHON_COMPILING_IN_CPYTHON && likely(PyMethod_Check(__pyx_t_2))) {
+    __pyx_t_3 = PyMethod_GET_SELF(__pyx_t_2);
+    if (likely(__pyx_t_3)) {
+      PyObject* function = PyMethod_GET_FUNCTION(__pyx_t_2);
+      __Pyx_INCREF(__pyx_t_3);
+      __Pyx_INCREF(function);
+      __Pyx_DECREF_SET(__pyx_t_2, function);
+    }
+  }
+  if (__pyx_t_3) {
+    __pyx_t_1 = __Pyx_PyObject_CallOneArg(__pyx_t_2, __pyx_t_3); if (unlikely(!__pyx_t_1)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 233; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+    __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
+  } else {
+    __pyx_t_1 = __Pyx_PyObject_CallNoArg(__pyx_t_2); if (unlikely(!__pyx_t_1)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 233; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  }
+  __Pyx_GOTREF(__pyx_t_1);
+  __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
+  __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
+
+  /* "deepnl/sentiwords.pyx":238
  *         # (generating 1000 integers at once takes about ten times the time for a single one)
  *         # FIXME: nonsense to create random features besides ID
  *         feature_tables = [e.table for e in self.converter.extractors]             # <<<<<<<<<<<<<<
  *         self.random_pool = RandomPool([x.shape[0] for x in feature_tables])
  *         self.total_pairs = 0
  */
-  __pyx_t_1 = PyList_New(0); if (unlikely(!__pyx_t_1)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 278; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_t_1 = PyList_New(0); if (unlikely(!__pyx_t_1)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 238; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_GOTREF(__pyx_t_1);
   if (unlikely(__pyx_v_self->__pyx_base.__pyx_base.converter->extractors == Py_None)) {
     PyErr_SetString(PyExc_TypeError, "'NoneType' object is not iterable");
-    {__pyx_filename = __pyx_f[0]; __pyx_lineno = 278; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+    {__pyx_filename = __pyx_f[0]; __pyx_lineno = 238; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   }
-  __pyx_t_2 = __pyx_v_self->__pyx_base.__pyx_base.converter->extractors; __Pyx_INCREF(__pyx_t_2); __pyx_t_3 = 0;
+  __pyx_t_2 = __pyx_v_self->__pyx_base.__pyx_base.converter->extractors; __Pyx_INCREF(__pyx_t_2); __pyx_t_4 = 0;
   for (;;) {
-    if (__pyx_t_3 >= PyList_GET_SIZE(__pyx_t_2)) break;
+    if (__pyx_t_4 >= PyList_GET_SIZE(__pyx_t_2)) break;
     #if CYTHON_COMPILING_IN_CPYTHON
-    __pyx_t_4 = PyList_GET_ITEM(__pyx_t_2, __pyx_t_3); __Pyx_INCREF(__pyx_t_4); __pyx_t_3++; if (unlikely(0 < 0)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 278; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+    __pyx_t_3 = PyList_GET_ITEM(__pyx_t_2, __pyx_t_4); __Pyx_INCREF(__pyx_t_3); __pyx_t_4++; if (unlikely(0 < 0)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 238; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
     #else
-    __pyx_t_4 = PySequence_ITEM(__pyx_t_2, __pyx_t_3); __pyx_t_3++; if (unlikely(!__pyx_t_4)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 278; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
-    __Pyx_GOTREF(__pyx_t_4);
+    __pyx_t_3 = PySequence_ITEM(__pyx_t_2, __pyx_t_4); __pyx_t_4++; if (unlikely(!__pyx_t_3)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 238; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+    __Pyx_GOTREF(__pyx_t_3);
     #endif
-    __Pyx_XDECREF_SET(__pyx_v_e, __pyx_t_4);
-    __pyx_t_4 = 0;
-    __pyx_t_4 = __Pyx_PyObject_GetAttrStr(__pyx_v_e, __pyx_n_s_table); if (unlikely(!__pyx_t_4)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 278; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
-    __Pyx_GOTREF(__pyx_t_4);
-    if (unlikely(__Pyx_ListComp_Append(__pyx_t_1, (PyObject*)__pyx_t_4))) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 278; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
-    __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
+    __Pyx_XDECREF_SET(__pyx_v_e, __pyx_t_3);
+    __pyx_t_3 = 0;
+    __pyx_t_3 = __Pyx_PyObject_GetAttrStr(__pyx_v_e, __pyx_n_s_table); if (unlikely(!__pyx_t_3)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 238; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+    __Pyx_GOTREF(__pyx_t_3);
+    if (unlikely(__Pyx_ListComp_Append(__pyx_t_1, (PyObject*)__pyx_t_3))) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 238; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+    __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
   }
   __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
   __pyx_v_feature_tables = ((PyObject*)__pyx_t_1);
   __pyx_t_1 = 0;
 
-  /* "deepnl/sentiwords.pyx":279
+  /* "deepnl/sentiwords.pyx":239
  *         # FIXME: nonsense to create random features besides ID
  *         feature_tables = [e.table for e in self.converter.extractors]
  *         self.random_pool = RandomPool([x.shape[0] for x in feature_tables])             # <<<<<<<<<<<<<<
  *         self.total_pairs = 0
  * 
  */
-  __pyx_t_1 = PyList_New(0); if (unlikely(!__pyx_t_1)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 279; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_t_1 = PyList_New(0); if (unlikely(!__pyx_t_1)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 239; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_GOTREF(__pyx_t_1);
-  __pyx_t_2 = __pyx_v_feature_tables; __Pyx_INCREF(__pyx_t_2); __pyx_t_3 = 0;
+  __pyx_t_2 = __pyx_v_feature_tables; __Pyx_INCREF(__pyx_t_2); __pyx_t_4 = 0;
   for (;;) {
-    if (__pyx_t_3 >= PyList_GET_SIZE(__pyx_t_2)) break;
+    if (__pyx_t_4 >= PyList_GET_SIZE(__pyx_t_2)) break;
     #if CYTHON_COMPILING_IN_CPYTHON
-    __pyx_t_4 = PyList_GET_ITEM(__pyx_t_2, __pyx_t_3); __Pyx_INCREF(__pyx_t_4); __pyx_t_3++; if (unlikely(0 < 0)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 279; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+    __pyx_t_3 = PyList_GET_ITEM(__pyx_t_2, __pyx_t_4); __Pyx_INCREF(__pyx_t_3); __pyx_t_4++; if (unlikely(0 < 0)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 239; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
     #else
-    __pyx_t_4 = PySequence_ITEM(__pyx_t_2, __pyx_t_3); __pyx_t_3++; if (unlikely(!__pyx_t_4)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 279; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
-    __Pyx_GOTREF(__pyx_t_4);
+    __pyx_t_3 = PySequence_ITEM(__pyx_t_2, __pyx_t_4); __pyx_t_4++; if (unlikely(!__pyx_t_3)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 239; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+    __Pyx_GOTREF(__pyx_t_3);
     #endif
-    __Pyx_XDECREF_SET(__pyx_v_x, __pyx_t_4);
-    __pyx_t_4 = 0;
-    __pyx_t_4 = __Pyx_PyObject_GetAttrStr(__pyx_v_x, __pyx_n_s_shape); if (unlikely(!__pyx_t_4)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 279; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
-    __Pyx_GOTREF(__pyx_t_4);
-    __pyx_t_5 = __Pyx_GetItemInt(__pyx_t_4, 0, long, 1, __Pyx_PyInt_From_long, 0, 0, 1); if (unlikely(__pyx_t_5 == NULL)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 279; __pyx_clineno = __LINE__; goto __pyx_L1_error;};
+    __Pyx_XDECREF_SET(__pyx_v_x, __pyx_t_3);
+    __pyx_t_3 = 0;
+    __pyx_t_3 = __Pyx_PyObject_GetAttrStr(__pyx_v_x, __pyx_n_s_shape); if (unlikely(!__pyx_t_3)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 239; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+    __Pyx_GOTREF(__pyx_t_3);
+    __pyx_t_5 = __Pyx_GetItemInt(__pyx_t_3, 0, long, 1, __Pyx_PyInt_From_long, 0, 0, 1); if (unlikely(__pyx_t_5 == NULL)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 239; __pyx_clineno = __LINE__; goto __pyx_L1_error;};
     __Pyx_GOTREF(__pyx_t_5);
-    __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
-    if (unlikely(__Pyx_ListComp_Append(__pyx_t_1, (PyObject*)__pyx_t_5))) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 279; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+    __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
+    if (unlikely(__Pyx_ListComp_Append(__pyx_t_1, (PyObject*)__pyx_t_5))) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 239; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
     __Pyx_DECREF(__pyx_t_5); __pyx_t_5 = 0;
   }
   __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
-  __pyx_t_2 = PyTuple_New(1); if (unlikely(!__pyx_t_2)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 279; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_t_2 = PyTuple_New(1); if (unlikely(!__pyx_t_2)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 239; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_GOTREF(__pyx_t_2);
   __Pyx_GIVEREF(__pyx_t_1);
   PyTuple_SET_ITEM(__pyx_t_2, 0, __pyx_t_1);
   __pyx_t_1 = 0;
-  __pyx_t_1 = __Pyx_PyObject_Call(((PyObject *)__pyx_ptype_6deepnl_5words_RandomPool), __pyx_t_2, NULL); if (unlikely(!__pyx_t_1)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 279; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_t_1 = __Pyx_PyObject_Call(((PyObject *)__pyx_ptype_6deepnl_5words_RandomPool), __pyx_t_2, NULL); if (unlikely(!__pyx_t_1)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 239; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_GOTREF(__pyx_t_1);
   __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
   __Pyx_GIVEREF(__pyx_t_1);
@@ -6464,7 +5930,7 @@ static PyObject *__pyx_pf_6deepnl_10sentiwords_16SentimentTrainer_2train(struct 
   __pyx_v_self->random_pool = ((struct __pyx_obj_6deepnl_5words_RandomPool *)__pyx_t_1);
   __pyx_t_1 = 0;
 
-  /* "deepnl/sentiwords.pyx":280
+  /* "deepnl/sentiwords.pyx":240
  *         feature_tables = [e.table for e in self.converter.extractors]
  *         self.random_pool = RandomPool([x.shape[0] for x in feature_tables])
  *         self.total_pairs = 0             # <<<<<<<<<<<<<<
@@ -6473,7 +5939,7 @@ static PyObject *__pyx_pf_6deepnl_10sentiwords_16SentimentTrainer_2train(struct 
  */
   __pyx_v_self->__pyx_base.total_pairs = 0;
 
-  /* "deepnl/sentiwords.pyx":283
+  /* "deepnl/sentiwords.pyx":243
  * 
  *         # how often to save model
  *         cdef int save_period = 1000 * 1000 # FIXME             # <<<<<<<<<<<<<<
@@ -6482,39 +5948,39 @@ static PyObject *__pyx_pf_6deepnl_10sentiwords_16SentimentTrainer_2train(struct 
  */
   __pyx_v_save_period = 1000000;
 
-  /* "deepnl/sentiwords.pyx":285
+  /* "deepnl/sentiwords.pyx":245
  *         cdef int save_period = 1000 * 1000 # FIXME
  * 
  *         cdef float all_cases = float(sum([len(sen) for sen in sentences]) * epochs * self.ngram_size)             # <<<<<<<<<<<<<<
  * 
  *         cdef int epoch, num, pos
  */
-  __pyx_t_1 = PyList_New(0); if (unlikely(!__pyx_t_1)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 285; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_t_1 = PyList_New(0); if (unlikely(!__pyx_t_1)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 245; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_GOTREF(__pyx_t_1);
   if (likely(PyList_CheckExact(((PyObject *)__pyx_v_sentences))) || PyTuple_CheckExact(((PyObject *)__pyx_v_sentences))) {
-    __pyx_t_2 = ((PyObject *)__pyx_v_sentences); __Pyx_INCREF(__pyx_t_2); __pyx_t_3 = 0;
+    __pyx_t_2 = ((PyObject *)__pyx_v_sentences); __Pyx_INCREF(__pyx_t_2); __pyx_t_4 = 0;
     __pyx_t_6 = NULL;
   } else {
-    __pyx_t_3 = -1; __pyx_t_2 = PyObject_GetIter(((PyObject *)__pyx_v_sentences)); if (unlikely(!__pyx_t_2)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 285; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+    __pyx_t_4 = -1; __pyx_t_2 = PyObject_GetIter(((PyObject *)__pyx_v_sentences)); if (unlikely(!__pyx_t_2)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 245; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
     __Pyx_GOTREF(__pyx_t_2);
-    __pyx_t_6 = Py_TYPE(__pyx_t_2)->tp_iternext; if (unlikely(!__pyx_t_6)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 285; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+    __pyx_t_6 = Py_TYPE(__pyx_t_2)->tp_iternext; if (unlikely(!__pyx_t_6)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 245; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   }
   for (;;) {
     if (likely(!__pyx_t_6)) {
       if (likely(PyList_CheckExact(__pyx_t_2))) {
-        if (__pyx_t_3 >= PyList_GET_SIZE(__pyx_t_2)) break;
+        if (__pyx_t_4 >= PyList_GET_SIZE(__pyx_t_2)) break;
         #if CYTHON_COMPILING_IN_CPYTHON
-        __pyx_t_5 = PyList_GET_ITEM(__pyx_t_2, __pyx_t_3); __Pyx_INCREF(__pyx_t_5); __pyx_t_3++; if (unlikely(0 < 0)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 285; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+        __pyx_t_5 = PyList_GET_ITEM(__pyx_t_2, __pyx_t_4); __Pyx_INCREF(__pyx_t_5); __pyx_t_4++; if (unlikely(0 < 0)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 245; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
         #else
-        __pyx_t_5 = PySequence_ITEM(__pyx_t_2, __pyx_t_3); __pyx_t_3++; if (unlikely(!__pyx_t_5)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 285; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+        __pyx_t_5 = PySequence_ITEM(__pyx_t_2, __pyx_t_4); __pyx_t_4++; if (unlikely(!__pyx_t_5)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 245; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
         __Pyx_GOTREF(__pyx_t_5);
         #endif
       } else {
-        if (__pyx_t_3 >= PyTuple_GET_SIZE(__pyx_t_2)) break;
+        if (__pyx_t_4 >= PyTuple_GET_SIZE(__pyx_t_2)) break;
         #if CYTHON_COMPILING_IN_CPYTHON
-        __pyx_t_5 = PyTuple_GET_ITEM(__pyx_t_2, __pyx_t_3); __Pyx_INCREF(__pyx_t_5); __pyx_t_3++; if (unlikely(0 < 0)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 285; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+        __pyx_t_5 = PyTuple_GET_ITEM(__pyx_t_2, __pyx_t_4); __Pyx_INCREF(__pyx_t_5); __pyx_t_4++; if (unlikely(0 < 0)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 245; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
         #else
-        __pyx_t_5 = PySequence_ITEM(__pyx_t_2, __pyx_t_3); __pyx_t_3++; if (unlikely(!__pyx_t_5)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 285; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+        __pyx_t_5 = PySequence_ITEM(__pyx_t_2, __pyx_t_4); __pyx_t_4++; if (unlikely(!__pyx_t_5)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 245; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
         __Pyx_GOTREF(__pyx_t_5);
         #endif
       }
@@ -6524,7 +5990,7 @@ static PyObject *__pyx_pf_6deepnl_10sentiwords_16SentimentTrainer_2train(struct 
         PyObject* exc_type = PyErr_Occurred();
         if (exc_type) {
           if (likely(exc_type == PyExc_StopIteration || PyErr_GivenExceptionMatches(exc_type, PyExc_StopIteration))) PyErr_Clear();
-          else {__pyx_filename = __pyx_f[0]; __pyx_lineno = 285; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+          else {__pyx_filename = __pyx_f[0]; __pyx_lineno = 245; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
         }
         break;
       }
@@ -6532,38 +5998,38 @@ static PyObject *__pyx_pf_6deepnl_10sentiwords_16SentimentTrainer_2train(struct 
     }
     __Pyx_XDECREF_SET(__pyx_v_sen, __pyx_t_5);
     __pyx_t_5 = 0;
-    __pyx_t_7 = PyObject_Length(__pyx_v_sen); if (unlikely(__pyx_t_7 == -1)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 285; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
-    __pyx_t_5 = PyInt_FromSsize_t(__pyx_t_7); if (unlikely(!__pyx_t_5)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 285; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+    __pyx_t_7 = PyObject_Length(__pyx_v_sen); if (unlikely(__pyx_t_7 == -1)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 245; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+    __pyx_t_5 = PyInt_FromSsize_t(__pyx_t_7); if (unlikely(!__pyx_t_5)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 245; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
     __Pyx_GOTREF(__pyx_t_5);
-    if (unlikely(__Pyx_ListComp_Append(__pyx_t_1, (PyObject*)__pyx_t_5))) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 285; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+    if (unlikely(__Pyx_ListComp_Append(__pyx_t_1, (PyObject*)__pyx_t_5))) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 245; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
     __Pyx_DECREF(__pyx_t_5); __pyx_t_5 = 0;
   }
   __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
-  __pyx_t_2 = PyTuple_New(1); if (unlikely(!__pyx_t_2)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 285; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_t_2 = PyTuple_New(1); if (unlikely(!__pyx_t_2)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 245; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_GOTREF(__pyx_t_2);
   __Pyx_GIVEREF(__pyx_t_1);
   PyTuple_SET_ITEM(__pyx_t_2, 0, __pyx_t_1);
   __pyx_t_1 = 0;
-  __pyx_t_1 = __Pyx_PyObject_Call(__pyx_builtin_sum, __pyx_t_2, NULL); if (unlikely(!__pyx_t_1)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 285; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_t_1 = __Pyx_PyObject_Call(__pyx_builtin_sum, __pyx_t_2, NULL); if (unlikely(!__pyx_t_1)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 245; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_GOTREF(__pyx_t_1);
   __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
-  __pyx_t_2 = __Pyx_PyInt_From_int(__pyx_v_epochs); if (unlikely(!__pyx_t_2)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 285; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_t_2 = __Pyx_PyInt_From_int(__pyx_v_epochs); if (unlikely(!__pyx_t_2)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 245; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_GOTREF(__pyx_t_2);
-  __pyx_t_5 = PyNumber_Multiply(__pyx_t_1, __pyx_t_2); if (unlikely(!__pyx_t_5)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 285; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_t_5 = PyNumber_Multiply(__pyx_t_1, __pyx_t_2); if (unlikely(!__pyx_t_5)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 245; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_GOTREF(__pyx_t_5);
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
   __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
-  __pyx_t_2 = __Pyx_PyInt_From_int(__pyx_v_self->__pyx_base.__pyx_base.ngram_size); if (unlikely(!__pyx_t_2)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 285; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_t_2 = __Pyx_PyInt_From_int(__pyx_v_self->__pyx_base.__pyx_base.ngram_size); if (unlikely(!__pyx_t_2)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 245; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_GOTREF(__pyx_t_2);
-  __pyx_t_1 = PyNumber_Multiply(__pyx_t_5, __pyx_t_2); if (unlikely(!__pyx_t_1)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 285; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_t_1 = PyNumber_Multiply(__pyx_t_5, __pyx_t_2); if (unlikely(!__pyx_t_1)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 245; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_GOTREF(__pyx_t_1);
   __Pyx_DECREF(__pyx_t_5); __pyx_t_5 = 0;
   __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
-  __pyx_t_8 = __Pyx_PyObject_AsDouble(__pyx_t_1); if (unlikely(__pyx_t_8 == ((double)-1) && PyErr_Occurred())) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 285; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_t_8 = __Pyx_PyObject_AsDouble(__pyx_t_1); if (unlikely(__pyx_t_8 == ((double)-1) && PyErr_Occurred())) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 245; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
   __pyx_v_all_cases = __pyx_t_8;
 
-  /* "deepnl/sentiwords.pyx":290
+  /* "deepnl/sentiwords.pyx":250
  *         cdef float remaining
  * 
  *         cdef int left_context = len(self.pre_padding)             # <<<<<<<<<<<<<<
@@ -6572,11 +6038,11 @@ static PyObject *__pyx_pf_6deepnl_10sentiwords_16SentimentTrainer_2train(struct 
  */
   __pyx_t_1 = ((PyObject *)__pyx_v_self->__pyx_base.__pyx_base.pre_padding);
   __Pyx_INCREF(__pyx_t_1);
-  __pyx_t_3 = PyObject_Length(__pyx_t_1); if (unlikely(__pyx_t_3 == -1)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 290; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_t_4 = PyObject_Length(__pyx_t_1); if (unlikely(__pyx_t_4 == -1)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 250; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
-  __pyx_v_left_context = __pyx_t_3;
+  __pyx_v_left_context = __pyx_t_4;
 
-  /* "deepnl/sentiwords.pyx":291
+  /* "deepnl/sentiwords.pyx":251
  * 
  *         cdef int left_context = len(self.pre_padding)
  *         cdef int right_context = len(self.post_padding)             # <<<<<<<<<<<<<<
@@ -6585,11 +6051,11 @@ static PyObject *__pyx_pf_6deepnl_10sentiwords_16SentimentTrainer_2train(struct 
  */
   __pyx_t_1 = ((PyObject *)__pyx_v_self->__pyx_base.__pyx_base.post_padding);
   __Pyx_INCREF(__pyx_t_1);
-  __pyx_t_3 = PyObject_Length(__pyx_t_1); if (unlikely(__pyx_t_3 == -1)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 291; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_t_4 = PyObject_Length(__pyx_t_1); if (unlikely(__pyx_t_4 == -1)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 251; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
-  __pyx_v_right_context = __pyx_t_3;
+  __pyx_v_right_context = __pyx_t_4;
 
-  /* "deepnl/sentiwords.pyx":292
+  /* "deepnl/sentiwords.pyx":252
  *         cdef int left_context = len(self.pre_padding)
  *         cdef int right_context = len(self.post_padding)
  *         cdef int window_size = left_context + 1 + right_context             # <<<<<<<<<<<<<<
@@ -6598,21 +6064,21 @@ static PyObject *__pyx_pf_6deepnl_10sentiwords_16SentimentTrainer_2train(struct 
  */
   __pyx_v_window_size = ((__pyx_v_left_context + 1) + __pyx_v_right_context);
 
-  /* "deepnl/sentiwords.pyx":294
+  /* "deepnl/sentiwords.pyx":254
  *         cdef int window_size = left_context + 1 + right_context
  *         # FIXME: might use len(self.example) instead of window_size?
  *         cdef np.ndarray window = np.empty((window_size, 1), dtype=np.int)             # <<<<<<<<<<<<<<
  *         cdef np.ndarray token, neg_token
  *         cdef int size = 1
  */
-  __pyx_t_1 = __Pyx_GetModuleGlobalName(__pyx_n_s_np); if (unlikely(!__pyx_t_1)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 294; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_t_1 = __Pyx_GetModuleGlobalName(__pyx_n_s_np); if (unlikely(!__pyx_t_1)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 254; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_GOTREF(__pyx_t_1);
-  __pyx_t_2 = __Pyx_PyObject_GetAttrStr(__pyx_t_1, __pyx_n_s_empty); if (unlikely(!__pyx_t_2)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 294; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_t_2 = __Pyx_PyObject_GetAttrStr(__pyx_t_1, __pyx_n_s_empty); if (unlikely(!__pyx_t_2)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 254; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_GOTREF(__pyx_t_2);
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
-  __pyx_t_1 = __Pyx_PyInt_From_int(__pyx_v_window_size); if (unlikely(!__pyx_t_1)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 294; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_t_1 = __Pyx_PyInt_From_int(__pyx_v_window_size); if (unlikely(!__pyx_t_1)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 254; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_GOTREF(__pyx_t_1);
-  __pyx_t_5 = PyTuple_New(2); if (unlikely(!__pyx_t_5)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 294; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_t_5 = PyTuple_New(2); if (unlikely(!__pyx_t_5)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 254; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_GOTREF(__pyx_t_5);
   __Pyx_GIVEREF(__pyx_t_1);
   PyTuple_SET_ITEM(__pyx_t_5, 0, __pyx_t_1);
@@ -6620,30 +6086,30 @@ static PyObject *__pyx_pf_6deepnl_10sentiwords_16SentimentTrainer_2train(struct 
   __Pyx_GIVEREF(__pyx_int_1);
   PyTuple_SET_ITEM(__pyx_t_5, 1, __pyx_int_1);
   __pyx_t_1 = 0;
-  __pyx_t_1 = PyTuple_New(1); if (unlikely(!__pyx_t_1)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 294; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_t_1 = PyTuple_New(1); if (unlikely(!__pyx_t_1)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 254; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_GOTREF(__pyx_t_1);
   __Pyx_GIVEREF(__pyx_t_5);
   PyTuple_SET_ITEM(__pyx_t_1, 0, __pyx_t_5);
   __pyx_t_5 = 0;
-  __pyx_t_5 = PyDict_New(); if (unlikely(!__pyx_t_5)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 294; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_t_5 = PyDict_New(); if (unlikely(!__pyx_t_5)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 254; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_GOTREF(__pyx_t_5);
-  __pyx_t_4 = __Pyx_GetModuleGlobalName(__pyx_n_s_np); if (unlikely(!__pyx_t_4)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 294; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
-  __Pyx_GOTREF(__pyx_t_4);
-  __pyx_t_9 = __Pyx_PyObject_GetAttrStr(__pyx_t_4, __pyx_n_s_int); if (unlikely(!__pyx_t_9)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 294; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_t_3 = __Pyx_GetModuleGlobalName(__pyx_n_s_np); if (unlikely(!__pyx_t_3)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 254; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __Pyx_GOTREF(__pyx_t_3);
+  __pyx_t_9 = __Pyx_PyObject_GetAttrStr(__pyx_t_3, __pyx_n_s_int); if (unlikely(!__pyx_t_9)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 254; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_GOTREF(__pyx_t_9);
-  __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
-  if (PyDict_SetItem(__pyx_t_5, __pyx_n_s_dtype, __pyx_t_9) < 0) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 294; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
+  if (PyDict_SetItem(__pyx_t_5, __pyx_n_s_dtype, __pyx_t_9) < 0) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 254; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_DECREF(__pyx_t_9); __pyx_t_9 = 0;
-  __pyx_t_9 = __Pyx_PyObject_Call(__pyx_t_2, __pyx_t_1, __pyx_t_5); if (unlikely(!__pyx_t_9)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 294; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_t_9 = __Pyx_PyObject_Call(__pyx_t_2, __pyx_t_1, __pyx_t_5); if (unlikely(!__pyx_t_9)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 254; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_GOTREF(__pyx_t_9);
   __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
   __Pyx_DECREF(__pyx_t_5); __pyx_t_5 = 0;
-  if (!(likely(((__pyx_t_9) == Py_None) || likely(__Pyx_TypeTest(__pyx_t_9, __pyx_ptype_5numpy_ndarray))))) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 294; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  if (!(likely(((__pyx_t_9) == Py_None) || likely(__Pyx_TypeTest(__pyx_t_9, __pyx_ptype_5numpy_ndarray))))) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 254; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __pyx_v_window = ((PyArrayObject *)__pyx_t_9);
   __pyx_t_9 = 0;
 
-  /* "deepnl/sentiwords.pyx":296
+  /* "deepnl/sentiwords.pyx":256
  *         cdef np.ndarray window = np.empty((window_size, 1), dtype=np.int)
  *         cdef np.ndarray token, neg_token
  *         cdef int size = 1             # <<<<<<<<<<<<<<
@@ -6652,20 +6118,20 @@ static PyObject *__pyx_pf_6deepnl_10sentiwords_16SentimentTrainer_2train(struct 
  */
   __pyx_v_size = 1;
 
-  /* "deepnl/sentiwords.pyx":298
+  /* "deepnl/sentiwords.pyx":258
  *         cdef int size = 1
  * 
  *         grads = SentGradients(self.nn.input_size, self.nn.hidden_size, self.nn.output_size)             # <<<<<<<<<<<<<<
  * 
  *         for epoch in xrange(epochs):
  */
-  __pyx_t_9 = __Pyx_PyInt_From_int(__pyx_v_self->__pyx_base.__pyx_base.nn->input_size); if (unlikely(!__pyx_t_9)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 298; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_t_9 = __Pyx_PyInt_From_int(__pyx_v_self->__pyx_base.__pyx_base.nn->input_size); if (unlikely(!__pyx_t_9)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 258; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_GOTREF(__pyx_t_9);
-  __pyx_t_5 = __Pyx_PyInt_From_int(__pyx_v_self->__pyx_base.__pyx_base.nn->hidden_size); if (unlikely(!__pyx_t_5)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 298; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_t_5 = __Pyx_PyInt_From_int(__pyx_v_self->__pyx_base.__pyx_base.nn->hidden_size); if (unlikely(!__pyx_t_5)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 258; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_GOTREF(__pyx_t_5);
-  __pyx_t_1 = __Pyx_PyInt_From_int(__pyx_v_self->__pyx_base.__pyx_base.nn->output_size); if (unlikely(!__pyx_t_1)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 298; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_t_1 = __Pyx_PyInt_From_int(__pyx_v_self->__pyx_base.__pyx_base.nn->output_size); if (unlikely(!__pyx_t_1)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 258; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_GOTREF(__pyx_t_1);
-  __pyx_t_2 = PyTuple_New(3); if (unlikely(!__pyx_t_2)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 298; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_t_2 = PyTuple_New(3); if (unlikely(!__pyx_t_2)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 258; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_GOTREF(__pyx_t_2);
   __Pyx_GIVEREF(__pyx_t_9);
   PyTuple_SET_ITEM(__pyx_t_2, 0, __pyx_t_9);
@@ -6676,13 +6142,13 @@ static PyObject *__pyx_pf_6deepnl_10sentiwords_16SentimentTrainer_2train(struct 
   __pyx_t_9 = 0;
   __pyx_t_5 = 0;
   __pyx_t_1 = 0;
-  __pyx_t_1 = __Pyx_PyObject_Call(((PyObject *)__pyx_ptype_6deepnl_10sentiwords_SentGradients), __pyx_t_2, NULL); if (unlikely(!__pyx_t_1)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 298; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_t_1 = __Pyx_PyObject_Call(((PyObject *)__pyx_ptype_6deepnl_10sentiwords_SentGradients), __pyx_t_2, NULL); if (unlikely(!__pyx_t_1)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 258; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_GOTREF(__pyx_t_1);
   __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
   __pyx_v_grads = ((struct __pyx_obj_6deepnl_10sentiwords_SentGradients *)__pyx_t_1);
   __pyx_t_1 = 0;
 
-  /* "deepnl/sentiwords.pyx":300
+  /* "deepnl/sentiwords.pyx":260
  *         grads = SentGradients(self.nn.input_size, self.nn.hidden_size, self.nn.output_size)
  * 
  *         for epoch in xrange(epochs):             # <<<<<<<<<<<<<<
@@ -6693,7 +6159,7 @@ static PyObject *__pyx_pf_6deepnl_10sentiwords_16SentimentTrainer_2train(struct 
   for (__pyx_t_11 = 0; __pyx_t_11 < __pyx_t_10; __pyx_t_11+=1) {
     __pyx_v_epoch = __pyx_t_11;
 
-    /* "deepnl/sentiwords.pyx":301
+    /* "deepnl/sentiwords.pyx":261
  * 
  *         for epoch in xrange(epochs):
  *             self.error = 0.0             # <<<<<<<<<<<<<<
@@ -6702,7 +6168,7 @@ static PyObject *__pyx_pf_6deepnl_10sentiwords_16SentimentTrainer_2train(struct 
  */
     __pyx_v_self->__pyx_base.__pyx_base.error = 0.0;
 
-    /* "deepnl/sentiwords.pyx":302
+    /* "deepnl/sentiwords.pyx":262
  *         for epoch in xrange(epochs):
  *             self.error = 0.0
  *             self.epoch_items = 0             # <<<<<<<<<<<<<<
@@ -6711,7 +6177,7 @@ static PyObject *__pyx_pf_6deepnl_10sentiwords_16SentimentTrainer_2train(struct 
  */
     __pyx_v_self->__pyx_base.__pyx_base.epoch_items = 0;
 
-    /* "deepnl/sentiwords.pyx":303
+    /* "deepnl/sentiwords.pyx":263
  *             self.error = 0.0
  *             self.epoch_items = 0
  *             self.epoch_hits = 0             # <<<<<<<<<<<<<<
@@ -6720,7 +6186,7 @@ static PyObject *__pyx_pf_6deepnl_10sentiwords_16SentimentTrainer_2train(struct 
  */
     __pyx_v_self->__pyx_base.__pyx_base.epoch_hits = 0;
 
-    /* "deepnl/sentiwords.pyx":304
+    /* "deepnl/sentiwords.pyx":264
  *             self.epoch_items = 0
  *             self.epoch_hits = 0
  *             self.skips = 0             # <<<<<<<<<<<<<<
@@ -6729,7 +6195,7 @@ static PyObject *__pyx_pf_6deepnl_10sentiwords_16SentimentTrainer_2train(struct 
  */
     __pyx_v_self->__pyx_base.__pyx_base.skips = 0;
 
-    /* "deepnl/sentiwords.pyx":305
+    /* "deepnl/sentiwords.pyx":265
  *             self.epoch_hits = 0
  *             self.skips = 0
  *             epoch_pairs = 0             # <<<<<<<<<<<<<<
@@ -6739,7 +6205,7 @@ static PyObject *__pyx_pf_6deepnl_10sentiwords_16SentimentTrainer_2train(struct 
     __Pyx_INCREF(__pyx_int_0);
     __Pyx_XDECREF_SET(__pyx_v_epoch_pairs, __pyx_int_0);
 
-    /* "deepnl/sentiwords.pyx":308
+    /* "deepnl/sentiwords.pyx":268
  *             # update LR by fan-in
  *             # decrease linearly by remaining
  *             remaining = 1.0 - (self.total_pairs / all_cases)             # <<<<<<<<<<<<<<
@@ -6748,11 +6214,11 @@ static PyObject *__pyx_pf_6deepnl_10sentiwords_16SentimentTrainer_2train(struct 
  */
     if (unlikely(__pyx_v_all_cases == 0)) {
       PyErr_SetString(PyExc_ZeroDivisionError, "float division");
-      {__pyx_filename = __pyx_f[0]; __pyx_lineno = 308; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+      {__pyx_filename = __pyx_f[0]; __pyx_lineno = 268; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
     }
     __pyx_v_remaining = (1.0 - (__pyx_v_self->__pyx_base.total_pairs / __pyx_v_all_cases));
 
-    /* "deepnl/sentiwords.pyx":310
+    /* "deepnl/sentiwords.pyx":270
  *             remaining = 1.0 - (self.total_pairs / all_cases)
  * 
  *             for num, sentence in enumerate(sentences):             # <<<<<<<<<<<<<<
@@ -6761,29 +6227,29 @@ static PyObject *__pyx_pf_6deepnl_10sentiwords_16SentimentTrainer_2train(struct 
  */
     __pyx_t_12 = 0;
     if (likely(PyList_CheckExact(((PyObject *)__pyx_v_sentences))) || PyTuple_CheckExact(((PyObject *)__pyx_v_sentences))) {
-      __pyx_t_1 = ((PyObject *)__pyx_v_sentences); __Pyx_INCREF(__pyx_t_1); __pyx_t_3 = 0;
+      __pyx_t_1 = ((PyObject *)__pyx_v_sentences); __Pyx_INCREF(__pyx_t_1); __pyx_t_4 = 0;
       __pyx_t_6 = NULL;
     } else {
-      __pyx_t_3 = -1; __pyx_t_1 = PyObject_GetIter(((PyObject *)__pyx_v_sentences)); if (unlikely(!__pyx_t_1)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 310; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+      __pyx_t_4 = -1; __pyx_t_1 = PyObject_GetIter(((PyObject *)__pyx_v_sentences)); if (unlikely(!__pyx_t_1)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 270; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
       __Pyx_GOTREF(__pyx_t_1);
-      __pyx_t_6 = Py_TYPE(__pyx_t_1)->tp_iternext; if (unlikely(!__pyx_t_6)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 310; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+      __pyx_t_6 = Py_TYPE(__pyx_t_1)->tp_iternext; if (unlikely(!__pyx_t_6)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 270; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
     }
     for (;;) {
       if (likely(!__pyx_t_6)) {
         if (likely(PyList_CheckExact(__pyx_t_1))) {
-          if (__pyx_t_3 >= PyList_GET_SIZE(__pyx_t_1)) break;
+          if (__pyx_t_4 >= PyList_GET_SIZE(__pyx_t_1)) break;
           #if CYTHON_COMPILING_IN_CPYTHON
-          __pyx_t_2 = PyList_GET_ITEM(__pyx_t_1, __pyx_t_3); __Pyx_INCREF(__pyx_t_2); __pyx_t_3++; if (unlikely(0 < 0)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 310; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+          __pyx_t_2 = PyList_GET_ITEM(__pyx_t_1, __pyx_t_4); __Pyx_INCREF(__pyx_t_2); __pyx_t_4++; if (unlikely(0 < 0)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 270; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
           #else
-          __pyx_t_2 = PySequence_ITEM(__pyx_t_1, __pyx_t_3); __pyx_t_3++; if (unlikely(!__pyx_t_2)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 310; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+          __pyx_t_2 = PySequence_ITEM(__pyx_t_1, __pyx_t_4); __pyx_t_4++; if (unlikely(!__pyx_t_2)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 270; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
           __Pyx_GOTREF(__pyx_t_2);
           #endif
         } else {
-          if (__pyx_t_3 >= PyTuple_GET_SIZE(__pyx_t_1)) break;
+          if (__pyx_t_4 >= PyTuple_GET_SIZE(__pyx_t_1)) break;
           #if CYTHON_COMPILING_IN_CPYTHON
-          __pyx_t_2 = PyTuple_GET_ITEM(__pyx_t_1, __pyx_t_3); __Pyx_INCREF(__pyx_t_2); __pyx_t_3++; if (unlikely(0 < 0)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 310; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+          __pyx_t_2 = PyTuple_GET_ITEM(__pyx_t_1, __pyx_t_4); __Pyx_INCREF(__pyx_t_2); __pyx_t_4++; if (unlikely(0 < 0)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 270; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
           #else
-          __pyx_t_2 = PySequence_ITEM(__pyx_t_1, __pyx_t_3); __pyx_t_3++; if (unlikely(!__pyx_t_2)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 310; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+          __pyx_t_2 = PySequence_ITEM(__pyx_t_1, __pyx_t_4); __pyx_t_4++; if (unlikely(!__pyx_t_2)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 270; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
           __Pyx_GOTREF(__pyx_t_2);
           #endif
         }
@@ -6793,7 +6259,7 @@ static PyObject *__pyx_pf_6deepnl_10sentiwords_16SentimentTrainer_2train(struct 
           PyObject* exc_type = PyErr_Occurred();
           if (exc_type) {
             if (likely(exc_type == PyExc_StopIteration || PyErr_GivenExceptionMatches(exc_type, PyExc_StopIteration))) PyErr_Clear();
-            else {__pyx_filename = __pyx_f[0]; __pyx_lineno = 310; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+            else {__pyx_filename = __pyx_f[0]; __pyx_lineno = 270; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
           }
           break;
         }
@@ -6804,7 +6270,7 @@ static PyObject *__pyx_pf_6deepnl_10sentiwords_16SentimentTrainer_2train(struct 
       __pyx_v_num = __pyx_t_12;
       __pyx_t_12 = (__pyx_t_12 + 1);
 
-      /* "deepnl/sentiwords.pyx":311
+      /* "deepnl/sentiwords.pyx":271
  * 
  *             for num, sentence in enumerate(sentences):
  *                 if polarities[num] == 0:             # <<<<<<<<<<<<<<
@@ -6813,18 +6279,18 @@ static PyObject *__pyx_pf_6deepnl_10sentiwords_16SentimentTrainer_2train(struct 
  */
       if (unlikely(__pyx_v_polarities == Py_None)) {
         PyErr_SetString(PyExc_TypeError, "'NoneType' object is not subscriptable");
-        {__pyx_filename = __pyx_f[0]; __pyx_lineno = 311; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+        {__pyx_filename = __pyx_f[0]; __pyx_lineno = 271; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
       }
-      __pyx_t_2 = __Pyx_GetItemInt_List(__pyx_v_polarities, __pyx_v_num, int, 1, __Pyx_PyInt_From_int, 1, 1, 1); if (unlikely(__pyx_t_2 == NULL)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 311; __pyx_clineno = __LINE__; goto __pyx_L1_error;};
+      __pyx_t_2 = __Pyx_GetItemInt_List(__pyx_v_polarities, __pyx_v_num, int, 1, __Pyx_PyInt_From_int, 1, 1, 1); if (unlikely(__pyx_t_2 == NULL)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 271; __pyx_clineno = __LINE__; goto __pyx_L1_error;};
       __Pyx_GOTREF(__pyx_t_2);
-      __pyx_t_5 = __Pyx_PyInt_EqObjC(__pyx_t_2, __pyx_int_0, 0, 0); if (unlikely(!__pyx_t_5)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 311; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+      __pyx_t_5 = __Pyx_PyInt_EqObjC(__pyx_t_2, __pyx_int_0, 0, 0); if (unlikely(!__pyx_t_5)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 271; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
       __Pyx_GOTREF(__pyx_t_5);
       __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
-      __pyx_t_13 = __Pyx_PyObject_IsTrue(__pyx_t_5); if (unlikely(__pyx_t_13 < 0)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 311; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+      __pyx_t_13 = __Pyx_PyObject_IsTrue(__pyx_t_5); if (unlikely(__pyx_t_13 < 0)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 271; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
       __Pyx_DECREF(__pyx_t_5); __pyx_t_5 = 0;
       if (__pyx_t_13) {
 
-        /* "deepnl/sentiwords.pyx":313
+        /* "deepnl/sentiwords.pyx":273
  *                 if polarities[num] == 0:
  *                     # skip neutral sentences
  *                     continue             # <<<<<<<<<<<<<<
@@ -6833,7 +6299,7 @@ static PyObject *__pyx_pf_6deepnl_10sentiwords_16SentimentTrainer_2train(struct 
  */
         goto __pyx_L11_continue;
 
-        /* "deepnl/sentiwords.pyx":311
+        /* "deepnl/sentiwords.pyx":271
  * 
  *             for num, sentence in enumerate(sentences):
  *                 if polarities[num] == 0:             # <<<<<<<<<<<<<<
@@ -6842,44 +6308,44 @@ static PyObject *__pyx_pf_6deepnl_10sentiwords_16SentimentTrainer_2train(struct 
  */
       }
 
-      /* "deepnl/sentiwords.pyx":315
+      /* "deepnl/sentiwords.pyx":275
  *                     continue
  *                 #print >> sys.stderr, self.converter.extractors[0].sentence(sentence).encode('utf-8') # DEBUG
  *                 for pos in xrange(len(sentence)):             # <<<<<<<<<<<<<<
  *                     # for any word or ngram at sentence[pos:pos+size]
  *                     for size in itertrie(trie, sentence, pos):
  */
-      __pyx_t_7 = PyObject_Length(__pyx_v_sentence); if (unlikely(__pyx_t_7 == -1)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 315; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+      __pyx_t_7 = PyObject_Length(__pyx_v_sentence); if (unlikely(__pyx_t_7 == -1)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 275; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
       for (__pyx_t_14 = 0; __pyx_t_14 < __pyx_t_7; __pyx_t_14+=1) {
         __pyx_v_pos = __pyx_t_14;
 
-        /* "deepnl/sentiwords.pyx":317
+        /* "deepnl/sentiwords.pyx":277
  *                 for pos in xrange(len(sentence)):
  *                     # for any word or ngram at sentence[pos:pos+size]
  *                     for size in itertrie(trie, sentence, pos):             # <<<<<<<<<<<<<<
  *                         # FIXME: avoid overlaps like 0-3, 1-2
  *                         # extract a window of tokens around the given position
  */
-        __pyx_t_2 = __Pyx_GetModuleGlobalName(__pyx_n_s_itertrie); if (unlikely(!__pyx_t_2)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 317; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+        __pyx_t_2 = __Pyx_GetModuleGlobalName(__pyx_n_s_itertrie); if (unlikely(!__pyx_t_2)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 277; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
         __Pyx_GOTREF(__pyx_t_2);
-        __pyx_t_9 = __Pyx_PyInt_From_int(__pyx_v_pos); if (unlikely(!__pyx_t_9)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 317; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+        __pyx_t_9 = __Pyx_PyInt_From_int(__pyx_v_pos); if (unlikely(!__pyx_t_9)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 277; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
         __Pyx_GOTREF(__pyx_t_9);
-        __pyx_t_4 = NULL;
+        __pyx_t_3 = NULL;
         __pyx_t_15 = 0;
         if (CYTHON_COMPILING_IN_CPYTHON && unlikely(PyMethod_Check(__pyx_t_2))) {
-          __pyx_t_4 = PyMethod_GET_SELF(__pyx_t_2);
-          if (likely(__pyx_t_4)) {
+          __pyx_t_3 = PyMethod_GET_SELF(__pyx_t_2);
+          if (likely(__pyx_t_3)) {
             PyObject* function = PyMethod_GET_FUNCTION(__pyx_t_2);
-            __Pyx_INCREF(__pyx_t_4);
+            __Pyx_INCREF(__pyx_t_3);
             __Pyx_INCREF(function);
             __Pyx_DECREF_SET(__pyx_t_2, function);
             __pyx_t_15 = 1;
           }
         }
-        __pyx_t_16 = PyTuple_New(3+__pyx_t_15); if (unlikely(!__pyx_t_16)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 317; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+        __pyx_t_16 = PyTuple_New(3+__pyx_t_15); if (unlikely(!__pyx_t_16)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 277; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
         __Pyx_GOTREF(__pyx_t_16);
-        if (__pyx_t_4) {
-          __Pyx_GIVEREF(__pyx_t_4); PyTuple_SET_ITEM(__pyx_t_16, 0, __pyx_t_4); __pyx_t_4 = NULL;
+        if (__pyx_t_3) {
+          __Pyx_GIVEREF(__pyx_t_3); PyTuple_SET_ITEM(__pyx_t_16, 0, __pyx_t_3); __pyx_t_3 = NULL;
         }
         __Pyx_INCREF(__pyx_v_trie);
         __Pyx_GIVEREF(__pyx_v_trie);
@@ -6890,7 +6356,7 @@ static PyObject *__pyx_pf_6deepnl_10sentiwords_16SentimentTrainer_2train(struct 
         __Pyx_GIVEREF(__pyx_t_9);
         PyTuple_SET_ITEM(__pyx_t_16, 2+__pyx_t_15, __pyx_t_9);
         __pyx_t_9 = 0;
-        __pyx_t_5 = __Pyx_PyObject_Call(__pyx_t_2, __pyx_t_16, NULL); if (unlikely(!__pyx_t_5)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 317; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+        __pyx_t_5 = __Pyx_PyObject_Call(__pyx_t_2, __pyx_t_16, NULL); if (unlikely(!__pyx_t_5)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 277; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
         __Pyx_GOTREF(__pyx_t_5);
         __Pyx_DECREF(__pyx_t_16); __pyx_t_16 = 0;
         __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
@@ -6898,9 +6364,9 @@ static PyObject *__pyx_pf_6deepnl_10sentiwords_16SentimentTrainer_2train(struct 
           __pyx_t_2 = __pyx_t_5; __Pyx_INCREF(__pyx_t_2); __pyx_t_15 = 0;
           __pyx_t_17 = NULL;
         } else {
-          __pyx_t_15 = -1; __pyx_t_2 = PyObject_GetIter(__pyx_t_5); if (unlikely(!__pyx_t_2)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 317; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+          __pyx_t_15 = -1; __pyx_t_2 = PyObject_GetIter(__pyx_t_5); if (unlikely(!__pyx_t_2)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 277; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
           __Pyx_GOTREF(__pyx_t_2);
-          __pyx_t_17 = Py_TYPE(__pyx_t_2)->tp_iternext; if (unlikely(!__pyx_t_17)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 317; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+          __pyx_t_17 = Py_TYPE(__pyx_t_2)->tp_iternext; if (unlikely(!__pyx_t_17)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 277; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
         }
         __Pyx_DECREF(__pyx_t_5); __pyx_t_5 = 0;
         for (;;) {
@@ -6908,17 +6374,17 @@ static PyObject *__pyx_pf_6deepnl_10sentiwords_16SentimentTrainer_2train(struct 
             if (likely(PyList_CheckExact(__pyx_t_2))) {
               if (__pyx_t_15 >= PyList_GET_SIZE(__pyx_t_2)) break;
               #if CYTHON_COMPILING_IN_CPYTHON
-              __pyx_t_5 = PyList_GET_ITEM(__pyx_t_2, __pyx_t_15); __Pyx_INCREF(__pyx_t_5); __pyx_t_15++; if (unlikely(0 < 0)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 317; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+              __pyx_t_5 = PyList_GET_ITEM(__pyx_t_2, __pyx_t_15); __Pyx_INCREF(__pyx_t_5); __pyx_t_15++; if (unlikely(0 < 0)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 277; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
               #else
-              __pyx_t_5 = PySequence_ITEM(__pyx_t_2, __pyx_t_15); __pyx_t_15++; if (unlikely(!__pyx_t_5)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 317; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+              __pyx_t_5 = PySequence_ITEM(__pyx_t_2, __pyx_t_15); __pyx_t_15++; if (unlikely(!__pyx_t_5)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 277; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
               __Pyx_GOTREF(__pyx_t_5);
               #endif
             } else {
               if (__pyx_t_15 >= PyTuple_GET_SIZE(__pyx_t_2)) break;
               #if CYTHON_COMPILING_IN_CPYTHON
-              __pyx_t_5 = PyTuple_GET_ITEM(__pyx_t_2, __pyx_t_15); __Pyx_INCREF(__pyx_t_5); __pyx_t_15++; if (unlikely(0 < 0)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 317; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+              __pyx_t_5 = PyTuple_GET_ITEM(__pyx_t_2, __pyx_t_15); __Pyx_INCREF(__pyx_t_5); __pyx_t_15++; if (unlikely(0 < 0)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 277; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
               #else
-              __pyx_t_5 = PySequence_ITEM(__pyx_t_2, __pyx_t_15); __pyx_t_15++; if (unlikely(!__pyx_t_5)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 317; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+              __pyx_t_5 = PySequence_ITEM(__pyx_t_2, __pyx_t_15); __pyx_t_15++; if (unlikely(!__pyx_t_5)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 277; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
               __Pyx_GOTREF(__pyx_t_5);
               #endif
             }
@@ -6928,32 +6394,32 @@ static PyObject *__pyx_pf_6deepnl_10sentiwords_16SentimentTrainer_2train(struct 
               PyObject* exc_type = PyErr_Occurred();
               if (exc_type) {
                 if (likely(exc_type == PyExc_StopIteration || PyErr_GivenExceptionMatches(exc_type, PyExc_StopIteration))) PyErr_Clear();
-                else {__pyx_filename = __pyx_f[0]; __pyx_lineno = 317; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+                else {__pyx_filename = __pyx_f[0]; __pyx_lineno = 277; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
               }
               break;
             }
             __Pyx_GOTREF(__pyx_t_5);
           }
-          __pyx_t_18 = __Pyx_PyInt_As_int(__pyx_t_5); if (unlikely((__pyx_t_18 == (int)-1) && PyErr_Occurred())) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 317; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+          __pyx_t_18 = __Pyx_PyInt_As_int(__pyx_t_5); if (unlikely((__pyx_t_18 == (int)-1) && PyErr_Occurred())) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 277; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
           __Pyx_DECREF(__pyx_t_5); __pyx_t_5 = 0;
           __pyx_v_size = __pyx_t_18;
 
-          /* "deepnl/sentiwords.pyx":320
+          /* "deepnl/sentiwords.pyx":280
  *                         # FIXME: avoid overlaps like 0-3, 1-2
  *                         # extract a window of tokens around the given position
  *                         token = self._extract_window(window, sentence, pos, size)             # <<<<<<<<<<<<<<
  *                         error, neg_token = self._train_pair_s(window, grads, size, polarities[num])
  *                         self.total_items += 1
  */
-          if (!(likely(((__pyx_v_sentence) == Py_None) || likely(__Pyx_TypeTest(__pyx_v_sentence, __pyx_ptype_5numpy_ndarray))))) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 320; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+          if (!(likely(((__pyx_v_sentence) == Py_None) || likely(__Pyx_TypeTest(__pyx_v_sentence, __pyx_ptype_5numpy_ndarray))))) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 280; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
           __pyx_t_19.__pyx_n = 1;
           __pyx_t_19.size = __pyx_v_size;
-          __pyx_t_5 = ((PyObject *)((struct __pyx_vtabstruct_6deepnl_10sentiwords_SentimentTrainer *)__pyx_v_self->__pyx_base.__pyx_base.__pyx_vtab)->__pyx_base._extract_window(((struct __pyx_obj_6deepnl_5words_LmTrainer *)__pyx_v_self), ((PyArrayObject *)__pyx_v_window), ((PyArrayObject *)__pyx_v_sentence), __pyx_v_pos, &__pyx_t_19)); if (unlikely(!__pyx_t_5)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 320; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+          __pyx_t_5 = ((PyObject *)((struct __pyx_vtabstruct_6deepnl_10sentiwords_SentimentTrainer *)__pyx_v_self->__pyx_base.__pyx_base.__pyx_vtab)->__pyx_base._extract_window(((struct __pyx_obj_6deepnl_5words_LmTrainer *)__pyx_v_self), ((PyArrayObject *)__pyx_v_window), ((PyArrayObject *)__pyx_v_sentence), __pyx_v_pos, &__pyx_t_19)); if (unlikely(!__pyx_t_5)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 280; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
           __Pyx_GOTREF(__pyx_t_5);
           __Pyx_XDECREF_SET(__pyx_v_token, ((PyArrayObject *)__pyx_t_5));
           __pyx_t_5 = 0;
 
-          /* "deepnl/sentiwords.pyx":321
+          /* "deepnl/sentiwords.pyx":281
  *                         # extract a window of tokens around the given position
  *                         token = self._extract_window(window, sentence, pos, size)
  *                         error, neg_token = self._train_pair_s(window, grads, size, polarities[num])             # <<<<<<<<<<<<<<
@@ -6962,16 +6428,16 @@ static PyObject *__pyx_pf_6deepnl_10sentiwords_16SentimentTrainer_2train(struct 
  */
           if (unlikely(__pyx_v_polarities == Py_None)) {
             PyErr_SetString(PyExc_TypeError, "'NoneType' object is not subscriptable");
-            {__pyx_filename = __pyx_f[0]; __pyx_lineno = 321; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+            {__pyx_filename = __pyx_f[0]; __pyx_lineno = 281; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
           }
-          __pyx_t_5 = __Pyx_GetItemInt_List(__pyx_v_polarities, __pyx_v_num, int, 1, __Pyx_PyInt_From_int, 1, 1, 1); if (unlikely(__pyx_t_5 == NULL)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 321; __pyx_clineno = __LINE__; goto __pyx_L1_error;};
+          __pyx_t_5 = __Pyx_GetItemInt_List(__pyx_v_polarities, __pyx_v_num, int, 1, __Pyx_PyInt_From_int, 1, 1, 1); if (unlikely(__pyx_t_5 == NULL)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 281; __pyx_clineno = __LINE__; goto __pyx_L1_error;};
           __Pyx_GOTREF(__pyx_t_5);
-          __pyx_t_18 = __Pyx_PyInt_As_int(__pyx_t_5); if (unlikely((__pyx_t_18 == (int)-1) && PyErr_Occurred())) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 321; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+          __pyx_t_18 = __Pyx_PyInt_As_int(__pyx_t_5); if (unlikely((__pyx_t_18 == (int)-1) && PyErr_Occurred())) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 281; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
           __Pyx_DECREF(__pyx_t_5); __pyx_t_5 = 0;
           __pyx_t_20.__pyx_n = 2;
           __pyx_t_20.size = __pyx_v_size;
           __pyx_t_20.polarity = __pyx_t_18;
-          __pyx_t_5 = ((struct __pyx_vtabstruct_6deepnl_10sentiwords_SentimentTrainer *)__pyx_v_self->__pyx_base.__pyx_base.__pyx_vtab)->_train_pair_s(__pyx_v_self, ((PyArrayObject *)__pyx_v_window), ((struct __pyx_obj_6deepnl_7network_Gradients *)__pyx_v_grads), &__pyx_t_20); if (unlikely(!__pyx_t_5)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 321; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+          __pyx_t_5 = ((struct __pyx_vtabstruct_6deepnl_10sentiwords_SentimentTrainer *)__pyx_v_self->__pyx_base.__pyx_base.__pyx_vtab)->_train_pair_s(__pyx_v_self, ((PyArrayObject *)__pyx_v_window), ((struct __pyx_obj_6deepnl_7network_Gradients *)__pyx_v_grads), &__pyx_t_20); if (unlikely(!__pyx_t_5)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 281; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
           __Pyx_GOTREF(__pyx_t_5);
           if ((likely(PyTuple_CheckExact(__pyx_t_5))) || (PyList_CheckExact(__pyx_t_5))) {
             PyObject* sequence = __pyx_t_5;
@@ -6983,7 +6449,7 @@ static PyObject *__pyx_pf_6deepnl_10sentiwords_16SentimentTrainer_2train(struct 
             if (unlikely(size != 2)) {
               if (size > 2) __Pyx_RaiseTooManyValuesError(2);
               else if (size >= 0) __Pyx_RaiseNeedMoreValuesError(size);
-              {__pyx_filename = __pyx_f[0]; __pyx_lineno = 321; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+              {__pyx_filename = __pyx_f[0]; __pyx_lineno = 281; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
             }
             #if CYTHON_COMPILING_IN_CPYTHON
             if (likely(PyTuple_CheckExact(sequence))) {
@@ -6996,40 +6462,40 @@ static PyObject *__pyx_pf_6deepnl_10sentiwords_16SentimentTrainer_2train(struct 
             __Pyx_INCREF(__pyx_t_16);
             __Pyx_INCREF(__pyx_t_9);
             #else
-            __pyx_t_16 = PySequence_ITEM(sequence, 0); if (unlikely(!__pyx_t_16)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 321; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+            __pyx_t_16 = PySequence_ITEM(sequence, 0); if (unlikely(!__pyx_t_16)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 281; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
             __Pyx_GOTREF(__pyx_t_16);
-            __pyx_t_9 = PySequence_ITEM(sequence, 1); if (unlikely(!__pyx_t_9)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 321; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+            __pyx_t_9 = PySequence_ITEM(sequence, 1); if (unlikely(!__pyx_t_9)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 281; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
             __Pyx_GOTREF(__pyx_t_9);
             #endif
             __Pyx_DECREF(__pyx_t_5); __pyx_t_5 = 0;
           } else {
             Py_ssize_t index = -1;
-            __pyx_t_4 = PyObject_GetIter(__pyx_t_5); if (unlikely(!__pyx_t_4)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 321; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
-            __Pyx_GOTREF(__pyx_t_4);
+            __pyx_t_3 = PyObject_GetIter(__pyx_t_5); if (unlikely(!__pyx_t_3)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 281; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+            __Pyx_GOTREF(__pyx_t_3);
             __Pyx_DECREF(__pyx_t_5); __pyx_t_5 = 0;
-            __pyx_t_21 = Py_TYPE(__pyx_t_4)->tp_iternext;
-            index = 0; __pyx_t_16 = __pyx_t_21(__pyx_t_4); if (unlikely(!__pyx_t_16)) goto __pyx_L18_unpacking_failed;
+            __pyx_t_21 = Py_TYPE(__pyx_t_3)->tp_iternext;
+            index = 0; __pyx_t_16 = __pyx_t_21(__pyx_t_3); if (unlikely(!__pyx_t_16)) goto __pyx_L18_unpacking_failed;
             __Pyx_GOTREF(__pyx_t_16);
-            index = 1; __pyx_t_9 = __pyx_t_21(__pyx_t_4); if (unlikely(!__pyx_t_9)) goto __pyx_L18_unpacking_failed;
+            index = 1; __pyx_t_9 = __pyx_t_21(__pyx_t_3); if (unlikely(!__pyx_t_9)) goto __pyx_L18_unpacking_failed;
             __Pyx_GOTREF(__pyx_t_9);
-            if (__Pyx_IternextUnpackEndCheck(__pyx_t_21(__pyx_t_4), 2) < 0) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 321; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+            if (__Pyx_IternextUnpackEndCheck(__pyx_t_21(__pyx_t_3), 2) < 0) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 281; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
             __pyx_t_21 = NULL;
-            __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
+            __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
             goto __pyx_L19_unpacking_done;
             __pyx_L18_unpacking_failed:;
-            __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
+            __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
             __pyx_t_21 = NULL;
             if (__Pyx_IterFinish() == 0) __Pyx_RaiseNeedMoreValuesError(index);
-            {__pyx_filename = __pyx_f[0]; __pyx_lineno = 321; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+            {__pyx_filename = __pyx_f[0]; __pyx_lineno = 281; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
             __pyx_L19_unpacking_done:;
           }
-          if (!(likely(((__pyx_t_9) == Py_None) || likely(__Pyx_TypeTest(__pyx_t_9, __pyx_ptype_5numpy_ndarray))))) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 321; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+          if (!(likely(((__pyx_t_9) == Py_None) || likely(__Pyx_TypeTest(__pyx_t_9, __pyx_ptype_5numpy_ndarray))))) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 281; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
           __Pyx_XDECREF_SET(__pyx_v_error, __pyx_t_16);
           __pyx_t_16 = 0;
           __Pyx_XDECREF_SET(__pyx_v_neg_token, ((PyArrayObject *)__pyx_t_9));
           __pyx_t_9 = 0;
 
-          /* "deepnl/sentiwords.pyx":322
+          /* "deepnl/sentiwords.pyx":282
  *                         token = self._extract_window(window, sentence, pos, size)
  *                         error, neg_token = self._train_pair_s(window, grads, size, polarities[num])
  *                         self.total_items += 1             # <<<<<<<<<<<<<<
@@ -7038,49 +6504,49 @@ static PyObject *__pyx_pf_6deepnl_10sentiwords_16SentimentTrainer_2train(struct 
  */
           __pyx_v_self->__pyx_base.__pyx_base.total_items = (__pyx_v_self->__pyx_base.__pyx_base.total_items + 1);
 
-          /* "deepnl/sentiwords.pyx":323
+          /* "deepnl/sentiwords.pyx":283
  *                         error, neg_token = self._train_pair_s(window, grads, size, polarities[num])
  *                         self.total_items += 1
  *                         if error > self.skipErr:             # <<<<<<<<<<<<<<
  *                             self.error += error
  *                             self._update(grads, remaining, window, token, neg_token)
  */
-          __pyx_t_5 = PyFloat_FromDouble(__pyx_v_self->__pyx_base.__pyx_base.skipErr); if (unlikely(!__pyx_t_5)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 323; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+          __pyx_t_5 = PyFloat_FromDouble(__pyx_v_self->__pyx_base.__pyx_base.skipErr); if (unlikely(!__pyx_t_5)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 283; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
           __Pyx_GOTREF(__pyx_t_5);
-          __pyx_t_9 = PyObject_RichCompare(__pyx_v_error, __pyx_t_5, Py_GT); __Pyx_XGOTREF(__pyx_t_9); if (unlikely(!__pyx_t_9)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 323; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+          __pyx_t_9 = PyObject_RichCompare(__pyx_v_error, __pyx_t_5, Py_GT); __Pyx_XGOTREF(__pyx_t_9); if (unlikely(!__pyx_t_9)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 283; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
           __Pyx_DECREF(__pyx_t_5); __pyx_t_5 = 0;
-          __pyx_t_13 = __Pyx_PyObject_IsTrue(__pyx_t_9); if (unlikely(__pyx_t_13 < 0)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 323; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+          __pyx_t_13 = __Pyx_PyObject_IsTrue(__pyx_t_9); if (unlikely(__pyx_t_13 < 0)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 283; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
           __Pyx_DECREF(__pyx_t_9); __pyx_t_9 = 0;
           if (__pyx_t_13) {
 
-            /* "deepnl/sentiwords.pyx":324
+            /* "deepnl/sentiwords.pyx":284
  *                         self.total_items += 1
  *                         if error > self.skipErr:
  *                             self.error += error             # <<<<<<<<<<<<<<
  *                             self._update(grads, remaining, window, token, neg_token)
  *                         else:
  */
-            __pyx_t_9 = PyFloat_FromDouble(__pyx_v_self->__pyx_base.__pyx_base.error); if (unlikely(!__pyx_t_9)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 324; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+            __pyx_t_9 = PyFloat_FromDouble(__pyx_v_self->__pyx_base.__pyx_base.error); if (unlikely(!__pyx_t_9)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 284; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
             __Pyx_GOTREF(__pyx_t_9);
-            __pyx_t_5 = PyNumber_InPlaceAdd(__pyx_t_9, __pyx_v_error); if (unlikely(!__pyx_t_5)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 324; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+            __pyx_t_5 = PyNumber_InPlaceAdd(__pyx_t_9, __pyx_v_error); if (unlikely(!__pyx_t_5)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 284; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
             __Pyx_GOTREF(__pyx_t_5);
             __Pyx_DECREF(__pyx_t_9); __pyx_t_9 = 0;
-            __pyx_t_22 = __pyx_PyFloat_AsFloat(__pyx_t_5); if (unlikely((__pyx_t_22 == (float)-1) && PyErr_Occurred())) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 324; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+            __pyx_t_22 = __pyx_PyFloat_AsFloat(__pyx_t_5); if (unlikely((__pyx_t_22 == (float)-1) && PyErr_Occurred())) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 284; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
             __Pyx_DECREF(__pyx_t_5); __pyx_t_5 = 0;
             __pyx_v_self->__pyx_base.__pyx_base.error = __pyx_t_22;
 
-            /* "deepnl/sentiwords.pyx":325
+            /* "deepnl/sentiwords.pyx":285
  *                         if error > self.skipErr:
  *                             self.error += error
  *                             self._update(grads, remaining, window, token, neg_token)             # <<<<<<<<<<<<<<
  *                         else:
  *                             self.epoch_hits += 1
  */
-            __pyx_t_5 = ((struct __pyx_vtabstruct_6deepnl_10sentiwords_SentimentTrainer *)__pyx_v_self->__pyx_base.__pyx_base.__pyx_vtab)->_update(__pyx_v_self, ((struct __pyx_obj_6deepnl_7network_Gradients *)__pyx_v_grads), __pyx_v_remaining, ((PyArrayObject *)__pyx_v_window), ((PyArrayObject *)__pyx_v_token), ((PyArrayObject *)__pyx_v_neg_token)); if (unlikely(!__pyx_t_5)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 325; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+            __pyx_t_5 = ((struct __pyx_vtabstruct_6deepnl_10sentiwords_SentimentTrainer *)__pyx_v_self->__pyx_base.__pyx_base.__pyx_vtab)->_update(__pyx_v_self, ((struct __pyx_obj_6deepnl_7network_Gradients *)__pyx_v_grads), __pyx_v_remaining, ((PyArrayObject *)__pyx_v_window), ((PyArrayObject *)__pyx_v_token), ((PyArrayObject *)__pyx_v_neg_token)); if (unlikely(!__pyx_t_5)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 285; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
             __Pyx_GOTREF(__pyx_t_5);
             __Pyx_DECREF(__pyx_t_5); __pyx_t_5 = 0;
 
-            /* "deepnl/sentiwords.pyx":323
+            /* "deepnl/sentiwords.pyx":283
  *                         error, neg_token = self._train_pair_s(window, grads, size, polarities[num])
  *                         self.total_items += 1
  *                         if error > self.skipErr:             # <<<<<<<<<<<<<<
@@ -7090,7 +6556,7 @@ static PyObject *__pyx_pf_6deepnl_10sentiwords_16SentimentTrainer_2train(struct 
             goto __pyx_L20;
           }
 
-          /* "deepnl/sentiwords.pyx":327
+          /* "deepnl/sentiwords.pyx":287
  *                             self._update(grads, remaining, window, token, neg_token)
  *                         else:
  *                             self.epoch_hits += 1             # <<<<<<<<<<<<<<
@@ -7102,19 +6568,19 @@ static PyObject *__pyx_pf_6deepnl_10sentiwords_16SentimentTrainer_2train(struct 
           }
           __pyx_L20:;
 
-          /* "deepnl/sentiwords.pyx":328
+          /* "deepnl/sentiwords.pyx":288
  *                         else:
  *                             self.epoch_hits += 1
  *                         epoch_pairs += 1             # <<<<<<<<<<<<<<
  * 
  *                         if report_freq > 0 and \
  */
-          __pyx_t_5 = __Pyx_PyInt_AddObjC(__pyx_v_epoch_pairs, __pyx_int_1, 1, 1); if (unlikely(!__pyx_t_5)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 328; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+          __pyx_t_5 = __Pyx_PyInt_AddObjC(__pyx_v_epoch_pairs, __pyx_int_1, 1, 1); if (unlikely(!__pyx_t_5)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 288; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
           __Pyx_GOTREF(__pyx_t_5);
           __Pyx_DECREF_SET(__pyx_v_epoch_pairs, __pyx_t_5);
           __pyx_t_5 = 0;
 
-          /* "deepnl/sentiwords.pyx":330
+          /* "deepnl/sentiwords.pyx":290
  *                         epoch_pairs += 1
  * 
  *                         if report_freq > 0 and \             # <<<<<<<<<<<<<<
@@ -7128,7 +6594,7 @@ static PyObject *__pyx_pf_6deepnl_10sentiwords_16SentimentTrainer_2train(struct 
             goto __pyx_L22_bool_binop_done;
           }
 
-          /* "deepnl/sentiwords.pyx":331
+          /* "deepnl/sentiwords.pyx":291
  * 
  *                         if report_freq > 0 and \
  *                            (self.total_pairs and             # <<<<<<<<<<<<<<
@@ -7142,7 +6608,7 @@ static PyObject *__pyx_pf_6deepnl_10sentiwords_16SentimentTrainer_2train(struct 
             goto __pyx_L22_bool_binop_done;
           }
 
-          /* "deepnl/sentiwords.pyx":332
+          /* "deepnl/sentiwords.pyx":292
  *                         if report_freq > 0 and \
  *                            (self.total_pairs and
  *                             self.total_pairs % report_freq == 0):             # <<<<<<<<<<<<<<
@@ -7151,13 +6617,13 @@ static PyObject *__pyx_pf_6deepnl_10sentiwords_16SentimentTrainer_2train(struct 
  */
           if (unlikely(__pyx_v_report_freq == 0)) {
             PyErr_SetString(PyExc_ZeroDivisionError, "integer division or modulo by zero");
-            {__pyx_filename = __pyx_f[0]; __pyx_lineno = 332; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+            {__pyx_filename = __pyx_f[0]; __pyx_lineno = 292; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
           }
           __pyx_t_23 = ((__Pyx_mod_int(__pyx_v_self->__pyx_base.total_pairs, __pyx_v_report_freq) == 0) != 0);
           __pyx_t_13 = __pyx_t_23;
           __pyx_L22_bool_binop_done:;
 
-          /* "deepnl/sentiwords.pyx":330
+          /* "deepnl/sentiwords.pyx":290
  *                         epoch_pairs += 1
  * 
  *                         if report_freq > 0 and \             # <<<<<<<<<<<<<<
@@ -7166,20 +6632,20 @@ static PyObject *__pyx_pf_6deepnl_10sentiwords_16SentimentTrainer_2train(struct 
  */
           if (__pyx_t_13) {
 
-            /* "deepnl/sentiwords.pyx":333
+            /* "deepnl/sentiwords.pyx":293
  *                            (self.total_pairs and
  *                             self.total_pairs % report_freq == 0):
  *                             self._progress_report(epoch, self.total_pairs, num)             # <<<<<<<<<<<<<<
  *                             # periodically save language model
  *                             if save_period and self.total_pairs % save_period == 0:
  */
-            __pyx_t_9 = __Pyx_PyObject_GetAttrStr(((PyObject *)__pyx_v_self), __pyx_n_s_progress_report); if (unlikely(!__pyx_t_9)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 333; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+            __pyx_t_9 = __Pyx_PyObject_GetAttrStr(((PyObject *)__pyx_v_self), __pyx_n_s_progress_report); if (unlikely(!__pyx_t_9)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 293; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
             __Pyx_GOTREF(__pyx_t_9);
-            __pyx_t_16 = __Pyx_PyInt_From_int(__pyx_v_epoch); if (unlikely(!__pyx_t_16)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 333; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+            __pyx_t_16 = __Pyx_PyInt_From_int(__pyx_v_epoch); if (unlikely(!__pyx_t_16)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 293; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
             __Pyx_GOTREF(__pyx_t_16);
-            __pyx_t_4 = __Pyx_PyInt_From_int(__pyx_v_self->__pyx_base.total_pairs); if (unlikely(!__pyx_t_4)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 333; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
-            __Pyx_GOTREF(__pyx_t_4);
-            __pyx_t_24 = __Pyx_PyInt_From_int(__pyx_v_num); if (unlikely(!__pyx_t_24)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 333; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+            __pyx_t_3 = __Pyx_PyInt_From_int(__pyx_v_self->__pyx_base.total_pairs); if (unlikely(!__pyx_t_3)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 293; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+            __Pyx_GOTREF(__pyx_t_3);
+            __pyx_t_24 = __Pyx_PyInt_From_int(__pyx_v_num); if (unlikely(!__pyx_t_24)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 293; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
             __Pyx_GOTREF(__pyx_t_24);
             __pyx_t_25 = NULL;
             __pyx_t_26 = 0;
@@ -7193,27 +6659,27 @@ static PyObject *__pyx_pf_6deepnl_10sentiwords_16SentimentTrainer_2train(struct 
                 __pyx_t_26 = 1;
               }
             }
-            __pyx_t_27 = PyTuple_New(3+__pyx_t_26); if (unlikely(!__pyx_t_27)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 333; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+            __pyx_t_27 = PyTuple_New(3+__pyx_t_26); if (unlikely(!__pyx_t_27)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 293; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
             __Pyx_GOTREF(__pyx_t_27);
             if (__pyx_t_25) {
               __Pyx_GIVEREF(__pyx_t_25); PyTuple_SET_ITEM(__pyx_t_27, 0, __pyx_t_25); __pyx_t_25 = NULL;
             }
             __Pyx_GIVEREF(__pyx_t_16);
             PyTuple_SET_ITEM(__pyx_t_27, 0+__pyx_t_26, __pyx_t_16);
-            __Pyx_GIVEREF(__pyx_t_4);
-            PyTuple_SET_ITEM(__pyx_t_27, 1+__pyx_t_26, __pyx_t_4);
+            __Pyx_GIVEREF(__pyx_t_3);
+            PyTuple_SET_ITEM(__pyx_t_27, 1+__pyx_t_26, __pyx_t_3);
             __Pyx_GIVEREF(__pyx_t_24);
             PyTuple_SET_ITEM(__pyx_t_27, 2+__pyx_t_26, __pyx_t_24);
             __pyx_t_16 = 0;
-            __pyx_t_4 = 0;
+            __pyx_t_3 = 0;
             __pyx_t_24 = 0;
-            __pyx_t_5 = __Pyx_PyObject_Call(__pyx_t_9, __pyx_t_27, NULL); if (unlikely(!__pyx_t_5)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 333; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+            __pyx_t_5 = __Pyx_PyObject_Call(__pyx_t_9, __pyx_t_27, NULL); if (unlikely(!__pyx_t_5)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 293; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
             __Pyx_GOTREF(__pyx_t_5);
             __Pyx_DECREF(__pyx_t_27); __pyx_t_27 = 0;
             __Pyx_DECREF(__pyx_t_9); __pyx_t_9 = 0;
             __Pyx_DECREF(__pyx_t_5); __pyx_t_5 = 0;
 
-            /* "deepnl/sentiwords.pyx":335
+            /* "deepnl/sentiwords.pyx":295
  *                             self._progress_report(epoch, self.total_pairs, num)
  *                             # periodically save language model
  *                             if save_period and self.total_pairs % save_period == 0:             # <<<<<<<<<<<<<<
@@ -7228,14 +6694,14 @@ static PyObject *__pyx_pf_6deepnl_10sentiwords_16SentimentTrainer_2train(struct 
             }
             if (unlikely(__pyx_v_save_period == 0)) {
               PyErr_SetString(PyExc_ZeroDivisionError, "integer division or modulo by zero");
-              {__pyx_filename = __pyx_f[0]; __pyx_lineno = 335; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+              {__pyx_filename = __pyx_f[0]; __pyx_lineno = 295; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
             }
             __pyx_t_23 = ((__Pyx_mod_int(__pyx_v_self->__pyx_base.total_pairs, __pyx_v_save_period) == 0) != 0);
             __pyx_t_13 = __pyx_t_23;
             __pyx_L26_bool_binop_done:;
             if (__pyx_t_13) {
 
-              /* "deepnl/sentiwords.pyx":336
+              /* "deepnl/sentiwords.pyx":296
  *                             # periodically save language model
  *                             if save_period and self.total_pairs % save_period == 0:
  *                                 self.saver(self)             # <<<<<<<<<<<<<<
@@ -7253,23 +6719,23 @@ static PyObject *__pyx_pf_6deepnl_10sentiwords_16SentimentTrainer_2train(struct 
                 }
               }
               if (!__pyx_t_27) {
-                __pyx_t_5 = __Pyx_PyObject_CallOneArg(__pyx_t_9, ((PyObject *)__pyx_v_self)); if (unlikely(!__pyx_t_5)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 336; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+                __pyx_t_5 = __Pyx_PyObject_CallOneArg(__pyx_t_9, ((PyObject *)__pyx_v_self)); if (unlikely(!__pyx_t_5)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 296; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
                 __Pyx_GOTREF(__pyx_t_5);
               } else {
-                __pyx_t_24 = PyTuple_New(1+1); if (unlikely(!__pyx_t_24)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 336; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+                __pyx_t_24 = PyTuple_New(1+1); if (unlikely(!__pyx_t_24)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 296; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
                 __Pyx_GOTREF(__pyx_t_24);
                 __Pyx_GIVEREF(__pyx_t_27); PyTuple_SET_ITEM(__pyx_t_24, 0, __pyx_t_27); __pyx_t_27 = NULL;
                 __Pyx_INCREF(((PyObject *)__pyx_v_self));
                 __Pyx_GIVEREF(((PyObject *)__pyx_v_self));
                 PyTuple_SET_ITEM(__pyx_t_24, 0+1, ((PyObject *)__pyx_v_self));
-                __pyx_t_5 = __Pyx_PyObject_Call(__pyx_t_9, __pyx_t_24, NULL); if (unlikely(!__pyx_t_5)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 336; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+                __pyx_t_5 = __Pyx_PyObject_Call(__pyx_t_9, __pyx_t_24, NULL); if (unlikely(!__pyx_t_5)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 296; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
                 __Pyx_GOTREF(__pyx_t_5);
                 __Pyx_DECREF(__pyx_t_24); __pyx_t_24 = 0;
               }
               __Pyx_DECREF(__pyx_t_9); __pyx_t_9 = 0;
               __Pyx_DECREF(__pyx_t_5); __pyx_t_5 = 0;
 
-              /* "deepnl/sentiwords.pyx":335
+              /* "deepnl/sentiwords.pyx":295
  *                             self._progress_report(epoch, self.total_pairs, num)
  *                             # periodically save language model
  *                             if save_period and self.total_pairs % save_period == 0:             # <<<<<<<<<<<<<<
@@ -7278,7 +6744,7 @@ static PyObject *__pyx_pf_6deepnl_10sentiwords_16SentimentTrainer_2train(struct 
  */
             }
 
-            /* "deepnl/sentiwords.pyx":330
+            /* "deepnl/sentiwords.pyx":290
  *                         epoch_pairs += 1
  * 
  *                         if report_freq > 0 and \             # <<<<<<<<<<<<<<
@@ -7287,7 +6753,7 @@ static PyObject *__pyx_pf_6deepnl_10sentiwords_16SentimentTrainer_2train(struct 
  */
           }
 
-          /* "deepnl/sentiwords.pyx":317
+          /* "deepnl/sentiwords.pyx":277
  *                 for pos in xrange(len(sentence)):
  *                     # for any word or ngram at sentence[pos:pos+size]
  *                     for size in itertrie(trie, sentence, pos):             # <<<<<<<<<<<<<<
@@ -7298,7 +6764,7 @@ static PyObject *__pyx_pf_6deepnl_10sentiwords_16SentimentTrainer_2train(struct 
         __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
       }
 
-      /* "deepnl/sentiwords.pyx":310
+      /* "deepnl/sentiwords.pyx":270
  *             remaining = 1.0 - (self.total_pairs / all_cases)
  * 
  *             for num, sentence in enumerate(sentences):             # <<<<<<<<<<<<<<
@@ -7309,14 +6775,14 @@ static PyObject *__pyx_pf_6deepnl_10sentiwords_16SentimentTrainer_2train(struct 
     }
     __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
 
-    /* "deepnl/sentiwords.pyx":337
+    /* "deepnl/sentiwords.pyx":297
  *                             if save_period and self.total_pairs % save_period == 0:
  *                                 self.saver(self)
  *             self._epoch_report(epoch + 1)             # <<<<<<<<<<<<<<
  */
-    __pyx_t_2 = __Pyx_PyObject_GetAttrStr(((PyObject *)__pyx_v_self), __pyx_n_s_epoch_report); if (unlikely(!__pyx_t_2)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 337; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+    __pyx_t_2 = __Pyx_PyObject_GetAttrStr(((PyObject *)__pyx_v_self), __pyx_n_s_epoch_report); if (unlikely(!__pyx_t_2)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 297; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
     __Pyx_GOTREF(__pyx_t_2);
-    __pyx_t_5 = __Pyx_PyInt_From_long((__pyx_v_epoch + 1)); if (unlikely(!__pyx_t_5)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 337; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+    __pyx_t_5 = __Pyx_PyInt_From_long((__pyx_v_epoch + 1)); if (unlikely(!__pyx_t_5)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 297; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
     __Pyx_GOTREF(__pyx_t_5);
     __pyx_t_9 = NULL;
     if (CYTHON_COMPILING_IN_CPYTHON && likely(PyMethod_Check(__pyx_t_2))) {
@@ -7329,17 +6795,17 @@ static PyObject *__pyx_pf_6deepnl_10sentiwords_16SentimentTrainer_2train(struct 
       }
     }
     if (!__pyx_t_9) {
-      __pyx_t_1 = __Pyx_PyObject_CallOneArg(__pyx_t_2, __pyx_t_5); if (unlikely(!__pyx_t_1)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 337; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+      __pyx_t_1 = __Pyx_PyObject_CallOneArg(__pyx_t_2, __pyx_t_5); if (unlikely(!__pyx_t_1)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 297; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
       __Pyx_DECREF(__pyx_t_5); __pyx_t_5 = 0;
       __Pyx_GOTREF(__pyx_t_1);
     } else {
-      __pyx_t_24 = PyTuple_New(1+1); if (unlikely(!__pyx_t_24)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 337; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+      __pyx_t_24 = PyTuple_New(1+1); if (unlikely(!__pyx_t_24)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 297; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
       __Pyx_GOTREF(__pyx_t_24);
       __Pyx_GIVEREF(__pyx_t_9); PyTuple_SET_ITEM(__pyx_t_24, 0, __pyx_t_9); __pyx_t_9 = NULL;
       __Pyx_GIVEREF(__pyx_t_5);
       PyTuple_SET_ITEM(__pyx_t_24, 0+1, __pyx_t_5);
       __pyx_t_5 = 0;
-      __pyx_t_1 = __Pyx_PyObject_Call(__pyx_t_2, __pyx_t_24, NULL); if (unlikely(!__pyx_t_1)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 337; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+      __pyx_t_1 = __Pyx_PyObject_Call(__pyx_t_2, __pyx_t_24, NULL); if (unlikely(!__pyx_t_1)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 297; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
       __Pyx_GOTREF(__pyx_t_1);
       __Pyx_DECREF(__pyx_t_24); __pyx_t_24 = 0;
     }
@@ -7347,8 +6813,8 @@ static PyObject *__pyx_pf_6deepnl_10sentiwords_16SentimentTrainer_2train(struct 
     __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
   }
 
-  /* "deepnl/sentiwords.pyx":264
- *                 offset += embeddings_size
+  /* "deepnl/sentiwords.pyx":221
+ *         self.converter.update(deltas, self.learning_rate, tokens)
  * 
  *     def train(self, Iterable sentences, list polarities, trie,             # <<<<<<<<<<<<<<
  *               int epochs, int report_freq):
@@ -7361,7 +6827,7 @@ static PyObject *__pyx_pf_6deepnl_10sentiwords_16SentimentTrainer_2train(struct 
   __pyx_L1_error:;
   __Pyx_XDECREF(__pyx_t_1);
   __Pyx_XDECREF(__pyx_t_2);
-  __Pyx_XDECREF(__pyx_t_4);
+  __Pyx_XDECREF(__pyx_t_3);
   __Pyx_XDECREF(__pyx_t_5);
   __Pyx_XDECREF(__pyx_t_9);
   __Pyx_XDECREF(__pyx_t_16);
@@ -9707,8 +9173,6 @@ static PyObject *__pyx_tp_new_6deepnl_10sentiwords_SentimentTrainer(PyTypeObject
   p = ((struct __pyx_obj_6deepnl_10sentiwords_SentimentTrainer *)o);
   p->__pyx_base.__pyx_base.__pyx_vtab = (struct __pyx_vtabstruct_6deepnl_7trainer_Trainer*)__pyx_vtabptr_6deepnl_10sentiwords_SentimentTrainer;
   p->polarities = ((PyObject*)Py_None); Py_INCREF(Py_None);
-  p->input_adagrads_neg = ((PyArrayObject *)Py_None); Py_INCREF(Py_None);
-  p->input_adagrads_pos = ((PyArrayObject *)Py_None); Py_INCREF(Py_None);
   p->random_pool = ((struct __pyx_obj_6deepnl_5words_RandomPool *)Py_None); Py_INCREF(Py_None);
   return o;
 }
@@ -9722,8 +9186,6 @@ static void __pyx_tp_dealloc_6deepnl_10sentiwords_SentimentTrainer(PyObject *o) 
   #endif
   PyObject_GC_UnTrack(o);
   Py_CLEAR(p->polarities);
-  Py_CLEAR(p->input_adagrads_neg);
-  Py_CLEAR(p->input_adagrads_pos);
   Py_CLEAR(p->random_pool);
   PyObject_GC_Track(o);
   if (likely(__pyx_ptype_6deepnl_5words_LmTrainer)) __pyx_ptype_6deepnl_5words_LmTrainer->tp_dealloc(o); else __Pyx_call_next_tp_dealloc(o, __pyx_tp_dealloc_6deepnl_10sentiwords_SentimentTrainer);
@@ -9735,12 +9197,6 @@ static int __pyx_tp_traverse_6deepnl_10sentiwords_SentimentTrainer(PyObject *o, 
   e = ((likely(__pyx_ptype_6deepnl_5words_LmTrainer)) ? ((__pyx_ptype_6deepnl_5words_LmTrainer->tp_traverse) ? __pyx_ptype_6deepnl_5words_LmTrainer->tp_traverse(o, v, a) : 0) : __Pyx_call_next_tp_traverse(o, v, a, __pyx_tp_traverse_6deepnl_10sentiwords_SentimentTrainer)); if (e) return e;
   if (p->polarities) {
     e = (*v)(p->polarities, a); if (e) return e;
-  }
-  if (p->input_adagrads_neg) {
-    e = (*v)(((PyObject*)p->input_adagrads_neg), a); if (e) return e;
-  }
-  if (p->input_adagrads_pos) {
-    e = (*v)(((PyObject*)p->input_adagrads_pos), a); if (e) return e;
   }
   if (p->random_pool) {
     e = (*v)(((PyObject*)p->random_pool), a); if (e) return e;
@@ -9754,12 +9210,6 @@ static int __pyx_tp_clear_6deepnl_10sentiwords_SentimentTrainer(PyObject *o) {
   if (likely(__pyx_ptype_6deepnl_5words_LmTrainer)) { if (__pyx_ptype_6deepnl_5words_LmTrainer->tp_clear) __pyx_ptype_6deepnl_5words_LmTrainer->tp_clear(o); } else __Pyx_call_next_tp_clear(o, __pyx_tp_clear_6deepnl_10sentiwords_SentimentTrainer);
   tmp = ((PyObject*)p->polarities);
   p->polarities = ((PyObject*)Py_None); Py_INCREF(Py_None);
-  Py_XDECREF(tmp);
-  tmp = ((PyObject*)p->input_adagrads_neg);
-  p->input_adagrads_neg = ((PyArrayObject *)Py_None); Py_INCREF(Py_None);
-  Py_XDECREF(tmp);
-  tmp = ((PyObject*)p->input_adagrads_pos);
-  p->input_adagrads_pos = ((PyArrayObject *)Py_None); Py_INCREF(Py_None);
   Py_XDECREF(tmp);
   tmp = ((PyObject*)p->random_pool);
   p->random_pool = ((struct __pyx_obj_6deepnl_5words_RandomPool *)Py_None); Py_INCREF(Py_None);
@@ -10008,13 +9458,13 @@ static __Pyx_StringTabEntry __pyx_string_tab[] = {
   {&__pyx_n_s_args, __pyx_k_args, sizeof(__pyx_k_args), 0, 0, 1, 1},
   {&__pyx_n_s_array, __pyx_k_array, sizeof(__pyx_k_array), 0, 0, 1, 1},
   {&__pyx_n_s_clear, __pyx_k_clear, sizeof(__pyx_k_clear), 0, 0, 1, 1},
+  {&__pyx_n_s_clearAdaGrad, __pyx_k_clearAdaGrad, sizeof(__pyx_k_clearAdaGrad), 0, 0, 1, 1},
   {&__pyx_n_s_close, __pyx_k_close, sizeof(__pyx_k_close), 0, 0, 1, 1},
   {&__pyx_n_s_converter, __pyx_k_converter, sizeof(__pyx_k_converter), 0, 0, 1, 1},
   {&__pyx_n_s_cur, __pyx_k_cur, sizeof(__pyx_k_cur), 0, 0, 1, 1},
   {&__pyx_n_s_deepnl_sentiwords, __pyx_k_deepnl_sentiwords, sizeof(__pyx_k_deepnl_sentiwords), 0, 0, 1, 1},
   {&__pyx_n_s_depth, __pyx_k_depth, sizeof(__pyx_k_depth), 0, 0, 1, 1},
   {&__pyx_n_s_dot, __pyx_k_dot, sizeof(__pyx_k_dot), 0, 0, 1, 1},
-  {&__pyx_n_s_double, __pyx_k_double, sizeof(__pyx_k_double), 0, 0, 1, 1},
   {&__pyx_n_s_dtype, __pyx_k_dtype, sizeof(__pyx_k_dtype), 0, 0, 1, 1},
   {&__pyx_n_s_empty, __pyx_k_empty, sizeof(__pyx_k_empty), 0, 0, 1, 1},
   {&__pyx_n_s_enumerate, __pyx_k_enumerate, sizeof(__pyx_k_enumerate), 0, 0, 1, 1},
@@ -10046,7 +9496,6 @@ static __Pyx_StringTabEntry __pyx_string_tab[] = {
   {&__pyx_n_s_output, __pyx_k_output, sizeof(__pyx_k_output), 0, 0, 1, 1},
   {&__pyx_n_s_output_size, __pyx_k_output_size, sizeof(__pyx_k_output_size), 0, 0, 1, 1},
   {&__pyx_n_s_polarities, __pyx_k_polarities, sizeof(__pyx_k_polarities), 0, 0, 1, 1},
-  {&__pyx_n_s_power, __pyx_k_power, sizeof(__pyx_k_power), 0, 0, 1, 1},
   {&__pyx_n_s_progress_report, __pyx_k_progress_report, sizeof(__pyx_k_progress_report), 0, 0, 1, 1},
   {&__pyx_n_s_pyx_vtable, __pyx_k_pyx_vtable, sizeof(__pyx_k_pyx_vtable), 0, 0, 1, 1},
   {&__pyx_n_s_range, __pyx_k_range, sizeof(__pyx_k_range), 0, 0, 1, 1},
@@ -10055,7 +9504,6 @@ static __Pyx_StringTabEntry __pyx_string_tab[] = {
   {&__pyx_n_s_sent, __pyx_k_sent, sizeof(__pyx_k_sent), 0, 0, 1, 1},
   {&__pyx_n_s_sentences, __pyx_k_sentences, sizeof(__pyx_k_sentences), 0, 0, 1, 1},
   {&__pyx_n_s_shape, __pyx_k_shape, sizeof(__pyx_k_shape), 0, 0, 1, 1},
-  {&__pyx_n_s_sqrt, __pyx_k_sqrt, sizeof(__pyx_k_sqrt), 0, 0, 1, 1},
   {&__pyx_n_s_start, __pyx_k_start, sizeof(__pyx_k_start), 0, 0, 1, 1},
   {&__pyx_n_s_sum, __pyx_k_sum, sizeof(__pyx_k_sum), 0, 0, 1, 1},
   {&__pyx_n_s_super, __pyx_k_super, sizeof(__pyx_k_super), 0, 0, 1, 1},
@@ -10067,6 +9515,7 @@ static __Pyx_StringTabEntry __pyx_string_tab[] = {
   {&__pyx_n_s_tr, __pyx_k_tr, sizeof(__pyx_k_tr), 0, 0, 1, 1},
   {&__pyx_n_s_trie, __pyx_k_trie, sizeof(__pyx_k_trie), 0, 0, 1, 1},
   {&__pyx_kp_u_unknown_dtype_code_in_numpy_pxd, __pyx_k_unknown_dtype_code_in_numpy_pxd, sizeof(__pyx_k_unknown_dtype_code_in_numpy_pxd), 0, 1, 0, 0},
+  {&__pyx_n_s_vstack, __pyx_k_vstack, sizeof(__pyx_k_vstack), 0, 0, 1, 1},
   {&__pyx_n_s_xrange, __pyx_k_xrange, sizeof(__pyx_k_xrange), 0, 0, 1, 1},
   {&__pyx_n_s_zeros, __pyx_k_zeros, sizeof(__pyx_k_zeros), 0, 0, 1, 1},
   {0, 0, 0, 0, 0, 0, 0}
@@ -10078,8 +9527,8 @@ static int __Pyx_InitCachedBuiltins(void) {
   #else
   __pyx_builtin_xrange = __Pyx_GetBuiltinName(__pyx_n_s_xrange); if (!__pyx_builtin_xrange) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 50; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   #endif
-  __pyx_builtin_enumerate = __Pyx_GetBuiltinName(__pyx_n_s_enumerate); if (!__pyx_builtin_enumerate) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 243; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
-  __pyx_builtin_sum = __Pyx_GetBuiltinName(__pyx_n_s_sum); if (!__pyx_builtin_sum) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 285; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_builtin_sum = __Pyx_GetBuiltinName(__pyx_n_s_sum); if (!__pyx_builtin_sum) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 245; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_builtin_enumerate = __Pyx_GetBuiltinName(__pyx_n_s_enumerate); if (!__pyx_builtin_enumerate) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 270; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __pyx_builtin_ValueError = __Pyx_GetBuiltinName(__pyx_n_s_ValueError); if (!__pyx_builtin_ValueError) {__pyx_filename = __pyx_f[1]; __pyx_lineno = 218; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __pyx_builtin_range = __Pyx_GetBuiltinName(__pyx_n_s_range); if (!__pyx_builtin_range) {__pyx_filename = __pyx_f[1]; __pyx_lineno = 231; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __pyx_builtin_RuntimeError = __Pyx_GetBuiltinName(__pyx_n_s_RuntimeError); if (!__pyx_builtin_RuntimeError) {__pyx_filename = __pyx_f[1]; __pyx_lineno = 799; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
@@ -10125,14 +9574,14 @@ static int __Pyx_InitCachedConstants(void) {
   __Pyx_GOTREF(__pyx_tuple__3);
   __Pyx_GIVEREF(__pyx_tuple__3);
 
-  /* "deepnl/sentiwords.pyx":92
+  /* "deepnl/sentiwords.pyx":89
  *         super(SentimentTrainer, self).__init__(nn, converter, options)
  * 
  *         self.alpha = options.get('alpha', 0.5)             # <<<<<<<<<<<<<<
  * 
- *         # cumulative AdaGrad$
+ *     @cython.boundscheck(False)
  */
-  __pyx_tuple__4 = PyTuple_Pack(2, __pyx_n_s_alpha, __pyx_float_0_5); if (unlikely(!__pyx_tuple__4)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 92; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_tuple__4 = PyTuple_Pack(2, __pyx_n_s_alpha, __pyx_float_0_5); if (unlikely(!__pyx_tuple__4)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 89; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_GOTREF(__pyx_tuple__4);
   __Pyx_GIVEREF(__pyx_tuple__4);
 
@@ -10226,7 +9675,6 @@ static int __Pyx_InitGlobals(void) {
   __pyx_float_0_5 = PyFloat_FromDouble(0.5); if (unlikely(!__pyx_float_0_5)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 1; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __pyx_int_0 = PyInt_FromLong(0); if (unlikely(!__pyx_int_0)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 1; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __pyx_int_1 = PyInt_FromLong(1); if (unlikely(!__pyx_int_1)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 1; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
-  __pyx_int_2 = PyInt_FromLong(2); if (unlikely(!__pyx_int_2)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 1; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   return 0;
   __pyx_L1_error:;
   return -1;
@@ -10373,20 +9821,20 @@ PyMODINIT_FUNC PyInit_sentiwords(void)
   __pyx_ptype_6deepnl_10extractors_Iterable = __Pyx_ImportType("deepnl.extractors", "Iterable", sizeof(struct __pyx_obj_6deepnl_10extractors_Iterable), 1); if (unlikely(!__pyx_ptype_6deepnl_10extractors_Iterable)) {__pyx_filename = __pyx_f[5]; __pyx_lineno = 15; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __pyx_ptype_6deepnl_10extractors_Converter = __Pyx_ImportType("deepnl.extractors", "Converter", sizeof(struct __pyx_obj_6deepnl_10extractors_Converter), 1); if (unlikely(!__pyx_ptype_6deepnl_10extractors_Converter)) {__pyx_filename = __pyx_f[5]; __pyx_lineno = 22; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __pyx_vtabptr_6deepnl_10extractors_Converter = (struct __pyx_vtabstruct_6deepnl_10extractors_Converter*)__Pyx_GetVtable(__pyx_ptype_6deepnl_10extractors_Converter->tp_dict); if (unlikely(!__pyx_vtabptr_6deepnl_10extractors_Converter)) {__pyx_filename = __pyx_f[5]; __pyx_lineno = 22; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
-  __pyx_ptype_6deepnl_10extractors_Extractor = __Pyx_ImportType("deepnl.extractors", "Extractor", sizeof(struct __pyx_obj_6deepnl_10extractors_Extractor), 1); if (unlikely(!__pyx_ptype_6deepnl_10extractors_Extractor)) {__pyx_filename = __pyx_f[5]; __pyx_lineno = 45; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
-  __pyx_vtabptr_6deepnl_10extractors_Extractor = (struct __pyx_vtabstruct_6deepnl_10extractors_Extractor*)__Pyx_GetVtable(__pyx_ptype_6deepnl_10extractors_Extractor->tp_dict); if (unlikely(!__pyx_vtabptr_6deepnl_10extractors_Extractor)) {__pyx_filename = __pyx_f[5]; __pyx_lineno = 45; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
-  __pyx_ptype_6deepnl_10extractors_Embeddings = __Pyx_ImportType("deepnl.extractors", "Embeddings", sizeof(struct __pyx_obj_6deepnl_10extractors_Embeddings), 1); if (unlikely(!__pyx_ptype_6deepnl_10extractors_Embeddings)) {__pyx_filename = __pyx_f[5]; __pyx_lineno = 53; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
-  __pyx_vtabptr_6deepnl_10extractors_Embeddings = (struct __pyx_vtabstruct_6deepnl_10extractors_Embeddings*)__Pyx_GetVtable(__pyx_ptype_6deepnl_10extractors_Embeddings->tp_dict); if (unlikely(!__pyx_vtabptr_6deepnl_10extractors_Embeddings)) {__pyx_filename = __pyx_f[5]; __pyx_lineno = 53; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
-  __pyx_ptype_6deepnl_10extractors_CapsExtractor = __Pyx_ImportType("deepnl.extractors", "CapsExtractor", sizeof(struct __pyx_obj_6deepnl_10extractors_CapsExtractor), 1); if (unlikely(!__pyx_ptype_6deepnl_10extractors_CapsExtractor)) {__pyx_filename = __pyx_f[5]; __pyx_lineno = 56; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
-  __pyx_vtabptr_6deepnl_10extractors_CapsExtractor = (struct __pyx_vtabstruct_6deepnl_10extractors_CapsExtractor*)__Pyx_GetVtable(__pyx_ptype_6deepnl_10extractors_CapsExtractor->tp_dict); if (unlikely(!__pyx_vtabptr_6deepnl_10extractors_CapsExtractor)) {__pyx_filename = __pyx_f[5]; __pyx_lineno = 56; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
-  __pyx_ptype_6deepnl_10extractors_AffixExtractor = __Pyx_ImportType("deepnl.extractors", "AffixExtractor", sizeof(struct __pyx_obj_6deepnl_10extractors_AffixExtractor), 1); if (unlikely(!__pyx_ptype_6deepnl_10extractors_AffixExtractor)) {__pyx_filename = __pyx_f[5]; __pyx_lineno = 59; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
-  __pyx_vtabptr_6deepnl_10extractors_AffixExtractor = (struct __pyx_vtabstruct_6deepnl_10extractors_AffixExtractor*)__Pyx_GetVtable(__pyx_ptype_6deepnl_10extractors_AffixExtractor->tp_dict); if (unlikely(!__pyx_vtabptr_6deepnl_10extractors_AffixExtractor)) {__pyx_filename = __pyx_f[5]; __pyx_lineno = 59; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
-  __pyx_ptype_6deepnl_10extractors_SuffixExtractor = __Pyx_ImportType("deepnl.extractors", "SuffixExtractor", sizeof(struct __pyx_obj_6deepnl_10extractors_SuffixExtractor), 1); if (unlikely(!__pyx_ptype_6deepnl_10extractors_SuffixExtractor)) {__pyx_filename = __pyx_f[5]; __pyx_lineno = 62; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
-  __pyx_vtabptr_6deepnl_10extractors_SuffixExtractor = (struct __pyx_vtabstruct_6deepnl_10extractors_SuffixExtractor*)__Pyx_GetVtable(__pyx_ptype_6deepnl_10extractors_SuffixExtractor->tp_dict); if (unlikely(!__pyx_vtabptr_6deepnl_10extractors_SuffixExtractor)) {__pyx_filename = __pyx_f[5]; __pyx_lineno = 62; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
-  __pyx_ptype_6deepnl_10extractors_PrefixExtractor = __Pyx_ImportType("deepnl.extractors", "PrefixExtractor", sizeof(struct __pyx_obj_6deepnl_10extractors_PrefixExtractor), 1); if (unlikely(!__pyx_ptype_6deepnl_10extractors_PrefixExtractor)) {__pyx_filename = __pyx_f[5]; __pyx_lineno = 65; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
-  __pyx_vtabptr_6deepnl_10extractors_PrefixExtractor = (struct __pyx_vtabstruct_6deepnl_10extractors_PrefixExtractor*)__Pyx_GetVtable(__pyx_ptype_6deepnl_10extractors_PrefixExtractor->tp_dict); if (unlikely(!__pyx_vtabptr_6deepnl_10extractors_PrefixExtractor)) {__pyx_filename = __pyx_f[5]; __pyx_lineno = 65; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
-  __pyx_ptype_6deepnl_10extractors_GazetteerExtractor = __Pyx_ImportType("deepnl.extractors", "GazetteerExtractor", sizeof(struct __pyx_obj_6deepnl_10extractors_GazetteerExtractor), 1); if (unlikely(!__pyx_ptype_6deepnl_10extractors_GazetteerExtractor)) {__pyx_filename = __pyx_f[5]; __pyx_lineno = 68; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
-  __pyx_vtabptr_6deepnl_10extractors_GazetteerExtractor = (struct __pyx_vtabstruct_6deepnl_10extractors_GazetteerExtractor*)__Pyx_GetVtable(__pyx_ptype_6deepnl_10extractors_GazetteerExtractor->tp_dict); if (unlikely(!__pyx_vtabptr_6deepnl_10extractors_GazetteerExtractor)) {__pyx_filename = __pyx_f[5]; __pyx_lineno = 68; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_ptype_6deepnl_10extractors_Extractor = __Pyx_ImportType("deepnl.extractors", "Extractor", sizeof(struct __pyx_obj_6deepnl_10extractors_Extractor), 1); if (unlikely(!__pyx_ptype_6deepnl_10extractors_Extractor)) {__pyx_filename = __pyx_f[5]; __pyx_lineno = 48; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_vtabptr_6deepnl_10extractors_Extractor = (struct __pyx_vtabstruct_6deepnl_10extractors_Extractor*)__Pyx_GetVtable(__pyx_ptype_6deepnl_10extractors_Extractor->tp_dict); if (unlikely(!__pyx_vtabptr_6deepnl_10extractors_Extractor)) {__pyx_filename = __pyx_f[5]; __pyx_lineno = 48; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_ptype_6deepnl_10extractors_Embeddings = __Pyx_ImportType("deepnl.extractors", "Embeddings", sizeof(struct __pyx_obj_6deepnl_10extractors_Embeddings), 1); if (unlikely(!__pyx_ptype_6deepnl_10extractors_Embeddings)) {__pyx_filename = __pyx_f[5]; __pyx_lineno = 59; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_vtabptr_6deepnl_10extractors_Embeddings = (struct __pyx_vtabstruct_6deepnl_10extractors_Embeddings*)__Pyx_GetVtable(__pyx_ptype_6deepnl_10extractors_Embeddings->tp_dict); if (unlikely(!__pyx_vtabptr_6deepnl_10extractors_Embeddings)) {__pyx_filename = __pyx_f[5]; __pyx_lineno = 59; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_ptype_6deepnl_10extractors_CapsExtractor = __Pyx_ImportType("deepnl.extractors", "CapsExtractor", sizeof(struct __pyx_obj_6deepnl_10extractors_CapsExtractor), 1); if (unlikely(!__pyx_ptype_6deepnl_10extractors_CapsExtractor)) {__pyx_filename = __pyx_f[5]; __pyx_lineno = 62; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_vtabptr_6deepnl_10extractors_CapsExtractor = (struct __pyx_vtabstruct_6deepnl_10extractors_CapsExtractor*)__Pyx_GetVtable(__pyx_ptype_6deepnl_10extractors_CapsExtractor->tp_dict); if (unlikely(!__pyx_vtabptr_6deepnl_10extractors_CapsExtractor)) {__pyx_filename = __pyx_f[5]; __pyx_lineno = 62; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_ptype_6deepnl_10extractors_AffixExtractor = __Pyx_ImportType("deepnl.extractors", "AffixExtractor", sizeof(struct __pyx_obj_6deepnl_10extractors_AffixExtractor), 1); if (unlikely(!__pyx_ptype_6deepnl_10extractors_AffixExtractor)) {__pyx_filename = __pyx_f[5]; __pyx_lineno = 65; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_vtabptr_6deepnl_10extractors_AffixExtractor = (struct __pyx_vtabstruct_6deepnl_10extractors_AffixExtractor*)__Pyx_GetVtable(__pyx_ptype_6deepnl_10extractors_AffixExtractor->tp_dict); if (unlikely(!__pyx_vtabptr_6deepnl_10extractors_AffixExtractor)) {__pyx_filename = __pyx_f[5]; __pyx_lineno = 65; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_ptype_6deepnl_10extractors_SuffixExtractor = __Pyx_ImportType("deepnl.extractors", "SuffixExtractor", sizeof(struct __pyx_obj_6deepnl_10extractors_SuffixExtractor), 1); if (unlikely(!__pyx_ptype_6deepnl_10extractors_SuffixExtractor)) {__pyx_filename = __pyx_f[5]; __pyx_lineno = 68; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_vtabptr_6deepnl_10extractors_SuffixExtractor = (struct __pyx_vtabstruct_6deepnl_10extractors_SuffixExtractor*)__Pyx_GetVtable(__pyx_ptype_6deepnl_10extractors_SuffixExtractor->tp_dict); if (unlikely(!__pyx_vtabptr_6deepnl_10extractors_SuffixExtractor)) {__pyx_filename = __pyx_f[5]; __pyx_lineno = 68; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_ptype_6deepnl_10extractors_PrefixExtractor = __Pyx_ImportType("deepnl.extractors", "PrefixExtractor", sizeof(struct __pyx_obj_6deepnl_10extractors_PrefixExtractor), 1); if (unlikely(!__pyx_ptype_6deepnl_10extractors_PrefixExtractor)) {__pyx_filename = __pyx_f[5]; __pyx_lineno = 71; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_vtabptr_6deepnl_10extractors_PrefixExtractor = (struct __pyx_vtabstruct_6deepnl_10extractors_PrefixExtractor*)__Pyx_GetVtable(__pyx_ptype_6deepnl_10extractors_PrefixExtractor->tp_dict); if (unlikely(!__pyx_vtabptr_6deepnl_10extractors_PrefixExtractor)) {__pyx_filename = __pyx_f[5]; __pyx_lineno = 71; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_ptype_6deepnl_10extractors_GazetteerExtractor = __Pyx_ImportType("deepnl.extractors", "GazetteerExtractor", sizeof(struct __pyx_obj_6deepnl_10extractors_GazetteerExtractor), 1); if (unlikely(!__pyx_ptype_6deepnl_10extractors_GazetteerExtractor)) {__pyx_filename = __pyx_f[5]; __pyx_lineno = 74; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_vtabptr_6deepnl_10extractors_GazetteerExtractor = (struct __pyx_vtabstruct_6deepnl_10extractors_GazetteerExtractor*)__Pyx_GetVtable(__pyx_ptype_6deepnl_10extractors_GazetteerExtractor->tp_dict); if (unlikely(!__pyx_vtabptr_6deepnl_10extractors_GazetteerExtractor)) {__pyx_filename = __pyx_f[5]; __pyx_lineno = 74; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __pyx_ptype_6deepnl_7network_Variables = __Pyx_ImportType("deepnl.network", "Variables", sizeof(struct __pyx_obj_6deepnl_7network_Variables), 1); if (unlikely(!__pyx_ptype_6deepnl_7network_Variables)) {__pyx_filename = __pyx_f[6]; __pyx_lineno = 13; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __pyx_ptype_6deepnl_7network_Parameters = __Pyx_ImportType("deepnl.network", "Parameters", sizeof(struct __pyx_obj_6deepnl_7network_Parameters), 1); if (unlikely(!__pyx_ptype_6deepnl_7network_Parameters)) {__pyx_filename = __pyx_f[6]; __pyx_lineno = 19; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __pyx_vtabptr_6deepnl_7network_Parameters = (struct __pyx_vtabstruct_6deepnl_7network_Parameters*)__Pyx_GetVtable(__pyx_ptype_6deepnl_7network_Parameters->tp_dict); if (unlikely(!__pyx_vtabptr_6deepnl_7network_Parameters)) {__pyx_filename = __pyx_f[6]; __pyx_lineno = 19; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
@@ -11701,103 +11149,6 @@ static CYTHON_INLINE void __Pyx_ErrFetch(PyObject **type, PyObject **value, PyOb
 #endif
 }
 
-static CYTHON_INLINE PyObject* __Pyx_PyObject_GetSlice(PyObject* obj,
-        Py_ssize_t cstart, Py_ssize_t cstop,
-        PyObject** _py_start, PyObject** _py_stop, PyObject** _py_slice,
-        int has_cstart, int has_cstop, CYTHON_UNUSED int wraparound) {
-#if CYTHON_COMPILING_IN_CPYTHON
-    PyMappingMethods* mp;
-#if PY_MAJOR_VERSION < 3
-    PySequenceMethods* ms = Py_TYPE(obj)->tp_as_sequence;
-    if (likely(ms && ms->sq_slice)) {
-        if (!has_cstart) {
-            if (_py_start && (*_py_start != Py_None)) {
-                cstart = __Pyx_PyIndex_AsSsize_t(*_py_start);
-                if ((cstart == (Py_ssize_t)-1) && PyErr_Occurred()) goto bad;
-            } else
-                cstart = 0;
-        }
-        if (!has_cstop) {
-            if (_py_stop && (*_py_stop != Py_None)) {
-                cstop = __Pyx_PyIndex_AsSsize_t(*_py_stop);
-                if ((cstop == (Py_ssize_t)-1) && PyErr_Occurred()) goto bad;
-            } else
-                cstop = PY_SSIZE_T_MAX;
-        }
-        if (wraparound && unlikely((cstart < 0) | (cstop < 0)) && likely(ms->sq_length)) {
-            Py_ssize_t l = ms->sq_length(obj);
-            if (likely(l >= 0)) {
-                if (cstop < 0) {
-                    cstop += l;
-                    if (cstop < 0) cstop = 0;
-                }
-                if (cstart < 0) {
-                    cstart += l;
-                    if (cstart < 0) cstart = 0;
-                }
-            } else {
-                if (PyErr_ExceptionMatches(PyExc_OverflowError))
-                    PyErr_Clear();
-                else
-                    goto bad;
-            }
-        }
-        return ms->sq_slice(obj, cstart, cstop);
-    }
-#endif
-    mp = Py_TYPE(obj)->tp_as_mapping;
-    if (likely(mp && mp->mp_subscript))
-#endif
-    {
-        PyObject* result;
-        PyObject *py_slice, *py_start, *py_stop;
-        if (_py_slice) {
-            py_slice = *_py_slice;
-        } else {
-            PyObject* owned_start = NULL;
-            PyObject* owned_stop = NULL;
-            if (_py_start) {
-                py_start = *_py_start;
-            } else {
-                if (has_cstart) {
-                    owned_start = py_start = PyInt_FromSsize_t(cstart);
-                    if (unlikely(!py_start)) goto bad;
-                } else
-                    py_start = Py_None;
-            }
-            if (_py_stop) {
-                py_stop = *_py_stop;
-            } else {
-                if (has_cstop) {
-                    owned_stop = py_stop = PyInt_FromSsize_t(cstop);
-                    if (unlikely(!py_stop)) {
-                        Py_XDECREF(owned_start);
-                        goto bad;
-                    }
-                } else
-                    py_stop = Py_None;
-            }
-            py_slice = PySlice_New(py_start, py_stop, Py_None);
-            Py_XDECREF(owned_start);
-            Py_XDECREF(owned_stop);
-            if (unlikely(!py_slice)) goto bad;
-        }
-#if CYTHON_COMPILING_IN_CPYTHON
-        result = mp->mp_subscript(obj, py_slice);
-#else
-        result = PyObject_GetItem(obj, py_slice);
-#endif
-        if (!_py_slice) {
-            Py_DECREF(py_slice);
-        }
-        return result;
-    }
-    PyErr_Format(PyExc_TypeError,
-        "'%.200s' object is unsliceable", Py_TYPE(obj)->tp_name);
-bad:
-    return NULL;
-}
-
 static void __Pyx_RaiseBufferIndexError(int axis) {
   PyErr_Format(PyExc_IndexError,
      "Out of bounds on buffer access (axis %d)", axis);
@@ -12751,32 +12102,6 @@ static CYTHON_INLINE PyObject* __Pyx_PyInt_From_long(long value) {
         int one = 1; int little = (int)*(unsigned char *)&one;
         unsigned char *bytes = (unsigned char *)&value;
         return _PyLong_FromByteArray(bytes, sizeof(long),
-                                     little, !is_unsigned);
-    }
-}
-
-static CYTHON_INLINE PyObject* __Pyx_PyInt_From_npy_long(npy_long value) {
-    const npy_long neg_one = (npy_long) -1, const_zero = (npy_long) 0;
-    const int is_unsigned = neg_one > const_zero;
-    if (is_unsigned) {
-        if (sizeof(npy_long) < sizeof(long)) {
-            return PyInt_FromLong((long) value);
-        } else if (sizeof(npy_long) <= sizeof(unsigned long)) {
-            return PyLong_FromUnsignedLong((unsigned long) value);
-        } else if (sizeof(npy_long) <= sizeof(unsigned PY_LONG_LONG)) {
-            return PyLong_FromUnsignedLongLong((unsigned PY_LONG_LONG) value);
-        }
-    } else {
-        if (sizeof(npy_long) <= sizeof(long)) {
-            return PyInt_FromLong((long) value);
-        } else if (sizeof(npy_long) <= sizeof(PY_LONG_LONG)) {
-            return PyLong_FromLongLong((PY_LONG_LONG) value);
-        }
-    }
-    {
-        int one = 1; int little = (int)*(unsigned char *)&one;
-        unsigned char *bytes = (unsigned char *)&value;
-        return _PyLong_FromByteArray(bytes, sizeof(npy_long),
                                      little, !is_unsigned);
     }
 }

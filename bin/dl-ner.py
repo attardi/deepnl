@@ -338,5 +338,11 @@ def main():
 
 # ----------------------------------------------------------------------
 
+profile = False
+
 if __name__ == '__main__':
-    main()
+    if profile:
+        import cProfile
+        cProfile.runctx("main()", globals(), locals(), "Profile.prof")
+    else:
+        main()

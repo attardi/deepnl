@@ -1,5 +1,18 @@
 2015-08-24  Giuseppe Attardi  <attardi@di.unipi.it>
 
+	* deepnl/trainer.pyx (Trainer.rain): stop after max_no_progress
+	epochs without progress.
+
+	* deepnl/network.pyx: use backward activation function hardath_back.
+
+	* deepnl/math.pyx (hardtanh_back): backward function for hardtanh
+	activation layer, that produces gradients of input by multiplying
+	by gradiets of output.
+
+	* deepnl/tagger.pyx: cpdef tag_sequence.
+
+	* bin/dl-words.py: commented out profiling.
+
 	* bin/dl-pos.py (main): updated similarly to dl-ner.py.
 
 	* deepnl/reader.py (PosReader.__init__): handle form and tag fields.

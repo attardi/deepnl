@@ -10,6 +10,8 @@ cdef class SeqGradients(Gradients):
 
     # gradients for output variables
     cdef public np.ndarray output
+    # gradients for hidden variables
+    cdef public np.ndarray hidden
     cdef public np.ndarray transitions
 
 cdef class SequenceNetwork(Network):

@@ -24,6 +24,8 @@ cdef class Tagger(object):
     cdef np.ndarray padding_left, padding_right
     cdef public np.ndarray pre_padding, post_padding
 
+    cpdef tag_sequence(self, list tokens, bool return_tokens=*)
+
     cpdef np.ndarray[FLOAT_t,ndim=2] _tag_sequence(self,
                                                   np.ndarray sentence,
                                                   bool train=*)

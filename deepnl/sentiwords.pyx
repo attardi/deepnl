@@ -202,7 +202,6 @@ cdef class SentimentTrainer(LmTrainer):
         cdef Parameters p = nn.p
         cdef int left_context = len(self.pre_padding)
 
-        # FIXME: use AdaGrad here too:
         p.output_weights += LR_2 * grads.output_weights
         p.output_bias += LR_2 * grads.output_bias
         
@@ -230,7 +229,9 @@ cdef class SentimentTrainer(LmTrainer):
         # FIXME: parallelize using ASGD.
 
         # prepare for AdaGrad
-        self.converter.clearAdaGrad()
+        global adaEps
+        if adaEps:
+            self.converter.clearAdaGrad()
 
         # generate 1000 random indices at a time to save time
         # (generating 1000 integers at once takes about ten times the time for a single one)

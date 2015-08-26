@@ -13,7 +13,7 @@ import argparse
 from ConfigParser import ConfigParser
 
 # profiling
-import yappi
+#import yappi
 
 # allow executing from anywhere without installing the package
 import sys
@@ -187,13 +187,13 @@ def main():
 
 # ----------------------------------------------------------------------
 
-profile = True
+profile = False
 
 if __name__ == '__main__':
-    if profile:
-        #yappi.start() # done after thread creation
-        main()
-        yappi.get_func_stats().print_all()
-        yappi.get_thread_stats().print_all()
-    else:
+    # if profile:
+    #     #yappi.start() # done after thread creation
+    #     main()
+    #     yappi.get_func_stats().print_all()
+    #     yappi.get_thread_stats().print_all()
+    # else:
         main()

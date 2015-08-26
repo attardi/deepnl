@@ -1,14 +1,12 @@
 # -*- coding: utf-8 -*-
 # distutils: language = c++
-# cython: profile=True
+# cython: profile=False
 
 """
 Train a DL Neural Network.
 """
 
 import numpy as np
-import cPickle as pickle
-import struct
 import logging
 from itertools import izip
 import sys
@@ -47,6 +45,8 @@ cdef class Trainer(object):
     """
     Abstract class for trainers.
     """
+
+    max_no_progress = 3         # stop after these epochs without progress
 
     # cdef np.ndarray pre_padding, post_padding
     # size of ngrams
@@ -109,17 +109,23 @@ cdef class Trainer(object):
             is reached. Ignored if 0.
         """
         logger = logging.getLogger("Logger")
+        global adaEps, adaRo
+        logger.info("Parameters: lr=%f, eps=%f, ro=%f" % (self.learning_rate,
+                                                          adaEps, adaRo))
         logger.info("Training for up to %d epochs" % epochs)
         
         # prepare for AdaGrad
-        self.converter.clearAdaGrads()
+        if adaEps:
+            self.converter.clearAdaGrads()
 
         self.total_items = 0
-        top_accuracy = 0
-        last_accuracy = 0
-        min_error = np.Infinity 
-        last_error = np.Infinity
+        cdef float top_accuracy = 0
+        cdef float last_accuracy = 0
+        cdef float min_error = np.Infinity 
+        cdef float last_error = np.Infinity
         
+        cdef int no_progress = 0 # how many epochs without progress
+
         np.seterr(all='raise')
 
         for i in xrange(epochs):
@@ -129,12 +135,6 @@ cdef class Trainer(object):
             
             # normalize error
             self.error /= self.epoch_items #if self.epoch_items else np.Infinity
-            # save model
-            if self.error < min_error:
-                min_error = self.error
-                logger.info("Saving model...")
-                self.saver(self)
-
             if self.accuracy > top_accuracy:
                 top_accuracy = self.accuracy
             
@@ -142,10 +142,22 @@ cdef class Trainer(object):
                 or self.accuracy >= desired_accuracy > 0 \
                 or (self.accuracy < last_accuracy and self.error > last_error):
                 self._epoch_report(i + 1)
-                if self.accuracy >= desired_accuracy > 0 \
-                        or (self.error > last_error and self.accuracy < last_accuracy): # early stop
-                    break
-                
+
+            # early stop
+            if self.accuracy >= desired_accuracy > 0:
+                break
+            if self.error > last_error and self.accuracy < last_accuracy:
+                no_progress += 1
+            if no_progress == Trainer.max_no_progress:
+                break
+            no_progress = 0
+
+            # save model
+            if self.error < min_error:
+                min_error = self.error
+                logger.info("Saving model...")
+                self.saver(self)
+
             last_accuracy = self.accuracy
             last_error = self.error
 
@@ -176,7 +188,11 @@ cdef class Trainer(object):
 
         nn = self.nn
         vars = nn.variables()   # allocate variables
-        ada = nn.gradients()
+        global adaEps
+        if adaEps:
+            ada = nn.gradients()
+        else:
+            ada = None
         cdef int i = 0
         for sent, label in izip(sentences, labels):
             # add padding
@@ -320,7 +336,8 @@ cdef class TaggerTrainer(Trainer):
         # np.random.set_state(random_state)
         # np.random.shuffle(tags)
         
-        cdef SeqGradients grads, ada
+        global adaEps
+        cdef SeqGradients grads, ada = None
 
         # keep last 2% for validation
         cdef int validation = int((len(sentences) - 1) * 0.98) + 1 # at least 1
@@ -333,7 +350,8 @@ cdef class TaggerTrainer(Trainer):
             sent = np.concatenate((self.pre_padding, sent, self.post_padding))
             scores = self.tagger._tag_sequence(sent, True)
             grads = nn.gradients(slen) # one for each item
-            ada = nn.gradients(slen) # one for each item
+            if adaEps:
+                ada = nn.gradients(slen) # one for each item
             error = nn.backpropagateSeq(sent_tags, scores, grads)
             if error > self.skipErr:
                 self.error += error

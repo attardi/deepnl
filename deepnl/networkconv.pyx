@@ -304,12 +304,11 @@ Output size: %d
         np.outer(grads.output_bias, vars.hidden2, grads.output_weights)
         # dC / df_4 = dC / df_5 * W_4				(23)
         # (output_size) * (output_size, hidden2_size) = (hidden2_size)
-        grads.output_bias.dot(p.output_weights, grads.hidden2_bias)
+        grads.output_bias.dot(p.output_weights, grads.hidden2_bias) # temp
 
         # f_4 = hardtanh(f_3)
         # dC / df_3 = dC / df_4 * hardtanhd(f_4)
-        hardtanhe(vars.hidden2, vars.hidden2)
-        grads.hidden2_bias *= vars.hidden2
+        hardtanh_back(vars.hidden2, grads.hidden2_bias, grads.hidden2_bias)
 
         # f_3 = W_2 f_2 + b_2
         # dC / db_2 = dC / df_3					(22)

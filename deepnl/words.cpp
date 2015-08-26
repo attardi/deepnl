@@ -1046,8 +1046,8 @@ struct __pyx_opt_args_6deepnl_4math_hardtanhd2d {
   PyArrayObject *out;
 };
 
-/* "math.pxd":30
- *                                    np.ndarray out=*)
+/* "math.pxd":38
+ *                                                  np.ndarray[FLOAT_t, ndim=2] grads_in)
  * 
  * cdef np.ndarray[FLOAT_t, ndim=1] hardtanhe(np.ndarray[FLOAT_t, ndim=1] y,             # <<<<<<<<<<<<<<
  *                                    np.ndarray out=*)
@@ -1058,7 +1058,7 @@ struct __pyx_opt_args_6deepnl_4math_hardtanhe {
   PyArrayObject *out;
 };
 
-/* "math.pxd":32
+/* "math.pxd":40
  * cdef np.ndarray[FLOAT_t, ndim=1] hardtanhe(np.ndarray[FLOAT_t, ndim=1] y,
  *                                    np.ndarray out=*)
  * cdef np.ndarray[FLOAT_t, ndim=2] hardtanhe2d(np.ndarray[FLOAT_t, ndim=2] y,             # <<<<<<<<<<<<<<
@@ -1299,11 +1299,12 @@ struct __pyx_obj_6deepnl_10networkseq_SeqParameters {
 struct __pyx_obj_6deepnl_10networkseq_SeqGradients {
   struct __pyx_obj_6deepnl_7network_Gradients __pyx_base;
   PyArrayObject *output;
+  PyArrayObject *hidden;
   PyArrayObject *transitions;
 };
 
 
-/* "networkseq.pxd":15
+/* "networkseq.pxd":17
  *     cdef public np.ndarray transitions
  * 
  * cdef class SequenceNetwork(Network):             # <<<<<<<<<<<<<<
@@ -1665,7 +1666,7 @@ struct __pyx_vtabstruct_6deepnl_10networkseq_SeqGradients {
 static struct __pyx_vtabstruct_6deepnl_10networkseq_SeqGradients *__pyx_vtabptr_6deepnl_10networkseq_SeqGradients;
 
 
-/* "networkseq.pxd":15
+/* "networkseq.pxd":17
  *     cdef public np.ndarray transitions
  * 
  * cdef class SequenceNetwork(Network):             # <<<<<<<<<<<<<<
@@ -13916,8 +13917,8 @@ PyMODINIT_FUNC PyInit_words(void)
   __pyx_vtabptr_6deepnl_10networkseq_SeqParameters = (struct __pyx_vtabstruct_6deepnl_10networkseq_SeqParameters*)__Pyx_GetVtable(__pyx_ptype_6deepnl_10networkseq_SeqParameters->tp_dict); if (unlikely(!__pyx_vtabptr_6deepnl_10networkseq_SeqParameters)) {__pyx_filename = __pyx_f[8]; __pyx_lineno = 4; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __pyx_ptype_6deepnl_10networkseq_SeqGradients = __Pyx_ImportType("deepnl.networkseq", "SeqGradients", sizeof(struct __pyx_obj_6deepnl_10networkseq_SeqGradients), 1); if (unlikely(!__pyx_ptype_6deepnl_10networkseq_SeqGradients)) {__pyx_filename = __pyx_f[8]; __pyx_lineno = 9; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __pyx_vtabptr_6deepnl_10networkseq_SeqGradients = (struct __pyx_vtabstruct_6deepnl_10networkseq_SeqGradients*)__Pyx_GetVtable(__pyx_ptype_6deepnl_10networkseq_SeqGradients->tp_dict); if (unlikely(!__pyx_vtabptr_6deepnl_10networkseq_SeqGradients)) {__pyx_filename = __pyx_f[8]; __pyx_lineno = 9; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
-  __pyx_ptype_6deepnl_10networkseq_SequenceNetwork = __Pyx_ImportType("deepnl.networkseq", "SequenceNetwork", sizeof(struct __pyx_obj_6deepnl_10networkseq_SequenceNetwork), 1); if (unlikely(!__pyx_ptype_6deepnl_10networkseq_SequenceNetwork)) {__pyx_filename = __pyx_f[8]; __pyx_lineno = 15; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
-  __pyx_vtabptr_6deepnl_10networkseq_SequenceNetwork = (struct __pyx_vtabstruct_6deepnl_10networkseq_SequenceNetwork*)__Pyx_GetVtable(__pyx_ptype_6deepnl_10networkseq_SequenceNetwork->tp_dict); if (unlikely(!__pyx_vtabptr_6deepnl_10networkseq_SequenceNetwork)) {__pyx_filename = __pyx_f[8]; __pyx_lineno = 15; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_ptype_6deepnl_10networkseq_SequenceNetwork = __Pyx_ImportType("deepnl.networkseq", "SequenceNetwork", sizeof(struct __pyx_obj_6deepnl_10networkseq_SequenceNetwork), 1); if (unlikely(!__pyx_ptype_6deepnl_10networkseq_SequenceNetwork)) {__pyx_filename = __pyx_f[8]; __pyx_lineno = 17; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_vtabptr_6deepnl_10networkseq_SequenceNetwork = (struct __pyx_vtabstruct_6deepnl_10networkseq_SequenceNetwork*)__Pyx_GetVtable(__pyx_ptype_6deepnl_10networkseq_SequenceNetwork->tp_dict); if (unlikely(!__pyx_vtabptr_6deepnl_10networkseq_SequenceNetwork)) {__pyx_filename = __pyx_f[8]; __pyx_lineno = 17; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __pyx_ptype_6deepnl_7trainer_MovingAverage = __Pyx_ImportType("deepnl.trainer", "MovingAverage", sizeof(struct __pyx_obj_6deepnl_7trainer_MovingAverage), 1); if (unlikely(!__pyx_ptype_6deepnl_7trainer_MovingAverage)) {__pyx_filename = __pyx_f[9]; __pyx_lineno = 11; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __pyx_vtabptr_6deepnl_7trainer_MovingAverage = (struct __pyx_vtabstruct_6deepnl_7trainer_MovingAverage*)__Pyx_GetVtable(__pyx_ptype_6deepnl_7trainer_MovingAverage->tp_dict); if (unlikely(!__pyx_vtabptr_6deepnl_7trainer_MovingAverage)) {__pyx_filename = __pyx_f[9]; __pyx_lineno = 11; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __pyx_ptype_6deepnl_7trainer_TaggerTrainer = __Pyx_ImportType("deepnl.trainer", "TaggerTrainer", sizeof(struct __pyx_obj_6deepnl_7trainer_TaggerTrainer), 1); if (unlikely(!__pyx_ptype_6deepnl_7trainer_TaggerTrainer)) {__pyx_filename = __pyx_f[9]; __pyx_lineno = 54; __pyx_clineno = __LINE__; goto __pyx_L1_error;}

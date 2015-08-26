@@ -267,12 +267,12 @@ cdef class Network(object):
         # (output_size) x (hidden_size) = (output_size, hidden_size)
         np.outer(grads.output_bias, vars.hidden, grads.output_weights)
         # dC / df_3 = dC / df_4 * W_2				(23)
-        grads.output_bias.dot(p.output_weights, grads.hidden_bias)
+        # (output_size) * (output_size, hidden_size) = (hidden_size)
+        grads.output_bias.dot(p.output_weights, grads.hidden_bias) # temporary
 
         # f_3 = hardtanh(f_2)
-        # dC / df_2 = dC / df_3 * hardtanhd(f_2)
-        hardtanhe(vars.hidden, vars.hidden)
-        grads.hidden_bias *= vars.hidden
+        # dC / df_2 = dC / df_3 * hardtanh'(f_2)
+        hardtanh_back(vars.hidden, grads.hidden_bias, grads.hidden_bias)
 
         # f_2 = W_1 f_1 + b_1
         # dC / db_1 = dC / df_2					(22)

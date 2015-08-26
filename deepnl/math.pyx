@@ -161,6 +161,42 @@ cdef np.ndarray[FLOAT_t, ndim=2] hardtanhd2d(np.ndarray[FLOAT_t, ndim=2] y,
             o[...] = 0.0
     return it.operands[1]
 
+cdef np.ndarray[FLOAT_t, ndim=1] hardtanh_back(np.ndarray[FLOAT_t, ndim=1] y,
+                                               np.ndarray[FLOAT_t, ndim=1] grads,
+                                               np.ndarray[FLOAT_t, ndim=1] grads_in):
+    """backward of hardtanh in terms of y = hardtanh(x)
+    Propagates the output gradients to the input, by multiplying with the
+    derivative p hardtanh.
+    grads:      gradients of output.
+    grads_in :  output array in which to place the result.
+    """
+    it = np.nditer([y, grads, grads_in],
+                   op_flags = [['readonly'], ['readonly'], ['writeonly']])
+    for w, g, o in it:
+        if  w == -1.0 or w == 1.0:
+            o[...] = 0.0
+        else:
+            o[...] = g[...]
+    return grads_in
+
+cdef np.ndarray[FLOAT_t, ndim=2] hardtanh_back2d(np.ndarray[FLOAT_t, ndim=2] y,
+                                                 np.ndarray[FLOAT_t, ndim=2] grads,
+                                                 np.ndarray[FLOAT_t, ndim=2] grads_in):
+    """derivative of hardtanh in terms of y = hardtanh(x)/
+    Propagates the output gradients to the input, by multiplying with the
+    derivative p hardtanh.
+    grads:      gradients of output.
+    grads_in:   array in which to place the result.
+    """
+    it = np.nditer([y, grads, grads_in],
+                   op_flags = [['readonly'], ['readonly'], ['writeonly']])
+    for w, g, o in it:
+        if  w == -1.0 or w == 1.0:
+            o[...] = 0.0
+        else:
+            o[...] = g[...]
+    return grads_in
+
 cdef np.ndarray[FLOAT_t, ndim=1] hardtanhe(np.ndarray[FLOAT_t, ndim=1] y,
                                            np.ndarray out=None):
     """derivative of hardtanh in terms of y = hardtanh(x)

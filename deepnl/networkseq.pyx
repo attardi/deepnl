@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 # distutils: language = c++
 # cython: embedsignature=True
-# cython: profile=True
+# cython: profile=False
 
 """
 A neural network for tagging sequences.
@@ -83,6 +83,7 @@ cdef class SeqParameters(Parameters):
 
 cdef class SeqGradients(Gradients):
 
+    #cdef readonly np.ndarray hidden
     #cdef readonly np.ndarray output
     #cdef readonly np.ndarray transitions
 
@@ -93,12 +94,14 @@ cdef class SeqGradients(Gradients):
         """
         super(SeqGradients, self).__init__(input_size, hidden_size, output_size)
         self.input = np.zeros((seq_len, input_size)) # overrides value from Gradients
+        self.hidden = np.zeros((seq_len, hidden_size))
         self.output = np.zeros((seq_len, output_size))
         self.transitions = np.zeros((output_size + 1, output_size))
 
     def clear(self):
         super(SeqGradients, self).clear()
         self.input.fill(0.0)
+        self.hidden.fill(0.0)
         self.output.fill(0.0)
         self.transitions.fill(0.0)
 
@@ -376,7 +379,8 @@ cdef class SequenceNetwork(Network):
 
         # dC / df_3 = M_2.T dC / df_4				(23)
         #  (len, output_size) (output_size, hidden_size) = (len, hidden_size)
-        dCdf_3 = grads.output.dot(self.p.output_weights)
+        # dCdf_3 = grads.output.dot(self.p.output_weights)
+        grads.output.dot(self.p.output_weights, grads.hidden)
 
         # layer 3: HardTanh layer
         # no weights to adjust
@@ -384,22 +388,26 @@ cdef class SequenceNetwork(Network):
         # dC / df_2 = hardtanhd(f_2) * dC / df_3
         # (len, hidden_size) * (len, hidden_size) = (len, hidden_size)
         # FIXME: this goes quickly to 0.
-        dCdf_2 = hardtanhe2d(self.hidden_sequence, self.hidden_sequence) * dCdf_3
+        # dCdf_2 = hardtanhe2d(self.hidden_sequence, self.hidden_sequence) * dCdf_3
+        hardtanh_back2d(self.hidden_sequence, grads.hidden, grads.hidden)
 
         # df_2 / df_1 = M_1
 
         # layer 2: linear layer
         # dC / dW_2 = dC / df_2 f_1.T				(22)
         # (len, hidden_size).T (len, input_size) = (hidden_size, input_size)
-        dCdf_2.T.dot(self.input_sequence, grads.hidden_weights)
+        # dCdf_2.T.dot(self.input_sequence, grads.hidden_weights)
+        grads.hidden.T.dot(self.input_sequence, grads.hidden_weights)
 
         # dC / db_1 = dC / df_2					(22)
         # sum by column contribution by each token
-        dCdf_2.sum(0, out=grads.hidden_bias)
+        # dCdf_2.sum(0, out=grads.hidden_bias)
+        grads.hidden.sum(0, out=grads.hidden_bias)
 
         # dC / df_1 = M_1.T dC / df_2
         # (len, hidden_size) (hidden_size, input_size) = (len, input_size)
-        dCdf_2.dot(self.p.hidden_weights, grads.input)
+        # dCdf_2.dot(self.p.hidden_weights, grads.input)
+        grads.hidden.dot(self.p.hidden_weights, grads.input)
         # print >> sys.stderr, 'hwg', grads.hidden_weights[:4,:4], grads.hidden_weights[-4:,-4:] # DEBUG
         # print >> sys.stderr, 'hbg', grads.hidden_bias[:4], grads.hidden_bias[-4:] # DEBUG
         # print >> sys.stderr, 'ig', grads.input[0,:4], grads.input[-1,-4:] # DEBUG

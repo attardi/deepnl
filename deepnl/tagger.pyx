@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 # distutils: language = c++
+# cython: profile=False
 
 """
 Sequence tagger exploiting a neural network.
@@ -46,7 +47,7 @@ cdef class Tagger(object):
     def tag(self, sent):
         return self.tag_sequence(sent, return_tokens=True)
 
-    def tag_sequence(self, list tokens, bool return_tokens=False):
+    cpdef tag_sequence(self, list tokens, bool return_tokens=False):
         """
         Tags a given list of tokens. 
         

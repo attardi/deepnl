@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 # distutils: language = c++
-# cython: profile=True
+# cython: profile=False
 
 """
 Train a DL Convolutional Neural Network.
@@ -51,7 +51,8 @@ cdef class ConvTrainer(Trainer):
         validation = int(len(sentences) * 0.98)
 
         nn = self.nn
-        cdef ConvGradients grads, ada
+        global adaEps
+        cdef ConvGradients grads, ada = None
         cdef int i = 0, slen
         for i in xrange(validation):
             sent = sentences[i]
@@ -63,7 +64,8 @@ cdef class ConvTrainer(Trainer):
             self.converter.lookup(sent, vars.input)
             nn.forward(vars)
             grads = nn.gradients(slen) # allocate gradients
-            ada = nn.gradients(slen) # allocate ada gradients
+            if adaEps:
+                ada = nn.gradients(slen) # allocate ada gradients
             loss = nn.backpropagate(label, vars, grads)
             if loss > 0.0:
                 self.error += loss

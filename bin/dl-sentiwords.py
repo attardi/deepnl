@@ -102,27 +102,27 @@ if __name__ == '__main__':
     # parser.set_defaults(**defaults)
 
     parser.add_argument('-w', '--window', type=int, default=5,
-                        help='Size of the word window (default 5)',
+                        help='Size of the word window (default %(default)s)',
                         dest='window')
     parser.add_argument('-s', '--embeddings-size', type=int, default=50,
-                        help='Number of features per word (default 50)',
+                        help='Number of features per word (default %(default)s)',
                         dest='embeddings_size')
     parser.add_argument('-e', '--epochs', type=int, default=100,
-                        help='Number of training epochs (default 100)',
+                        help='Number of training epochs (default %(default)s)',
                         dest='iterations')
     parser.add_argument('-l', '--learning-rate', type=float, default=0.001,
-                        help='Learning rate for network weights (default 0.001)',
+                        help='Learning rate for network weights (default %(default)s)',
                         dest='learning_rate')
     parser.add_argument('--eps', type=float, default=1e-8,
-                        help='Epsilon value for AdaGrad (default 1e-8)')
+                        help='Epsilon value for AdaGrad (default %(default)s)')
     parser.add_argument('--ro', type=float, default=0.95,
-                        help='Ro value for AdaDelta (default 0.95)')
+                        help='Ro value for AdaDelta (default %(default)s)')
     parser.add_argument('-n', '--hidden', type=int, default=200,
-                        help='Number of hidden neurons (default 200)')
+                        help='Number of hidden neurons (default %(default)s)')
     parser.add_argument('--ngrams', type=int, default=2,
-                        help='Length of ngrams (default 2)')
+                        help='Length of ngrams (default %(default)s)')
     parser.add_argument('--alpha', type=float, default=0.5,
-                        help='Relative weight of normal wrt sentiment score (default 0.5)')
+                        help='Relative weight of normal wrt sentiment score (default %(default)s)')
     parser.add_argument('train', type=str,
                         help='File with text corpus for training.')
     parser.add_argument('--model', type=str, default=None,
@@ -134,7 +134,7 @@ if __name__ == '__main__':
     parser.add_argument('--load', type=str, default=None,
                         help='Load previously saved model')
     parser.add_argument('--threads', type=int, default=1,
-                        help='Number of threads (default 1)')
+                        help='Number of threads (default %(default)s)')
     parser.add_argument('--variant', type=str, default=None,
                         help='Either "senna" (default), "polyglot" or "word2vec".')
     parser.add_argument('-v', '--verbose', help='Verbose mode',

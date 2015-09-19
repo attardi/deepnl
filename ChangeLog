@@ -1,3 +1,12 @@
+2015-09-19  Giuseppe Attardi  <attardi@di.unipi.it>
+
+	* bin/dl-ner.py (main): use %(default)s in help string.
+	* bin/dl-pos.py (main): idem.
+
+2015-09-18  Giuseppe Attardi  <attardi@di.unipi.it>
+
+	* deepnl/word_dictionary.py (WordDictionary.size): added.
+
 2015-08-24  Giuseppe Attardi  <attardi@di.unipi.it>
 
 	* deepnl/trainer.pyx (Trainer.rain): stop after max_no_progress

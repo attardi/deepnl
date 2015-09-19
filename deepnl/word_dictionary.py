@@ -96,6 +96,18 @@ class WordDictionary(dict):
         
         self.check()
     
+    def size(self):
+        """
+        :return: the number of words ins the dictionary, excluding special symbols.
+        """
+        l = len(self)
+        special_symbols = set((WordDictionary.rare, 
+                               WordDictionary.padding_left,
+                               WordDictionary.padding_right))
+        for symbol in special_symbols:
+            l -= super(WordDictionary, self).get(symbol) is not None
+        return l
+
     def save(self, file):
         """
         Saves the word dictionary to the given file as a list of words.

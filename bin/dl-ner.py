@@ -109,23 +109,23 @@ def main():
     train.add_argument('-t', '--train', type=str, default='',
                         help='File with annotated data for training.')
     train.add_argument('-w', '--window', type=int, default=5,
-                        help='Size of the word window (default 5)')
+                        help='Size of the word window (default %(default)s)')
     train.add_argument('-s', '--embeddings-size', type=int, default=50,
-                        help='Number of features per word (default 50)',
+                        help='Number of features per word (default %(default)s)',
                         dest='embeddings_size')
     train.add_argument('-e', '--epochs', type=int, default=100,
-                        help='Number of training epochs (default 100)',
+                        help='Number of training epochs (default %(default)s)',
                         dest='iterations')
     train.add_argument('-l', '--learning_rate', type=float, default=0.001,
-                        help='Learning rate for network weights (default 0.001)',
+                        help='Learning rate for network weights (default %(default)s)',
                         dest='learning_rate')
     train.add_argument('-n', '--hidden', type=int, default=200,
-                        help='Number of hidden neurons (default 200)',
+                        help='Number of hidden neurons (default %(default)s)',
                         dest='hidden')
     train.add_argument('--eps', type=float, default=1e-8,
-                        help='Epsilon value for AdaGrad (default 1e-8)')
+                        help='Epsilon value for AdaGrad (default %(default)s)')
     train.add_argument('--ro', type=float, default=0.95,
-                        help='Ro value for AdaDelta (default 0.95)')
+                        help='Ro value for AdaDelta (default %(default)s)')
     train.add_argument('-o', '--output', type=str, default='',
                         help='File where to save embeddings')
 
@@ -134,11 +134,11 @@ def main():
     embeddings.add_argument('--vocab', type=str, default='',
                         help='Vocabulary file, either read or created')
     embeddings.add_argument('--vocab-size', type=int, default=0,
-                            help='Maximum size of vocabulary (default 0)')
+                            help='Maximum size of vocabulary from corpus (default %(default)s)')
     embeddings.add_argument('--vectors', type=str, default='',
                         help='Embeddings file, either read or created')
     embeddings.add_argument('--min-occurr', type=int, default=3,
-                        help='Minimum occurrences for inclusion in vocabulary',
+                        help='Minimum occurrences for inclusion in vocabulary (default %(default)s',
                         dest='minOccurr')
     embeddings.add_argument('--load', type=str, default='',
                         help='Load previously saved model')
@@ -148,29 +148,29 @@ def main():
     # Extractors:
     extractors = parser.add_argument_group('Extractors')
     extractors.add_argument('--caps', const=5, nargs='?', type=int, default=None,
-                        help='Include capitalization features. Optionally, supply the number of features (default 5)')
+                        help='Include capitalization features. Optionally, supply the number of features (default %(default)s)')
     extractors.add_argument('--suffix', const=5, nargs='?', type=int, default=None,
-                            help='Include suffix features. Optionally, supply the number of features (default 5)')
+                            help='Include suffix features. Optionally, supply the number of features (default %(default)s)')
     extractors.add_argument('--suffixes', type=str, default='',
                         help='Load suffixes from this file')
     extractors.add_argument('--prefix', const=5, nargs='?', type=int, default=None,
                             help='Include prefix features. Optionally, '\
-                            'supply the number of features (default 5)')
+                            'supply the number of features (default %(default)s)')
     extractors.add_argument('--prefixes', type=str, default='',
                         help='Load prefixes from this file')
     extractors.add_argument('--gazetteer', type=str,
                         help='Load gazetteer from this file')
     extractors.add_argument('--gsize', type=int, default=5,
-                        help='Size of gazetteer features (default 5)')
+                        help='Size of gazetteer features (default %(default)s)')
 
     # reader
     parser.add_argument('--form-field', type=int, default=0,
-                        help='Token field containing form (default 0)',
+                        help='Token field containing form (default %(default)s)',
                         dest='formField')
 
     # common
     parser.add_argument('--threads', type=int, default=1,
-                        help='Number of threads (default 1)')
+                        help='Number of threads (default %(default)s)')
     parser.add_argument('-v', '--verbose', help='Verbose mode',
                         action='store_true')
 
@@ -196,14 +196,13 @@ def main():
         sentence_iter = reader.read(args.train)
 
         if args.vocab and os.path.exists(args.vocab):
-            # start with the given vocabulary
-            base_vocab = reader.load_vocabulary(args.vocab)
             if args.vectors and os.path.exists(args.vectors):
-                embeddings = Embeddings(vectors=args.vectors, vocab=base_vocab,
+                # use supplied embeddings
+                embeddings = Embeddings(vectors=args.vectors, vocab_file=args.vocab,
                                         variant=args.variant)
             else:
                 # create random embeddings
-                embeddings = Embeddings(args.embeddings_size, vocab=base_vocab,
+                embeddings = Embeddings(args.embeddings_size, vocab_file=args.vocab,
                                         variant=args.variant)
             # add the ngrams from the corpus
             # build vocabulary and tag set
@@ -215,18 +214,7 @@ def main():
                 logger.info("Overriding vocabulary in %s" % args.vocab)
                 embeddings.save_vocabulary(args.vocab)
             else:
-                vocab = base_vocab
                 tagset = reader.create_tagset(sentence_iter)
-
-        elif args.vocab:
-            if not args.vectors:
-                logger.error("No --vectors specified")
-                return
-            embeddings = Embeddings(args.embeddings_size, args.vocab,
-                                    args.vectors, variant=args.variant)
-            tagset = reader.create_tagset(sentence_iter)
-            logger.info("Creating vocabulary in %s" % args.vocab)
-            embeddings.save_vocabulary(args.vocab)
 
         elif args.variant == 'word2vec':
             if os.path.exists(args.vectors):
@@ -237,11 +225,13 @@ def main():
                                                          args.minOccurr)
                 embeddings.merge(vocab)
             else:
-                embeddings = Embeddings(vectors=args.vectors,
+                vocab, tagset = reader.create_vocabulary(sentence_iter,
+                                                         args.vocab_size,
+                                                         args.minOccurr)
+                embeddings = Embeddings(vocab=vocab,
                                         variant=args.variant)
-                tagset = reader.create_tagset(sentence_iter)
             if args.vocab:
-                logger.info("Creating vocabulary in %s" % args.vocab)
+                logger.info("Saving vocabulary in %s" % args.vocab)
                 embeddings.save_vocabulary(args.vocab)
         else:
             # build vocabulary and tag set
@@ -265,45 +255,48 @@ def main():
             (args.prefixes and not os.path.exists(args.prefixes))):
             # collect the forms once
             words = (tok[reader.formField] for sent in sentence_iter for tok in sent)
-        if os.path.exists(args.suffixes):
-            logger.info("Loading suffix list...")
-            extractor = SuffixExtractor(args.suffix, args.suffixes)
-            converter.add(extractor)
-        elif args.suffixes:
-            logger.info("Creating suffix list...")
-            # collect the forms
-            words = (tok[reader.formField] for sent in sentence_iter for tok in sent)
-            extractor = SuffixExtractor(args.suffix, None, words)
-            converter.add(extractor)
-            if args.suffixes:
-                logger.info("Saving suffix list to: %s", args.suffixes)
-                extractor.write(args.suffixes)
-        if os.path.exists(args.prefixes):
-            logger.info("Loading prefix list...")
-            extractor = PrefixExtractor(args.prefix, args.prefixes)
-            converter.add(extractor)
-        elif args.prefix:
-            logger.info("Creating prefix list...")
-            extractor = PrefixExtractor(args.prefix, None, words)
-            converter.add(extractor)
-            if args.prefixes:
-                logger.info("Saving prefix list to: %s", args.prefixes)
-                extractor.write(args.prefixes)
 
-        if os.path.exists(args.gazetteer):
-            logger.info("Loading gazetteers")
-            for extractor in GazetteerExtractor.create(args.gazetteer, args.gsize):
+        if args.suffix:
+            if os.path.exists(args.suffixes):
+                logger.info("Loading suffix list...")
+                extractor = SuffixExtractor(args.suffix, args.suffixes)
                 converter.add(extractor)
-        elif args.gazetteer:
-            logger.info("Creating gazetteer")
-            tries = GazetteerExtractor.build(sentence_iter, reader.formField, reader.tagField)
-            for tag, trie in tries.items():
-                converter.add(GazetteerExtractor(trie, args.gsize))
-            logger.info("Saving gazetter list to: %s", args.gazetteer)
-            with open(args.gazetteer, 'wb') as file:
-                for tag, trie in tries.iteritems():
-                    for ngram in trie:
-                        print >> file, ('%s\t%s' % (tag, ' '.join(ngram))).encode('UTF-8')
+            else:
+                logger.info("Creating suffix list...")
+                extractor = SuffixExtractor(args.suffix, None, words)
+                converter.add(extractor)
+                if args.suffixes:
+                    logger.info("Saving suffix list to: %s", args.suffixes)
+                    extractor.write(args.suffixes)
+
+        if args.prefix:
+            if os.path.exists(args.prefixes):
+                logger.info("Loading prefix list...")
+                extractor = PrefixExtractor(args.prefix, args.prefixes)
+                converter.add(extractor)
+            else:
+                logger.info("Creating prefix list...")
+                extractor = PrefixExtractor(args.prefix, None, words)
+                converter.add(extractor)
+                if args.prefixes:
+                    logger.info("Saving prefix list to: %s", args.prefixes)
+                    extractor.write(args.prefixes)
+
+        if args.gazetteer:
+            if os.path.exists(args.gazetteer):
+                logger.info("Loading gazetteers")
+                for extractor in GazetteerExtractor.create(args.gazetteer, args.gsize):
+                    converter.add(extractor)
+            else:
+                logger.info("Creating gazetteer")
+                tries = GazetteerExtractor.build(sentence_iter, reader.formField, reader.tagField)
+                for tag, trie in tries.items():
+                    converter.add(GazetteerExtractor(trie, args.gsize))
+                logger.info("Saving gazetter list to: %s", args.gazetteer)
+                with open(args.gazetteer, 'wb') as file:
+                    for tag, trie in tries.iteritems():
+                        for ngram in trie:
+                            print >> file, ('%s\t%s' % (tag, ' '.join(ngram))).encode('UTF-8')
 
         # if args.pos:
         #     converter.add(POS(arg.pos))
@@ -316,6 +309,8 @@ def main():
             sentences.append(converter.convert([token[reader.formField] for token in sent]))
             tags.append(np.array([tag_index[token[reader.tagField]] for token in sent]))
     
+        logger.info("Vocabulary size: %d" % embeddings.dict.size())
+        logger.info("Tagset size: %d" % len(tagset))
         trainer = create_trainer(args, converter, tag_index)
         logger.info("Starting training with %d sentences" % len(sentences))
 

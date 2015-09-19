@@ -50,7 +50,7 @@ cdef class SeqParameters(Parameters):
         # Adjusts the transition scores table with the calculated gradients.
         if ada:
             global adaEps
-            # this is done in update() above.
+            # this is done in super.update().
             #ada.transitions += grads.transitions * grads.transitions
             self.transitions += learning_rate * grads.transitions / np.sqrt(ada.transitions + adaEps)
         else:
@@ -106,12 +106,13 @@ cdef class SeqGradients(Gradients):
         self.transitions.fill(0.0)
 
     def addSquare(self, Gradients grads):
-        #super(SeqGradients, self).addSquare(grads) # we deal differetly with input
+        #super(SeqGradients, self).addSquare(grads) # we deal differently with input
         self.output_weights += grads.output_weights * grads.output_weights
         self.output_bias += grads.output_bias * grads.output_bias
         self.hidden_weights += grads.hidden_weights * grads.hidden_weights
         self.hidden_bias += grads.hidden_bias * grads.hidden_bias
         self.transitions += grads.transitions * grads.transitions
+        # do nothing fot self.input here, they will be dealt in Embeddiings.update()
 
 # ----------------------------------------------------------------------
 
@@ -146,7 +147,7 @@ cdef class SequenceNetwork(Network):
         # @see http://www.jmlr.org/papers/volume12/collobert11a/collobert11a.pdf
 
         # scores[t][k] = ftheta_k,t
-        delta = scores
+        cdef np.ndarray[FLOAT_t,ndim=2] delta = scores
         # logadd for first token. the transition score of the starting tag must be used.
         # it turns out that logadd = log(exp(score)) = score
         # transitions[-1] represents initial transition, A_0,i in paper (mispelled as A_i,0)
@@ -162,7 +163,7 @@ cdef class SequenceNetwork(Network):
             # add and sum by columns
             # newaxis allows adding vector to columns:
             logadd = logsumexp2d(delta[token - 1][:,np.newaxis] + transitions, 0)
-            #14 logadd = logsumexp2d(delta[token - 1] + transitions.T, 1)
+            # nlpnet: logadd = logsumexp2d(delta[token - 1] + transitions.T, 1)
             delta[token] += logadd
             
         return delta

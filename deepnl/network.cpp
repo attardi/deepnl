@@ -2107,6 +2107,7 @@ static PyObject *__pyx_float_0_0;
 static PyObject *__pyx_float_2_38;
 static PyObject *__pyx_int_0;
 static PyObject *__pyx_int_1;
+static PyObject *__pyx_int_10;
 static PyObject *__pyx_int_neg_1;
 static PyObject *__pyx_tuple_;
 static PyObject *__pyx_slice__6;
@@ -4046,9 +4047,9 @@ static PyObject *__pyx_f_6deepnl_7network_10Parameters_update(struct __pyx_obj_6
   /* "deepnl/network.pyx":103
  *         else:
  *             # divide by the fan-in
- *             self.output_weights += grads.output_weights * learning_rate # DEBUG / self.hidden_size             # <<<<<<<<<<<<<<
- *             self.output_bias += grads.output_bias * learning_rate # DEBUG self.hidden_size
- *             self.hidden_weights += grads.hidden_weights * learning_rate # DEBUG self.input_size
+ *             self.output_weights += grads.output_weights * learning_rate / 10  # DEBUG / self.hidden_size             # <<<<<<<<<<<<<<
+ *             self.output_bias += grads.output_bias * learning_rate / 10 # DEBUG self.hidden_size
+ *             self.hidden_weights += grads.hidden_weights * learning_rate / 10  # DEBUG self.input_size
  */
   /*else*/ {
     __pyx_t_1 = PyFloat_FromDouble(__pyx_v_learning_rate); if (unlikely(!__pyx_t_1)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 103; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
@@ -4056,26 +4057,32 @@ static PyObject *__pyx_f_6deepnl_7network_10Parameters_update(struct __pyx_obj_6
     __pyx_t_2 = PyNumber_Multiply(((PyObject *)__pyx_v_grads->__pyx_base.output_weights), __pyx_t_1); if (unlikely(!__pyx_t_2)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 103; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
     __Pyx_GOTREF(__pyx_t_2);
     __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
-    __pyx_t_1 = PyNumber_InPlaceAdd(((PyObject *)__pyx_v_self->output_weights), __pyx_t_2); if (unlikely(!__pyx_t_1)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 103; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+    __pyx_t_1 = __Pyx_PyNumber_Divide(__pyx_t_2, __pyx_int_10); if (unlikely(!__pyx_t_1)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 103; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
     __Pyx_GOTREF(__pyx_t_1);
     __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
-    if (!(likely(((__pyx_t_1) == Py_None) || likely(__Pyx_TypeTest(__pyx_t_1, __pyx_ptype_5numpy_ndarray))))) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 103; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
-    __Pyx_GIVEREF(__pyx_t_1);
+    __pyx_t_2 = PyNumber_InPlaceAdd(((PyObject *)__pyx_v_self->output_weights), __pyx_t_1); if (unlikely(!__pyx_t_2)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 103; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+    __Pyx_GOTREF(__pyx_t_2);
+    __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
+    if (!(likely(((__pyx_t_2) == Py_None) || likely(__Pyx_TypeTest(__pyx_t_2, __pyx_ptype_5numpy_ndarray))))) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 103; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+    __Pyx_GIVEREF(__pyx_t_2);
     __Pyx_GOTREF(__pyx_v_self->output_weights);
     __Pyx_DECREF(((PyObject *)__pyx_v_self->output_weights));
-    __pyx_v_self->output_weights = ((PyArrayObject *)__pyx_t_1);
-    __pyx_t_1 = 0;
+    __pyx_v_self->output_weights = ((PyArrayObject *)__pyx_t_2);
+    __pyx_t_2 = 0;
 
     /* "deepnl/network.pyx":104
  *             # divide by the fan-in
- *             self.output_weights += grads.output_weights * learning_rate # DEBUG / self.hidden_size
- *             self.output_bias += grads.output_bias * learning_rate # DEBUG self.hidden_size             # <<<<<<<<<<<<<<
- *             self.hidden_weights += grads.hidden_weights * learning_rate # DEBUG self.input_size
- *             self.hidden_bias += grads.hidden_bias * learning_rate # DEBUG self.input_size
+ *             self.output_weights += grads.output_weights * learning_rate / 10  # DEBUG / self.hidden_size
+ *             self.output_bias += grads.output_bias * learning_rate / 10 # DEBUG self.hidden_size             # <<<<<<<<<<<<<<
+ *             self.hidden_weights += grads.hidden_weights * learning_rate / 10  # DEBUG self.input_size
+ *             self.hidden_bias += grads.hidden_bias * learning_rate / 10 # DEBUG self.input_size
  */
-    __pyx_t_1 = PyFloat_FromDouble(__pyx_v_learning_rate); if (unlikely(!__pyx_t_1)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 104; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+    __pyx_t_2 = PyFloat_FromDouble(__pyx_v_learning_rate); if (unlikely(!__pyx_t_2)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 104; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+    __Pyx_GOTREF(__pyx_t_2);
+    __pyx_t_1 = PyNumber_Multiply(((PyObject *)__pyx_v_grads->__pyx_base.output_bias), __pyx_t_2); if (unlikely(!__pyx_t_1)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 104; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
     __Pyx_GOTREF(__pyx_t_1);
-    __pyx_t_2 = PyNumber_Multiply(((PyObject *)__pyx_v_grads->__pyx_base.output_bias), __pyx_t_1); if (unlikely(!__pyx_t_2)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 104; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+    __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
+    __pyx_t_2 = __Pyx_PyNumber_Divide(__pyx_t_1, __pyx_int_10); if (unlikely(!__pyx_t_2)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 104; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
     __Pyx_GOTREF(__pyx_t_2);
     __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
     __pyx_t_1 = PyNumber_InPlaceAdd(((PyObject *)__pyx_v_self->output_bias), __pyx_t_2); if (unlikely(!__pyx_t_1)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 104; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
@@ -4089,10 +4096,10 @@ static PyObject *__pyx_f_6deepnl_7network_10Parameters_update(struct __pyx_obj_6
     __pyx_t_1 = 0;
 
     /* "deepnl/network.pyx":105
- *             self.output_weights += grads.output_weights * learning_rate # DEBUG / self.hidden_size
- *             self.output_bias += grads.output_bias * learning_rate # DEBUG self.hidden_size
- *             self.hidden_weights += grads.hidden_weights * learning_rate # DEBUG self.input_size             # <<<<<<<<<<<<<<
- *             self.hidden_bias += grads.hidden_bias * learning_rate # DEBUG self.input_size
+ *             self.output_weights += grads.output_weights * learning_rate / 10  # DEBUG / self.hidden_size
+ *             self.output_bias += grads.output_bias * learning_rate / 10 # DEBUG self.hidden_size
+ *             self.hidden_weights += grads.hidden_weights * learning_rate / 10  # DEBUG self.input_size             # <<<<<<<<<<<<<<
+ *             self.hidden_bias += grads.hidden_bias * learning_rate / 10 # DEBUG self.input_size
  * 
  */
     __pyx_t_1 = PyFloat_FromDouble(__pyx_v_learning_rate); if (unlikely(!__pyx_t_1)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 105; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
@@ -4100,26 +4107,32 @@ static PyObject *__pyx_f_6deepnl_7network_10Parameters_update(struct __pyx_obj_6
     __pyx_t_2 = PyNumber_Multiply(((PyObject *)__pyx_v_grads->__pyx_base.hidden_weights), __pyx_t_1); if (unlikely(!__pyx_t_2)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 105; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
     __Pyx_GOTREF(__pyx_t_2);
     __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
-    __pyx_t_1 = PyNumber_InPlaceAdd(((PyObject *)__pyx_v_self->hidden_weights), __pyx_t_2); if (unlikely(!__pyx_t_1)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 105; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+    __pyx_t_1 = __Pyx_PyNumber_Divide(__pyx_t_2, __pyx_int_10); if (unlikely(!__pyx_t_1)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 105; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
     __Pyx_GOTREF(__pyx_t_1);
     __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
-    if (!(likely(((__pyx_t_1) == Py_None) || likely(__Pyx_TypeTest(__pyx_t_1, __pyx_ptype_5numpy_ndarray))))) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 105; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
-    __Pyx_GIVEREF(__pyx_t_1);
+    __pyx_t_2 = PyNumber_InPlaceAdd(((PyObject *)__pyx_v_self->hidden_weights), __pyx_t_1); if (unlikely(!__pyx_t_2)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 105; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+    __Pyx_GOTREF(__pyx_t_2);
+    __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
+    if (!(likely(((__pyx_t_2) == Py_None) || likely(__Pyx_TypeTest(__pyx_t_2, __pyx_ptype_5numpy_ndarray))))) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 105; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+    __Pyx_GIVEREF(__pyx_t_2);
     __Pyx_GOTREF(__pyx_v_self->hidden_weights);
     __Pyx_DECREF(((PyObject *)__pyx_v_self->hidden_weights));
-    __pyx_v_self->hidden_weights = ((PyArrayObject *)__pyx_t_1);
-    __pyx_t_1 = 0;
+    __pyx_v_self->hidden_weights = ((PyArrayObject *)__pyx_t_2);
+    __pyx_t_2 = 0;
 
     /* "deepnl/network.pyx":106
- *             self.output_bias += grads.output_bias * learning_rate # DEBUG self.hidden_size
- *             self.hidden_weights += grads.hidden_weights * learning_rate # DEBUG self.input_size
- *             self.hidden_bias += grads.hidden_bias * learning_rate # DEBUG self.input_size             # <<<<<<<<<<<<<<
+ *             self.output_bias += grads.output_bias * learning_rate / 10 # DEBUG self.hidden_size
+ *             self.hidden_weights += grads.hidden_weights * learning_rate / 10  # DEBUG self.input_size
+ *             self.hidden_bias += grads.hidden_bias * learning_rate / 10 # DEBUG self.input_size             # <<<<<<<<<<<<<<
  * 
  *     def save(self, file):
  */
-    __pyx_t_1 = PyFloat_FromDouble(__pyx_v_learning_rate); if (unlikely(!__pyx_t_1)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 106; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+    __pyx_t_2 = PyFloat_FromDouble(__pyx_v_learning_rate); if (unlikely(!__pyx_t_2)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 106; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+    __Pyx_GOTREF(__pyx_t_2);
+    __pyx_t_1 = PyNumber_Multiply(((PyObject *)__pyx_v_grads->__pyx_base.hidden_bias), __pyx_t_2); if (unlikely(!__pyx_t_1)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 106; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
     __Pyx_GOTREF(__pyx_t_1);
-    __pyx_t_2 = PyNumber_Multiply(((PyObject *)__pyx_v_grads->__pyx_base.hidden_bias), __pyx_t_1); if (unlikely(!__pyx_t_2)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 106; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+    __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
+    __pyx_t_2 = __Pyx_PyNumber_Divide(__pyx_t_1, __pyx_int_10); if (unlikely(!__pyx_t_2)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 106; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
     __Pyx_GOTREF(__pyx_t_2);
     __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
     __pyx_t_1 = PyNumber_InPlaceAdd(((PyObject *)__pyx_v_self->hidden_bias), __pyx_t_2); if (unlikely(!__pyx_t_1)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 106; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
@@ -4286,7 +4299,7 @@ static PyObject *__pyx_pf_6deepnl_7network_10Parameters_4update(struct __pyx_obj
 }
 
 /* "deepnl/network.pyx":108
- *             self.hidden_bias += grads.hidden_bias * learning_rate # DEBUG self.input_size
+ *             self.hidden_bias += grads.hidden_bias * learning_rate / 10 # DEBUG self.input_size
  * 
  *     def save(self, file):             # <<<<<<<<<<<<<<
  *         """
@@ -4374,7 +4387,7 @@ static PyObject *__pyx_pf_6deepnl_7network_10Parameters_6save(struct __pyx_obj_6
   __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
 
   /* "deepnl/network.pyx":108
- *             self.hidden_bias += grads.hidden_bias * learning_rate # DEBUG self.input_size
+ *             self.hidden_bias += grads.hidden_bias * learning_rate / 10 # DEBUG self.input_size
  * 
  *     def save(self, file):             # <<<<<<<<<<<<<<
  *         """
@@ -10983,6 +10996,7 @@ static int __Pyx_InitGlobals(void) {
   __pyx_float_2_38 = PyFloat_FromDouble(2.38); if (unlikely(!__pyx_float_2_38)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 1; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __pyx_int_0 = PyInt_FromLong(0); if (unlikely(!__pyx_int_0)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 1; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __pyx_int_1 = PyInt_FromLong(1); if (unlikely(!__pyx_int_1)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 1; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_int_10 = PyInt_FromLong(10); if (unlikely(!__pyx_int_10)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 1; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __pyx_int_neg_1 = PyInt_FromLong(-1); if (unlikely(!__pyx_int_neg_1)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 1; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   return 0;
   __pyx_L1_error:;

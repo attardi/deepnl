@@ -55,12 +55,12 @@ def main():
     # parser.set_defaults(**defaults)
 
     parser.add_argument('-w', '--window', type=int, default=5,
-                        help='Size of the word window (default 5)')
+                        help='Size of the word window (default %(default)s)')
     parser.add_argument('-s', '--embeddings-size', type=int, default=50,
-                        help='Number of features per word (default 50)',
+                        help='Number of features per word (default %(default)s)',
                         dest='embeddings_size')
     parser.add_argument('--ngrams', type=int, default=1,
-                        help='Size of ngrams (default 1)')
+                        help='Size of ngrams (default %(default)s)')
     parser.add_argument('--train', type=str, required=True,
                         help='File with text corpus for training.')
     parser.add_argument('-o', '--output', type=str,
@@ -74,7 +74,7 @@ def main():
     parser.add_argument('--vectors', type=str, required=True,
                         help='Embeddings file, either read and updated or created')
     parser.add_argument('--threads', type=int, default=1,
-                        help='Number of threads (default 1)')
+                        help='Number of threads (default %(default)s)')
     parser.add_argument('--variant', type=str, default=None,
                         help='Either "senna" (default), "polyglot" or "word2vec".')
     parser.add_argument('--covariance', action='store_true',

@@ -111,32 +111,32 @@ def main():
                       help='File with annotated data for training.')
 
     train.add_argument('-w', '--window', type=int, default=5,
-                        help='Size of the word window (default 5)')
+                        help='Size of the word window (default %(default)s)')
     train.add_argument('-s', '--embeddings-size', type=int, default=50,
-                        help='Number of features per word (default 50)',
+                        help='Number of features per word (default %(default)s)',
                         dest='embeddings_size')
     train.add_argument('-e', '--epochs', type=int, default=100,
-                        help='Number of training epochs (default 100)',
+                        help='Number of training epochs (default %(default)s)',
                         dest='iterations')
     train.add_argument('-l', '--learning_rate', type=float, default=0.001,
-                        help='Learning rate for network weights (default 0.001)',
+                        help='Learning rate for network weights (default %(default)s)',
                         dest='learning_rate')
     train.add_argument('-n', '--hidden', type=int, default=200,
-                        help='Number of hidden neurons (default 200)')
+                        help='Number of hidden neurons (default %(default)s)')
     train.add_argument('-n2', '--hidden2', type=int, default=200,
-                        help='Number of hidden neurons (default 200)')
+                        help='Number of hidden neurons (default %(default)s)')
 
     # Extractors:
     extractors = parser.add_argument_group('Extractors')
     extractors.add_argument('--caps', const=5, nargs='?', type=int, default=None,
-                        help='Include capitalization features. Optionally, supply the number of features (default 5)')
+                            help='Include capitalization features. Optionally, supply the number of features (default %(default)s)')
     extractors.add_argument('--suffix', const=5, nargs='?', type=int, default=None,
-                            help='Include suffix features. Optionally, supply the number of features (default 5)')
+                            help='Include suffix features. Optionally, supply the number of features (default %(default)s)')
     extractors.add_argument('--suffixes', type=str, default='',
                         help='Load suffixes from this file')
     extractors.add_argument('--prefix', const=0, nargs='?', type=int, default=None,
                         help='Include prefix features. Optionally, '\
-                        'supply the number of features (default 0)')
+                            'supply the number of features (default %(default)s)')
     extractors.add_argument('--prefixes', type=str, default='',
                         help='Load prefixes from this file')
     # Embeddings
@@ -155,7 +155,7 @@ def main():
 
     # common
     parser.add_argument('--threads', type=int, default=1,
-                        help='Number of threads (default 1)')
+                        help='Number of threads (default %(default)s)')
     parser.add_argument('-v', '--verbose', help='Verbose mode',
                         action='store_true')
 

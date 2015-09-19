@@ -330,11 +330,10 @@ cdef class TaggerTrainer(Trainer):
         # shuffle data
         # get the random number generator state in order to shuffle
         # sentences and their tags in the same order
-        # DEBUG:
-        # random_state = np.random.get_state()
-        # np.random.shuffle(sentences)
-        # np.random.set_state(random_state)
-        # np.random.shuffle(tags)
+        random_state = np.random.get_state()
+        np.random.shuffle(sentences)
+        np.random.set_state(random_state)
+        np.random.shuffle(tags)
         
         global adaEps
         cdef SeqGradients grads, ada = None

@@ -7,6 +7,8 @@ from extractors cimport *
 # ctypedef np.ndarray[INT_t, ndim=1] np.ndarray[INT_t,ndim=1]
 # ctypedef np.ndarray[INT_t, ndim=2] np.ndarray[INT_t,ndim=2]
 
+cdef float skipErr
+
 # using globals, since can't use static variables
 cdef FLOAT_t l1_decay, l2_decay, momentum, adaRo, adaEps
 

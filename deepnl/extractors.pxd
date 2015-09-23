@@ -40,7 +40,7 @@ cdef class Converter(Iterable):
                                             np.ndarray[INT_t,ndim=2] sentence,
                                             np.ndarray out=*)
 
-    cpdef void clearAdaGrads(self)
+    cpdef clearAdaGrads(self)
 
     cpdef update(self, np.ndarray[FLOAT_t,ndim=1] grads, float learning_rate,
                  np.ndarray[INT_t,ndim=2] sentence)
@@ -54,7 +54,7 @@ cdef class Extractor(object):
 
     cpdef int size(self)
 
-    cpdef void clearAdaGrads(self)
+    cpdef clearAdaGrads(self)
 
 cdef class Embeddings(Extractor):
     pass

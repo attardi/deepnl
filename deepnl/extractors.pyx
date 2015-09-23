@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 # distutils: language = c++
-# cython: profile=False
+# cython: profile=True
 
 """
 Feature extractors.
@@ -149,7 +149,7 @@ cdef class Converter(object):
                 start = end
         return out
 
-    cpdef void clearAdaGrads(self):
+    cpdef clearAdaGrads(self):
         """
         Initialize AdaGrad.
         """
@@ -239,7 +239,7 @@ cdef class Extractor(object):
         """
         return self.table.shape[1]
 
-    cpdef void clearAdaGrads(self):
+    cpdef clearAdaGrads(self):
         if self.adaGrads:
             self.adaGrads.fill(0.0)
         else:
@@ -273,20 +273,20 @@ cdef class Embeddings(Extractor):
         """
         super(Embeddings, self).__init__()
 
-        if variant == 'word2vec':
-            # load both vocab and vectors from single file
-            self.table, wordlist = embeddings.Word2Vec.load(vectors)
-            self.dict = <dict>WD(None, wordlist=wordlist, variant=variant)
-            # add vectors for special symbols
-            extra = len(self.dict) - len(self.table)
-            if extra:
-                self.table = np.concatenate((self.table, embeddings.generate_vectors(extra, self.table.shape[1])))
-        elif vocab:
+        if vocab:
             self.dict = <dict>WD(None, wordlist=vocab, variant=variant)
             if vectors and os.path.exists(vectors):
                 self.table = self.load_vectors(vectors)
             else:
                 self.table = embeddings.generate_vectors(len(self.dict), size)
+        elif variant == 'word2vec':
+            # load both vocab and vectors from single file
+            self.table, wordlist = embeddings.Word2Vec.load(vectors)
+            self.dict = <dict>WD(None, wordlist=wordlist, variant=variant)
+            # add vectors for special symbols
+            extra = len(self.dict) - len(self.table)
+            if extra > 0:
+                self.table = np.concatenate((self.table, embeddings.generate_vectors(extra, self.table.shape[1])))
         elif vocab_file:
             self.dict = <dict>WD(None, wordlist=self.load_vocabulary(vocab_file), variant=variant)
             if vectors and os.path.exists(vectors):
@@ -297,7 +297,7 @@ cdef class Embeddings(Extractor):
     def merge(self, list vocab):
         """Extend the dictionary with words from list :param vocab:"""
         for word in vocab:
-            self.dict.setdefault(word, len(self.dict)) # add if not present
+            self.dict.add(word) # add if not present
         # generate vectors for added words
         extra = len(self.dict) - len(self.table)
         if extra:
@@ -316,12 +316,7 @@ cdef class Embeddings(Extractor):
         return embeddings.Plain.read_vocabulary(file)
 
     def save_vocabulary(self, filename):
-        # FIXME: allow chosing variant
-        # order by ID
-        words = [''] * len(self.dict)
-        for k,v in self.dict.iteritems():
-            words[v] = k
-        embeddings.Plain.write_vocabulary(words, filename)
+        embeddings.Plain.write_vocabulary(self.dict.words, filename)
 
     def load_vectors(self, file, variant=None):
         # FIXME: allow choosing variant
@@ -329,11 +324,7 @@ cdef class Embeddings(Extractor):
 
     def save_vectors(self, filename, variant=None):
         if variant == 'word2vec':
-            # order by ID
-            words = [''] * len(self.dict)
-            for k,v in self.dict.iteritems():
-                words[v] = k
-            embeddings.Word2Vec.save(filename, words, self.table)
+            embeddings.Word2Vec.save(filename, self.dict.words, self.table)
         else:
             embeddings.Plain.write_vectors(filename, self.table)
 
@@ -541,8 +532,7 @@ cdef class SuffixExtractor(AffixExtractor):
     def build(self, wordlist, num=200, min_occurrences=3,
               length=SuffixExtractor.max_length, lowcase=True):
         """
-        Creates a list with the most common suffixes found in 
-        wordlist.
+        Creates a list with the most common suffixes found in wordlist.
         
         :param wordlist: a list of words (there shouldn't be repetitions)
         :param num: maximum number of suffixes
@@ -585,8 +575,7 @@ cdef class PrefixExtractor(AffixExtractor):
     def build(cls, wordlist, num=200, min_occurrences=3,
               length=PrefixExtractor.max_length, lowcase=True):
         """
-        Creates a list with the most common prefixes found in 
-        wordlist.
+        Creates a list with the most common prefixes found in wordlist.
         
         :param wordlist: a list of words (there shouldn't be repetitions)
         :param num: maximum number of prefixes
@@ -628,6 +617,12 @@ cdef class GazetteerExtractor(Extractor):
                 self.dict.add(ngram)
             self.table = embeddings.generate_vectors(GazetteerExtractor.num_values, size)
 
+    @classmethod
+    def normalize(cls, w, lowcase, noaccents):
+        if lowcase: w = w.lower()
+        if noaccents: w = strip_accents(w)
+        return w 
+
     def extract(self, words):
         """
         Check presence in dictionary possibly as multiword.
@@ -635,12 +630,13 @@ cdef class GazetteerExtractor(Extractor):
         :return: the list of codes for the given :param words:.
         """
         res = [GazetteerExtractor.absent] * len(words)
-        for i, token in enumerate(words):
+        words[:] = [GazetteerExtractor.normalize(w, self.lowcase, self.noaccents) for w in words]
+        for start, token in enumerate(words):
             if token == WD.padding_left or token == WD.padding_right:
-                res[i] = GazetteerExtractor.padding
+                res[start] = GazetteerExtractor.padding
                 continue
-            for end in self.dict.iter(words, i, self.lowcase, self.noaccents):
-                for k in range(i, end):
+            for end in self.dict.iter(words, start, self.lowcase, self.noaccents):
+                for k in range(start, end):
                     res[k] = GazetteerExtractor.present
         return res
 
@@ -659,13 +655,10 @@ cdef class GazetteerExtractor(Extractor):
             for line in file:
                 line = line.strip().decode('utf-8')
                 c, words = line.split(None, 1)
-                if lowcase:
-                    words = words.lower()
-                if noaccents:
-                    words = strip_accents(words)
+                words = [cls.normalize(w, lowcase, noaccents) for w in words.split()]
                 if c not in classes:
                     classes[c] = Trie()
-                classes[c].add(words.split())
+                classes[c].add(words)
         extractors = [cls(ws, size, lowcase, noaccents) for ws in classes.values()]
         return extractors
 
@@ -677,7 +670,7 @@ cdef class GazetteerExtractor(Extractor):
     def build(cls, sentences, formField, tagField=-1, lowcase=True, noaccents=True):
         """
         Build a trie for each tag in :param sentences: which counts the
-        frequency of each ngram with taht tag.
+        frequency of each ngram with that tag.
         :param lowcase: whether to compare lowercase words.
         :param noaccents: whether to remove accents from words.
         """

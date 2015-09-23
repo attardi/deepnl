@@ -1,4 +1,29 @@
+2015-09-22  Giuseppe Attardi  <attardi@di.unipi.it>
+
+	* deepnl/tagger.pyx (_tag_sequence): lookup whole sentence at once.
+
+	* deepnl/networkseq.pyx (SequenceNetwork._calculate_gradients_sll): added parameter skipErr.
+
+	* deepnl/network.pyx (skipErr): set to 0.01 (was 1e-4). This might impact speed.
+
+	* deepnl/extractors.pyx (normalize): added.
+
+2015-09-21  Giuseppe Attardi  <attardi@di.unipi.it>
+
+	* deepnl/word_dictionary.py (WordDictionary.__setitem__): update
+	words as well.
+
+	* deepnl/extractors.pyx (save_vectors): use self.dict.words.
+
+	* deepnl/word_dictionary.py (WordDictionary.__init__): words are
+	normalized before insertion.
+
 2015-09-19  Giuseppe Attardi  <attardi@di.unipi.it>
+
+	* deepnl/extractors.pyx (merge): avoid getdefault().
+
+	* deepnl/word_dictionary.py (WordDictionary.__setitem__): added.
+	(WordDictionary._normalize): added.
 
 	* bin/dl-ner.py (main): use %(default)s in help string.
 	* bin/dl-pos.py (main): idem.

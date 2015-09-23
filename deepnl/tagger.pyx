@@ -93,6 +93,10 @@ cdef class Tagger(object):
         # scores[t, i] = ftheta_i,t = score for i-th tag, t-th word
         cdef np.ndarray[FLOAT_t,ndim=2] scores = np.empty((slen, nn.output_size))
         
+        # container for network variables
+        #vars = nn.variables()
+        vars = network.Variables() # empty fields, filled below
+
         if train:
             # we must keep the whole history
             nn.input_sequence = np.empty((slen, nn.input_size))
@@ -100,31 +104,35 @@ cdef class Tagger(object):
             nn.hidden_sequence = np.empty((slen, nn.hidden_size))
         else:
             # we can discard intermediate values
-            nn.input_sequence = np.empty(nn.input_size)
-            nn.hidden_sequence = np.empty(nn.hidden_size)
+            vars.input = np.empty(nn.input_size)
+            vars.hidden = np.empty(nn.hidden_size)
 
-        cdef int i
+        # add padding to the sentence
+        cdef np.ndarray padded_sentence = np.concatenate((self.pre_padding,
+                                                          sentence,
+                                                          self.post_padding))
 
-        # container for network variables
-        #vars = nn.variables()
-        vars = network.Variables()
+        # print >> sys.stderr, padded_sentence[:4,0]   # DEBUG
+        # print >> sys.stderr, 'hweights', nn.p.hidden_weights[:4,:4] # DEBUG
+        # print >> sys.stderr, 'hbias', nn.p.hidden_bias[:4]          # DEBUG
 
-        #print >> sys.stderr, padded_sentence   # DEBUG
-        #print >> sys.stderr, 'hweights', nn.p.hidden_weights[:4,:4] # DEBUG
-        #print >> sys.stderr, 'hbias', nn.p.hidden_bias[:4]          # DEBUG
+        # lookup the whole sentence at once
+        # number of features in a window
+        cdef int token_size = nn.input_size / window_size
+        cdef np.ndarray sentence_features = np.empty(len(padded_sentence) * token_size)
+        self.converter.lookup(padded_sentence, sentence_features)
+
         # run through all windows in the sentence
+        cdef int i, start
         for i in xrange(slen):
-            window = sentence[i: i+window_size]
+            start = i * token_size
+            vars.input = sentence_features[start: start+nn.input_size]
             if train:
-                vars.input = nn.input_sequence[i]
+                nn.input_sequence[i,:] = vars.input
                 vars.hidden = nn.hidden_sequence[i]
-            else:
-                vars.input = nn.input_sequence
-                vars.hidden = nn.hidden_sequence
-            self.converter.lookup(window, vars.input)
             vars.output = scores[i]
             nn.forward(vars)
-            # # DEBUG
+            # DEBUG
             # if train:
             #     print >> sys.stderr, 'window:', self.converter.extractors[0].sentence(window)
             #     print >> sys.stderr, 'sent:', window[:4], window[-4:]

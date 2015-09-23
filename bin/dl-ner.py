@@ -292,7 +292,7 @@ def main():
                 tries = GazetteerExtractor.build(sentence_iter, reader.formField, reader.tagField)
                 for tag, trie in tries.items():
                     converter.add(GazetteerExtractor(trie, args.gsize))
-                logger.info("Saving gazetter list to: %s", args.gazetteer)
+                logger.info("Saving gazetteer list to: %s", args.gazetteer)
                 with open(args.gazetteer, 'wb') as file:
                     for tag, trie in tries.iteritems():
                         for ngram in trie:
@@ -333,7 +333,7 @@ def main():
 
 # ----------------------------------------------------------------------
 
-profile = False
+profile = True
 
 if __name__ == '__main__':
     if profile:

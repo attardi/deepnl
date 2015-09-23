@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 # distutils: language = c++
 # cython: embedsignature=True
-# cython: profile=False
+# cython: profile=True
 
 """
 A neural network for NLP tagging tasks.
@@ -100,10 +100,10 @@ cdef class Parameters(object):
             self.hidden_bias += learning_rate * grads.hidden_bias / np.sqrt(ada.hidden_bias + adaEps)
         else:
             # divide by the fan-in
-            self.output_weights += grads.output_weights * learning_rate / 10  # DEBUG / self.hidden_size
-            self.output_bias += grads.output_bias * learning_rate / 10 # DEBUG self.hidden_size
-            self.hidden_weights += grads.hidden_weights * learning_rate / 10  # DEBUG self.input_size
-            self.hidden_bias += grads.hidden_bias * learning_rate / 10 # DEBUG self.input_size
+            self.output_weights += grads.output_weights * learning_rate / 100  # DEBUG / self.hidden_size
+            self.output_bias += grads.output_bias * learning_rate / 100 # DEBUG self.hidden_size
+            self.hidden_weights += grads.hidden_weights * learning_rate / 100  # DEBUG self.input_size
+            self.hidden_bias += grads.hidden_bias * learning_rate / 100 # DEBUG self.input_size
 
     def save(self, file):
         """
@@ -205,7 +205,7 @@ cdef class Network(object):
         """Allocate variables.
         :param slen: sequence length (for sequence or convolutional networks)
         """
-        return Variables(self.input_size, self.hidden_size, self.output_size)
+        return Variables(self.input_size * slen, self.hidden_size * slen, self.output_size * slen)
 
     cdef gradients(self, int slen=1):
         """Allocate variables.

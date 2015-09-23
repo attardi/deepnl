@@ -180,21 +180,19 @@ def main():
         sentences = reader.read(args.train)
 
         if args.vocab and os.path.exists(args.vocab):
-            # start with the given vocabulary
-            base_vocab = reader.load_vocabulary(args.vocab)
-            if os.path.exists(args.vectors):
-                # load vectors
-                embeddings = Embeddings(vectors=args.vectors, vocab=base_vocab,
+            if args.vectors and  os.path.exists(args.vectors):
+                # use supplied embeddings
+                embeddings = Embeddings(vectors=args.vectors, vocab_file=args.vocab,
                                         variant=args.variant)
             else:
-                # create vectors
-                embeddings = Embeddings(args.embeddings_size, vocab=base_vocab,
+                # create random embeddings
+                embeddings = Embeddings(args.embeddings_size, vocab_file=args.vocab,
                                         variant=args.variant)
             # collect words from the corpus
             # build vocabulary
             vocab, bigrams, trigrams = reader.create_vocabulary(sentences,
                                                                 #size=args.vocab_size,
-                                                     min_occurrences=args.minOccurr)
+                                                                min_occurrences=args.minOccurr)
             # add them to the given vocabulary
             embeddings.merge(vocab)
             logger.info("Overriding vocabulary in %s" % args.vocab)
@@ -206,29 +204,23 @@ def main():
                                         variant=args.variant)
                 vocab, bigrams, trigrams = reader.create_vocabulary(sentences,
                                                                     #args.vocab_size,
-                                                     min_occurrences=args.minOccurr)
+                                                                    min_occurrences=args.minOccurr)
                 embeddings.merge(vocab)
             else:
-                embeddings = Embeddings(vectors=args.vectors,
+                vocab, bigrams, trigrams = reader.create_vocabulary(sentences,
+                                                                    #args.vocab_size,
+                                                                    min_occurrences=args.minOccurr)
+                embeddings = Embeddings(vocab=vocab,
                                         variant=args.variant)
             if args.vocab:
-                logger.info("Creating vocabulary in %s" % args.vocab)
+                logger.info("Saving vocabulary in %s" % args.vocab)
                 embeddings.save_vocabulary(args.vocab)
-
-        elif args.vocab:
-            if not args.vectors:
-                logger.error("No --vectors specified")
-                return
-            embeddings = Embeddings(args.embeddings_size, args.vocab,
-                                    args.vectors, variant=args.variant)
-            logger.info("Creating vocabulary in %s" % args.vocab)
-            embeddings.save_vocabulary(args.vocab)
 
         else:
             # build vocabulary and tag set
             vocab, bigrams, trigrams = reader.create_vocabulary(sentences,
                                                                 #args.vocab_size,
-                                                     min_occurrences=args.minOccurr)
+                                                                min_occurrences=args.minOccurr)
             logger.info("Creating vocabulary in %s" % args.vocab)
             embeddings.save_vocabulary(args.vocab)
             logger.info("Creating word embeddings")
@@ -242,33 +234,36 @@ def main():
             logger.info("Creating capitalization features...")
             converter.add(CapsExtractor(args.caps))
 
-        if os.path.exists(args.suffixes):
-            logger.info("Loading suffix list...")
-            extractor = SuffixExtractor.create(args.suffix, args.suffixes)
-            converter.add(extractor)
-        elif args.suffix:
-            logger.info("Creating suffix list...")
-            # collect the forms
-            words = (tok[0] for sent in sentences for tok in sent)
-            extractor = SuffixExtractor(args.suffix, args.suffixes, words)
-            converter.add(extractor)
-            if args.suffixes:
-                logger.info("Saving suffix list to: %s", args.suffixes)
-                extractor.write(args.suffixes)
-        if os.path.exists(args.prefixes):
-            logger.info("Loading prefix list...")
-            extractor = PrefixExtractor.create(args.prefix, args.prefixes)
-            converter.add(extractor)
-        elif args.prefix:
-            logger.info("Creating prefix list...")
-            # collect the forms
-            words = (tok[0] for sent in sentences for tok in sent)
-            extractor = PrefixExtractor(args.prefix, args.prefixes, words)
-            converter.add(extractor)
-            if args.prefixes:
-                logger.info("Saving prefix list to: %s", args.prefixes)
-                extractor.write(args.prefixes)
+        if ((args.suffixes and not os.path.exists(args.suffixes)) or
+            (args.prefixes and not os.path.exists(args.prefixes))):
+            # collect the forms once
+            words = (tok[reader.formField] for sent in sentence_iter for tok in sent)
 
+        if args.suffix:
+            if os.path.exists(args.suffixes):
+                logger.info("Loading suffix list...")
+                extractor = SuffixExtractor(args.suffix, args.suffixes)
+                converter.add(extractor)
+            else:
+                logger.info("Creating suffix list...")
+                extractor = SuffixExtractor(args.suffix, None, words)
+                converter.add(extractor)
+                if args.suffixes:
+                    logger.info("Saving suffix list to: %s", args.suffixes)
+                    extractor.write(args.suffixes)
+
+        if args.prefix:
+            if os.path.exists(args.prefixes):
+                logger.info("Loading prefix list...")
+                extractor = PrefixExtractor(args.prefix, args.prefixes)
+                converter.add(extractor)
+            else:
+                logger.info("Creating prefix list...")
+                extractor = PrefixExtractor(args.prefix, None, words)
+                converter.add(extractor)
+                if args.prefixes:
+                    logger.info("Saving prefix list to: %s", args.prefixes)
+                    extractor.write(args.prefixes)
 
         # labels from all examples
         examples = []

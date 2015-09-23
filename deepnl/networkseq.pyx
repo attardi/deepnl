@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 # distutils: language = c++
 # cython: embedsignature=True
-# cython: profile=False
+# cython: profile=True
 
 """
 A neural network for tagging sequences.
@@ -171,7 +171,8 @@ cdef class SequenceNetwork(Network):
     @cython.boundscheck(False)
     cdef float _calculate_gradients_sll(self, np.ndarray[INT_t,ndim=1] tags,
                                         SeqGradients grads,
-                                        np.ndarray[FLOAT_t,ndim=2] scores):
+                                        np.ndarray[FLOAT_t,ndim=2] scores,
+                                        FLOAT_t skipErr):
         """
         Calculates the output and transition deltas for each token, using
         Sentence Level Likelihood.
@@ -203,7 +204,7 @@ cdef class SequenceNetwork(Network):
         cdef FLOAT_t error = logsumexp(delta[-1]) - correct_path_score
         # if the error is too low, don't bother training (saves time and avoids
         # overfitting). An error of 0.01 means a log-prob of -0.01 for the right
-        if error < self.skipErr:
+        if error < skipErr:
             return error
         
         # things get nasty from here
@@ -343,9 +344,9 @@ cdef class SequenceNetwork(Network):
         answer[0] = previous_tag
         return answer
 
-    cdef float backpropagateSeq(self, sent_tags, scores, SeqGradients grads):
-        cdef FLOAT_t err =  self._calculate_gradients_sll(sent_tags, grads, scores)
-        if err > self.skipErr:
+    cdef float backpropagateSeq(self, sent_tags, scores, SeqGradients grads, FLOAT_t skipErr):
+        cdef FLOAT_t err = self._calculate_gradients_sll(sent_tags, grads, scores, skipErr)
+        if err > skipErr:
             self._backpropagate(grads)
         return err
 

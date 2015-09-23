@@ -1,10 +1,9 @@
 # -*- coding: utf-8 -*-
 
-import itertools
 from collections import Counter, OrderedDict
 import cPickle as pickle
-
 import re
+import sys                      # DEBUG
 
 num = re.compile('[+\-]?([0-9][,.]?)+$')
 
@@ -20,9 +19,9 @@ class WordDictionary(dict):
     """
     
     # SENNA convenctions
-    padding_left = 'PADDING'
-    padding_right = 'PADDING'
-    rare = 'UNKNOWN'
+    padding_left = u'PADDING'
+    padding_right = u'PADDING'
+    rare = u'UNKNOWN'
     
     def __init__(self, iterable_sent, size=None, minimum_occurrences=None, wordlist=None, variant=None):
         """
@@ -44,13 +43,13 @@ class WordDictionary(dict):
         if variant:
             self.variant = variant.lower()
         if self.variant == 'polyglot':
-            WordDictionary.padding_left = '<PAD>'
-            WordDictionary.padding_right = '<PAD>'
-            WordDictionary.rare = '<UNK>'
+            WordDictionary.padding_left = u'<PAD>'
+            WordDictionary.padding_right = u'<PAD>'
+            WordDictionary.rare = u'<UNK>'
         elif self.variant == 'word2vec':
-            WordDictionary.padding_left = '</s>'
-            WordDictionary.padding_right = '</s>'
-            WordDictionary.rare = '<UNK>'
+            WordDictionary.padding_left = u'</s>'
+            WordDictionary.padding_right = u'</s>'
+            WordDictionary.rare = u'<UNK>'
 
         if wordlist is None:
             # work with the supplied iterable_sent. extract frequencies.
@@ -69,7 +68,7 @@ class WordDictionary(dict):
         
         else:
             # Keep the order and eliminate duplicates
-            words = list(OrderedDict.fromkeys(wordlist))
+            words = list(OrderedDict.fromkeys(self.normalize(w) for w in wordlist))
             
         # trim to the maximum size
         if size is None:
@@ -81,7 +80,8 @@ class WordDictionary(dict):
         # build the inverse index
         self.words = [0] * len(words) # inverse index
         for num, word in enumerate(words):
-            self[word] = num    # keep original form. Attardi
+            # self[word] = num (since words have been normalized)
+            super(WordDictionary, self).__setitem__(word, num)
             self.words[num] = word
         
         # if the given words include one of the the rare or padding symbols,
@@ -128,19 +128,17 @@ class WordDictionary(dict):
         o.words = pickle.load(file)
         (WordDictionary.rare, WordDictionary.padding_left,  WordDictionary.padding_right, o.index_rare) = pickle.load(file)
         for i,x in enumerate(o.words):
-            o[x] = i
+            #o[x] = i
+            super(WordDictionary, o).__setitem__(x, i)
         return o
 
     def _get_frequency_count(self, iterable_sent):
         """
-        Returns a token counter for tokens in :param iterable_sent:.
+        Returns a token counter for normalized tokens in :param iterable_sent:.
         
         :param iterable_sent: an iterable list of lists of tokens.
         """
-        if self.variant == 'senna':
-            return Counter(t.lower() for sent in iterable_sent for t in sent)
-        else:
-            return Counter(t for sent in iterable_sent for t in sent)
+        return Counter(self.normalize(t) for sent in iterable_sent for t in sent)
     
     def update_tokens(self, tokens, size=None, minimum_occurrences=1, freqs=None):
         """
@@ -174,24 +172,27 @@ class WordDictionary(dict):
         
         self.check()
     
+    def normalize(self, word):
+        """
+        Normalize word, converting digits to 0 and lowercasing (when variant is 'senna').
+        """
+        if self.variant == 'senna':
+            # senna converts numbers to '0'
+            if isNumber(word):
+                word = '0'
+            else:
+                word = word.lower()
+        # replace all digits by '0'
+        return re.sub('[0-9]', '0', word)
+
     def __contains__(self, key):
         """
         Overrides the "in" operator. Case insensitive when variant is 'senna'.
         """
-        # deal with symbols in original case, e.g. PADDING, UNKNOWN. Attardi
-        if super(WordDictionary, self).__contains__(key):
-            return True
-        if self.variant == 'senna':
-            # senna converts numbers to '0'
-            if isNumber(key):
-                key = '0'
-            else:
-                key = key.lower()
-                # replace all digits by '0'
-                re.sub('[0-9]', '0', key)
-        return super(WordDictionary, self).__contains__(key)
+        # deal with symbols in original case, e.g. PADDING, UNKNOWN.
+        return super(WordDictionary, self).__contains__(key) or \
+            super(WordDictionary, self).__contains__(self.normalize(key))
 
-    # Keep case: 'padding' and 'PADDING' must remain different.
     def __getitem__(self, key):
         """
         Overrides the [] read operator. 
@@ -199,31 +200,40 @@ class WordDictionary(dict):
         Two differences from the original:
         1) when given a word without an entry, it returns the value for the
            UNKNOWN key.
-        2) entries are converted, replacing digits with 0 and lower casing
-           before access (when variant is 'senna').
+        2) entries are converted, replacing digits with 0 (and lower cased
+           when variant is 'senna').
         """
-        # deal with symbols in original case, e.g. PADDING, UNKNOWN. Attardi
+        # deal with symbols in original case, e.g. PADDING, UNKNOWN.
         idx = super(WordDictionary, self).get(key)
         if idx is not None:     # might be 0
             return idx
-        if self.variant == 'senna':
-            # senna converts numbers to '0'
-            if isNumber(key):
-                key = '0'
-            else:
-                key = key.lower()
-                # replace each digit by '0'
-                re.sub('[0-9]', '0', key)
-        return super(WordDictionary, self).get(key, self.index_rare)
-    
+        return super(WordDictionary, self).get(self.normalize(key), self.index_rare)
+
     def get(self, key):
         """
-        Overrides the dictionary get method, so when given a word without
-        an entry, it returns the value for the UNKNOWN key.
+        Overrides the dictionary get method, so when given a word without an entry,
+        it returns the value for the UNKNOWN key.
         Note that it is NOT possible to supply a default value as in the dict class.
         """
         return self.__getitem__(key)
+
+    def __setitem__(self, key, value):
+        """
+        Replaces the [] write operator.
+
+        Words are normalized before insertion.
+        """
+        # deal with symbols in original case, e.g. PADDING, UNKNOWN.
+        idx = super(WordDictionary, self).get(key, -1)
+        if idx == -1:
+            key = self.normalize(key)
+            self.words.append(key)
+        super(WordDictionary, self).__setitem__(key, value)
         
+    def add(self, word):
+        if word not in self:
+            self[word] = len(self)
+
     def check(self):
         """
         Checks the internal structure of the dictionary and makes necessary
@@ -231,16 +241,16 @@ class WordDictionary(dict):
         """
 
         # must repeat, since it is called in reader.load_dictionary()
-        # after reloading from dump. Attardi
+        # after reloading from dump.
         # FIXME: still needed?
         if self.variant == 'polyglot':
-            WordDictionary.padding_left = '<PAD>'
-            WordDictionary.padding_right = '<PAD>'
-            WordDictionary.rare = '<UNK>'
+            WordDictionary.padding_left = u'<PAD>'
+            WordDictionary.padding_right = u'<PAD>'
+            WordDictionary.rare = u'<UNK>'
         elif self.variant == 'word2vec':
-            WordDictionary.padding_left = '</s>'
-            WordDictionary.padding_right = '</s>'
-            WordDictionary.rare = '<UNK>'
+            WordDictionary.padding_left = u'</s>'
+            WordDictionary.padding_right = u'</s>'
+            WordDictionary.rare = u'<UNK>'
 
         # Keep case for special tokens.
         self.index_padding_left = super(WordDictionary, self).get(WordDictionary.padding_left)

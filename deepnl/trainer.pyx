@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 # distutils: language = c++
-# cython: profile=False
+# cython: profile=True
 
 """
 Train a DL Neural Network.
@@ -82,7 +82,7 @@ cdef class Trainer(object):
         adaRo = options.get('ro', 0.95)
         adaEps = options.get('eps', 1e-8)
 
-        self.skipErr = 1e-4     # skip errors < this value
+        self.skipErr = skipErr     # skip errors < this value
 
         self.verbose = options.get('verbose', False)
         self.ngram_size = options.get('ngram_size', 1)
@@ -351,7 +351,7 @@ cdef class TaggerTrainer(Trainer):
             grads = nn.gradients(slen) # one for each item
             if adaEps:
                 ada = nn.gradients(slen) # one for each item
-            error = nn.backpropagateSeq(sent_tags, scores, grads)
+            error = nn.backpropagateSeq(sent_tags, scores, grads, self.skipErr)
             if error > self.skipErr:
                 self.error += error
                 self.update(grads, self.learning_rate, sent, ada)

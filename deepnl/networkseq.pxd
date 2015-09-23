@@ -16,15 +16,12 @@ cdef class SeqGradients(Gradients):
 
 cdef class SequenceNetwork(Network):
 
-    # FIXME: cant share a global?
-    cdef public FLOAT_t skipErr
-
     cdef public np.ndarray input_sequence
     # FIXME: put in SeqVariables
     cdef public np.ndarray hidden_sequence
 
     # FIXME: clash with method in Network
-    cdef float backpropagateSeq(self, sent_tags, scores, SeqGradients grads)
+    cdef float backpropagateSeq(self, sent_tags, scores, SeqGradients grads, FLOAT_t skipErr)
 
     cdef _backpropagate(self, SeqGradients grads)
 
@@ -32,7 +29,8 @@ cdef class SequenceNetwork(Network):
 
     cdef float _calculate_gradients_sll(self, np.ndarray[INT_t,ndim=1] tags,
                                         SeqGradients grads,
-                                        np.ndarray[FLOAT_t,ndim=2] scores)
+                                        np.ndarray[FLOAT_t,ndim=2] scores,
+                                        FLOAT_t skipErr)
 
     cdef float _calculate_gradients_wll(self, np.ndarray[INT_t,ndim=1] tags,
                                         SeqGradients grads,

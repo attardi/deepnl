@@ -107,20 +107,15 @@ cdef class Tagger(object):
             vars.input = np.empty(nn.input_size)
             vars.hidden = np.empty(nn.hidden_size)
 
-        # add padding to the sentence
-        cdef np.ndarray padded_sentence = np.concatenate((self.pre_padding,
-                                                          sentence,
-                                                          self.post_padding))
-
-        # print >> sys.stderr, padded_sentence[:4,0]   # DEBUG
+        # print >> sys.stderr, sentence[:4,0]   # DEBUG
         # print >> sys.stderr, 'hweights', nn.p.hidden_weights[:4,:4] # DEBUG
         # print >> sys.stderr, 'hbias', nn.p.hidden_bias[:4]          # DEBUG
 
         # lookup the whole sentence at once
         # number of features in a window
         cdef int token_size = nn.input_size / window_size
-        cdef np.ndarray sentence_features = np.empty(len(padded_sentence) * token_size)
-        self.converter.lookup(padded_sentence, sentence_features)
+        cdef np.ndarray sentence_features = np.empty(len(sentence) * token_size)
+        self.converter.lookup(sentence, sentence_features)
 
         # run through all windows in the sentence
         cdef int i, start

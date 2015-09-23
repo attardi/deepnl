@@ -44,7 +44,7 @@ setup(
     url = "https://github.com/attardi/deepnl",
 
     license = "GNU GPL",
-    version = "1.3.8",
+    version = "1.3.9",
 
     platforms = "any",
 

@@ -124,7 +124,7 @@ def main():
                         help='File where to save model, for further training')
     parser.add_argument('--vocab', type=str, required=True,
                         help='Vocabulary file')
-    parser.add_argument('--vectors', type=file, required=True,
+    parser.add_argument('--vectors', required=True,
                         help='Embeddings file, either read and updated or created')
     parser.add_argument('--load', type=str,
                         help='Load previously saved model')

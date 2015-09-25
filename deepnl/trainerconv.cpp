@@ -2859,7 +2859,7 @@ static PyObject *__pyx_pf_6deepnl_11trainerconv_11ConvTrainer_2_train_epoch(stru
  *             slen = len(sent)
  *             # add padding
  *             sent = np.concatenate((self.pre_padding, sent, self.post_padding))             # <<<<<<<<<<<<<<
- *             vars = nn.variables(slen) # allocate variables
+ *             vars = nn.variables(len(sent)) # allocate variables
  *             self.converter.lookup(sent, vars.input)
  */
     __pyx_t_2 = __Pyx_GetModuleGlobalName(__pyx_n_s_np); if (unlikely(!__pyx_t_2)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 62; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
@@ -2910,12 +2910,13 @@ static PyObject *__pyx_pf_6deepnl_11trainerconv_11ConvTrainer_2_train_epoch(stru
     /* "deepnl/trainerconv.pyx":63
  *             # add padding
  *             sent = np.concatenate((self.pre_padding, sent, self.post_padding))
- *             vars = nn.variables(slen) # allocate variables             # <<<<<<<<<<<<<<
+ *             vars = nn.variables(len(sent)) # allocate variables             # <<<<<<<<<<<<<<
  *             self.converter.lookup(sent, vars.input)
  *             nn.forward(vars)
  */
+    __pyx_t_5 = PyObject_Length(__pyx_v_sent); if (unlikely(__pyx_t_5 == -1)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 63; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
     __pyx_t_9.__pyx_n = 1;
-    __pyx_t_9.slen = __pyx_v_slen;
+    __pyx_t_9.slen = __pyx_t_5;
     __pyx_t_1 = ((struct __pyx_vtabstruct_6deepnl_7network_Network *)__pyx_v_nn->__pyx_vtab)->variables(__pyx_v_nn, &__pyx_t_9); if (unlikely(!__pyx_t_1)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 63; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
     __Pyx_GOTREF(__pyx_t_1);
     __Pyx_XDECREF_SET(__pyx_v_vars, __pyx_t_1);
@@ -2923,7 +2924,7 @@ static PyObject *__pyx_pf_6deepnl_11trainerconv_11ConvTrainer_2_train_epoch(stru
 
     /* "deepnl/trainerconv.pyx":64
  *             sent = np.concatenate((self.pre_padding, sent, self.post_padding))
- *             vars = nn.variables(slen) # allocate variables
+ *             vars = nn.variables(len(sent)) # allocate variables
  *             self.converter.lookup(sent, vars.input)             # <<<<<<<<<<<<<<
  *             nn.forward(vars)
  *             grads = nn.gradients(slen) # allocate gradients
@@ -2940,7 +2941,7 @@ static PyObject *__pyx_pf_6deepnl_11trainerconv_11ConvTrainer_2_train_epoch(stru
     __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
 
     /* "deepnl/trainerconv.pyx":65
- *             vars = nn.variables(slen) # allocate variables
+ *             vars = nn.variables(len(sent)) # allocate variables
  *             self.converter.lookup(sent, vars.input)
  *             nn.forward(vars)             # <<<<<<<<<<<<<<
  *             grads = nn.gradients(slen) # allocate gradients

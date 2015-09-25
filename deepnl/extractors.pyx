@@ -729,7 +729,7 @@ cdef class AttributeExtractor(Extractor):
     def __init__(self, idx, size=5):
         """
         :param idx: index of token attribute to use.
-        :[aram size: vector dimension.
+        :param size: vector dimension.
         """
         super(AttributeExtractor, self).__init__()
         self.idx = idx

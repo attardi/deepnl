@@ -11,6 +11,7 @@ import logging
 import numpy as np
 import argparse
 from ConfigParser import ConfigParser
+from itertools import chain
 
 # allow executing from anywhere without installing the package
 import sys
@@ -237,7 +238,7 @@ def main():
         if ((args.suffixes and not os.path.exists(args.suffixes)) or
             (args.prefixes and not os.path.exists(args.prefixes))):
             # collect the forms once
-            words = (tok[reader.formField] for sent in sentence_iter for tok in sent)
+            words = chain(tok[reader.formField].split() for sent in sentence_iter for tok in sent)
 
         if args.suffix:
             if os.path.exists(args.suffixes):
@@ -293,7 +294,7 @@ def main():
         reader = ClassifyReader(args.test)
         
         for example in reader:
-            text = example[text_field]
+            text = example[reader.text_field]
             input = classifier.converter.convert(text)
             example[reader.label_field] = classifier.nn.forward(input).argmax()
             print example

@@ -17983,7 +17983,7 @@ static PyObject *__pyx_pf_6deepnl_10extractors_18GazetteerExtractor_12load(struc
 
 /* Python wrapper */
 static int __pyx_pw_6deepnl_10extractors_18AttributeExtractor_1__init__(PyObject *__pyx_v_self, PyObject *__pyx_args, PyObject *__pyx_kwds); /*proto*/
-static char __pyx_doc_6deepnl_10extractors_18AttributeExtractor___init__[] = "\n        :param idx: index of token attribute to use.\n        :[aram size: vector dimension.\n        ";
+static char __pyx_doc_6deepnl_10extractors_18AttributeExtractor___init__[] = "\n        :param idx: index of token attribute to use.\n        :param size: vector dimension.\n        ";
 #if CYTHON_COMPILING_IN_CPYTHON
 struct wrapperbase __pyx_wrapperbase_6deepnl_10extractors_18AttributeExtractor___init__;
 #endif
@@ -18066,7 +18066,7 @@ static int __pyx_pf_6deepnl_10extractors_18AttributeExtractor___init__(struct __
   __Pyx_TraceCall("__init__", __pyx_f[0], 729, 0, {__pyx_filename = __pyx_f[0]; __pyx_lineno = 729; __pyx_clineno = __LINE__; goto __pyx_L1_error;});
 
   /* "deepnl/extractors.pyx":734
- *         :[aram size: vector dimension.
+ *         :param size: vector dimension.
  *         """
  *         super(AttributeExtractor, self).__init__()             # <<<<<<<<<<<<<<
  *         self.idx = idx

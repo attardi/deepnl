@@ -257,8 +257,8 @@ class ClassifyReader(TweetReader):
     """
     Variant of TweetReader with multiple labels.
     """
-    label_field = 2
-    text_field = 3
+    text_field = -1
+    label_field = -2
 
     def read(self, filename):
         """

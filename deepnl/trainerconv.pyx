@@ -60,7 +60,7 @@ cdef class ConvTrainer(Trainer):
             slen = len(sent)
             # add padding
             sent = np.concatenate((self.pre_padding, sent, self.post_padding))
-            vars = nn.variables(slen) # allocate variables
+            vars = nn.variables(len(sent)) # allocate variables
             self.converter.lookup(sent, vars.input)
             nn.forward(vars)
             grads = nn.gradients(slen) # allocate gradients

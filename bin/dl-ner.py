@@ -149,6 +149,8 @@ def main():
     extractors = parser.add_argument_group('Extractors')
     extractors.add_argument('--caps', const=5, nargs='?', type=int, default=None,
                         help='Include capitalization features. Optionally, supply the number of features (default %(default)s)')
+    extractors.add_argument('--pos', const=5, nargs='?', type=int, default=1,
+                        help='Use POS tag, from the given token field (default %(default)s)')
     extractors.add_argument('--suffix', const=5, nargs='?', type=int, default=None,
                             help='Include suffix features. Optionally, supply the number of features (default %(default)s)')
     extractors.add_argument('--suffixes', type=str, default='',
@@ -250,6 +252,10 @@ def main():
         if args.caps:
             logger.info("Creating capitalization features...")
             converter.add(CapsExtractor(args.caps))
+
+        if args.pos:
+            logger.info("Creating POS features...")
+            converter.add(AttributeExtractor(args.pos))
 
         if ((args.suffixes and not os.path.exists(args.suffixes)) or
             (args.prefixes and not os.path.exists(args.prefixes))):

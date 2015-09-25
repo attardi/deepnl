@@ -1,3 +1,13 @@
+2015-09-25  Giuseppe Attardi  <attardi@di.unipi.it>
+
+	* deepnl/trainerconv.pyx (_train_epoch): fixed nn.variables() size.
+
+	* deepnl/reader.py (ClassifyReader): label_field -2, text_field -1.
+
+2015-09-24  Giuseppe Attardi  <attardi@di.unipi.it>
+
+	* bin/dl-ner.py (main): added option --pos to use POS tag features.
+
 2015-09-22  Giuseppe Attardi  <attardi@di.unipi.it>
 
 	* deepnl/tagger.pyx (_tag_sequence): lookup whole sentence at once.

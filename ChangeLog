@@ -1,5 +1,9 @@
 2015-09-25  Giuseppe Attardi  <attardi@di.unipi.it>
 
+	* bin/dl-ner.py (main): fixed AttributeExtractor initialization.
+
+	* deepnl/extractors.pxd (class AttributeExtractor): added.
+
 	* deepnl/trainerconv.pyx (_train_epoch): fixed nn.variables() size.
 
 	* deepnl/reader.py (ClassifyReader): label_field -2, text_field -1.

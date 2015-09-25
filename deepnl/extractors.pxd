@@ -74,3 +74,6 @@ cdef class PrefixExtractor(AffixExtractor):
 cdef class GazetteerExtractor(Extractor):
     cdef bool lowcase
     cdef bool noaccents
+
+cdef class AttributeExtractor(Extractor):
+    cdef int idx

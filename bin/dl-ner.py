@@ -83,7 +83,7 @@ def saver(model_file, vectors_file, variant):
 def main():
 
     # set the seed for replicability
-    np.random.seed(42)
+    np.random.seed(89) #(42)
 
     defaults = {}
     
@@ -149,8 +149,8 @@ def main():
     extractors = parser.add_argument_group('Extractors')
     extractors.add_argument('--caps', const=5, nargs='?', type=int, default=None,
                         help='Include capitalization features. Optionally, supply the number of features (default %(default)s)')
-    extractors.add_argument('--pos', const=5, nargs='?', type=int, default=1,
-                        help='Use POS tag, from the given token field (default %(default)s)')
+    extractors.add_argument('--pos', const=1, nargs='?', default=None,
+                        help='Use POS tag. Optionally supply the POS token field index (default %(default)s)')
     extractors.add_argument('--suffix', const=5, nargs='?', type=int, default=None,
                             help='Include suffix features. Optionally, supply the number of features (default %(default)s)')
     extractors.add_argument('--suffixes', type=str, default='',
@@ -235,13 +235,14 @@ def main():
             if args.vocab:
                 logger.info("Saving vocabulary in %s" % args.vocab)
                 embeddings.save_vocabulary(args.vocab)
+        elif not args.vocab_size:
+            logger.error("Missing parameter --vocab-size")
+            return
         else:
             # build vocabulary and tag set
             vocab, tagset = reader.create_vocabulary(sentence_iter,
                                                      args.vocab_size,
                                                      args.minOccurr)
-            logger.info("Creating vocabulary in %s" % args.vocab)
-            embeddings.save_vocabulary(args.vocab)
             logger.info("Creating word embeddings")
             embeddings = Embeddings(args.embeddings_size, vocab=vocab,
                                     variant=args.variant)
@@ -255,7 +256,8 @@ def main():
 
         if args.pos:
             logger.info("Creating POS features...")
-            converter.add(AttributeExtractor(args.pos))
+            postags = frozenset((token[args.pos] for token in sentence_iter))
+            converter.add(AttributeExtractor(args.pos, postags, variant=args.variant))
 
         if ((args.suffixes and not os.path.exists(args.suffixes)) or
             (args.prefixes and not os.path.exists(args.prefixes))):

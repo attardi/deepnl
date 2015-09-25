@@ -792,6 +792,7 @@ struct __pyx_obj_6deepnl_10extractors_AffixExtractor;
 struct __pyx_obj_6deepnl_10extractors_SuffixExtractor;
 struct __pyx_obj_6deepnl_10extractors_PrefixExtractor;
 struct __pyx_obj_6deepnl_10extractors_GazetteerExtractor;
+struct __pyx_obj_6deepnl_10extractors_AttributeExtractor;
 struct __pyx_obj_6deepnl_7network_Variables;
 struct __pyx_obj_6deepnl_7network_Parameters;
 struct __pyx_obj_6deepnl_7network_Gradients;
@@ -1047,6 +1048,18 @@ struct __pyx_obj_6deepnl_10extractors_GazetteerExtractor {
   struct __pyx_obj_6deepnl_10extractors_Extractor __pyx_base;
   PyBoolObject *lowcase;
   PyBoolObject *noaccents;
+};
+
+
+/* "extractors.pxd":78
+ *     cdef bool noaccents
+ * 
+ * cdef class AttributeExtractor(Extractor):             # <<<<<<<<<<<<<<
+ *     cdef int idx
+ */
+struct __pyx_obj_6deepnl_10extractors_AttributeExtractor {
+  struct __pyx_obj_6deepnl_10extractors_Extractor __pyx_base;
+  int idx;
 };
 
 
@@ -1401,6 +1414,19 @@ struct __pyx_vtabstruct_6deepnl_10extractors_GazetteerExtractor {
   struct __pyx_vtabstruct_6deepnl_10extractors_Extractor __pyx_base;
 };
 static struct __pyx_vtabstruct_6deepnl_10extractors_GazetteerExtractor *__pyx_vtabptr_6deepnl_10extractors_GazetteerExtractor;
+
+
+/* "extractors.pxd":78
+ *     cdef bool noaccents
+ * 
+ * cdef class AttributeExtractor(Extractor):             # <<<<<<<<<<<<<<
+ *     cdef int idx
+ */
+
+struct __pyx_vtabstruct_6deepnl_10extractors_AttributeExtractor {
+  struct __pyx_vtabstruct_6deepnl_10extractors_Extractor __pyx_base;
+};
+static struct __pyx_vtabstruct_6deepnl_10extractors_AttributeExtractor *__pyx_vtabptr_6deepnl_10extractors_AttributeExtractor;
 
 
 /* "network.pxd":21
@@ -2090,6 +2116,7 @@ static PyTypeObject *__pyx_ptype_6deepnl_10extractors_AffixExtractor = 0;
 static PyTypeObject *__pyx_ptype_6deepnl_10extractors_SuffixExtractor = 0;
 static PyTypeObject *__pyx_ptype_6deepnl_10extractors_PrefixExtractor = 0;
 static PyTypeObject *__pyx_ptype_6deepnl_10extractors_GazetteerExtractor = 0;
+static PyTypeObject *__pyx_ptype_6deepnl_10extractors_AttributeExtractor = 0;
 
 /* Module declarations from 'deepnl.network' */
 static PyTypeObject *__pyx_ptype_6deepnl_7network_Variables = 0;
@@ -6856,6 +6883,8 @@ PyMODINIT_FUNC PyInit_trainerconv(void)
   __pyx_vtabptr_6deepnl_10extractors_PrefixExtractor = (struct __pyx_vtabstruct_6deepnl_10extractors_PrefixExtractor*)__Pyx_GetVtable(__pyx_ptype_6deepnl_10extractors_PrefixExtractor->tp_dict); if (unlikely(!__pyx_vtabptr_6deepnl_10extractors_PrefixExtractor)) {__pyx_filename = __pyx_f[5]; __pyx_lineno = 71; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __pyx_ptype_6deepnl_10extractors_GazetteerExtractor = __Pyx_ImportType("deepnl.extractors", "GazetteerExtractor", sizeof(struct __pyx_obj_6deepnl_10extractors_GazetteerExtractor), 1); if (unlikely(!__pyx_ptype_6deepnl_10extractors_GazetteerExtractor)) {__pyx_filename = __pyx_f[5]; __pyx_lineno = 74; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __pyx_vtabptr_6deepnl_10extractors_GazetteerExtractor = (struct __pyx_vtabstruct_6deepnl_10extractors_GazetteerExtractor*)__Pyx_GetVtable(__pyx_ptype_6deepnl_10extractors_GazetteerExtractor->tp_dict); if (unlikely(!__pyx_vtabptr_6deepnl_10extractors_GazetteerExtractor)) {__pyx_filename = __pyx_f[5]; __pyx_lineno = 74; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_ptype_6deepnl_10extractors_AttributeExtractor = __Pyx_ImportType("deepnl.extractors", "AttributeExtractor", sizeof(struct __pyx_obj_6deepnl_10extractors_AttributeExtractor), 1); if (unlikely(!__pyx_ptype_6deepnl_10extractors_AttributeExtractor)) {__pyx_filename = __pyx_f[5]; __pyx_lineno = 78; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_vtabptr_6deepnl_10extractors_AttributeExtractor = (struct __pyx_vtabstruct_6deepnl_10extractors_AttributeExtractor*)__Pyx_GetVtable(__pyx_ptype_6deepnl_10extractors_AttributeExtractor->tp_dict); if (unlikely(!__pyx_vtabptr_6deepnl_10extractors_AttributeExtractor)) {__pyx_filename = __pyx_f[5]; __pyx_lineno = 78; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __pyx_ptype_6deepnl_7network_Variables = __Pyx_ImportType("deepnl.network", "Variables", sizeof(struct __pyx_obj_6deepnl_7network_Variables), 1); if (unlikely(!__pyx_ptype_6deepnl_7network_Variables)) {__pyx_filename = __pyx_f[6]; __pyx_lineno = 15; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __pyx_ptype_6deepnl_7network_Parameters = __Pyx_ImportType("deepnl.network", "Parameters", sizeof(struct __pyx_obj_6deepnl_7network_Parameters), 1); if (unlikely(!__pyx_ptype_6deepnl_7network_Parameters)) {__pyx_filename = __pyx_f[6]; __pyx_lineno = 21; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __pyx_vtabptr_6deepnl_7network_Parameters = (struct __pyx_vtabstruct_6deepnl_7network_Parameters*)__Pyx_GetVtable(__pyx_ptype_6deepnl_7network_Parameters->tp_dict); if (unlikely(!__pyx_vtabptr_6deepnl_7network_Parameters)) {__pyx_filename = __pyx_f[6]; __pyx_lineno = 21; __pyx_clineno = __LINE__; goto __pyx_L1_error;}

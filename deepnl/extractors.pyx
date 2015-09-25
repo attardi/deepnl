@@ -269,7 +269,7 @@ cdef class Embeddings(Extractor):
         :param vocab_file: file containing the vocabulary
         :param vocab: list of vocabulary words
         :param vectors: file containing the vectors
-        :param variant: style of embeddgins (senna, polyglot, word2vect)
+        :param variant: style of embeddings (senna, polyglot, word2vect)
         """
         super(Embeddings, self).__init__()
 
@@ -725,15 +725,19 @@ cdef class AttributeExtractor(Extractor):
     """
 
     padding = 0
+    num_values = 5              # extractor values
 
-    def __init__(self, idx, size=5):
+    def __init__(self, idx, values, size=5, variant=None):
         """
         :param idx: index of token attribute to use.
+        :param values: attribute values.
         :param size: vector dimension.
+        :param variant: style of embeddings (senna, polyglot, word2vect)
         """
         super(AttributeExtractor, self).__init__()
         self.idx = idx
-        self.table = embeddings.generate_vectors(AttributeExtractor.num_values, size)
+        self.dict = <dict>WD(None, wordlist=values, variant=variant)
+        self.table = embeddings.generate_vectors(len(self.dict), size)
 
     def extract(self, words):
         """

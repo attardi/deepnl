@@ -217,16 +217,20 @@ def main():
                 logger.info("Saving vocabulary in %s" % args.vocab)
                 embeddings.save_vocabulary(args.vocab)
 
+        elif not args.vocab_size:
+            logger.error("Missing parameter --vocab-size")
+            return
         else:
             # build vocabulary and tag set
             vocab, bigrams, trigrams = reader.create_vocabulary(sentences,
                                                                 #args.vocab_size,
                                                                 min_occurrences=args.minOccurr)
-            logger.info("Creating vocabulary in %s" % args.vocab)
-            embeddings.save_vocabulary(args.vocab)
             logger.info("Creating word embeddings")
             embeddings = Embeddings(args.embeddings_size, vocab=vocab,
                                     variant=args.variant)
+            if args.vocab:
+                logger.info("Saving vocabulary in %s" % args.vocab)
+                embeddings.save_vocabulary(args.vocab)
 
         converter = Converter()
         converter.add(embeddings)

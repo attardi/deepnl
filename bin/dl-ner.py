@@ -149,7 +149,7 @@ def main():
     extractors = parser.add_argument_group('Extractors')
     extractors.add_argument('--caps', const=5, nargs='?', type=int, default=None,
                         help='Include capitalization features. Optionally, supply the number of features (default %(default)s)')
-    extractors.add_argument('--pos', const=1, nargs='?', default=None,
+    extractors.add_argument('--pos', const=1, type=int, nargs='?', default=None,
                         help='Use POS tag. Optionally supply the POS token field index (default %(default)s)')
     extractors.add_argument('--suffix', const=5, nargs='?', type=int, default=None,
                             help='Include suffix features. Optionally, supply the number of features (default %(default)s)')
@@ -246,6 +246,9 @@ def main():
             logger.info("Creating word embeddings")
             embeddings = Embeddings(args.embeddings_size, vocab=vocab,
                                     variant=args.variant)
+            if args.vocab:
+                logger.info("Saving vocabulary in %s" % args.vocab)
+                embeddings.save_vocabulary(args.vocab)
 
         converter = Converter()
         converter.add(embeddings)

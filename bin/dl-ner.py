@@ -259,7 +259,7 @@ def main():
 
         if args.pos:
             logger.info("Creating POS features...")
-            postags = frozenset((token[args.pos] for token in sentence_iter))
+            postags = frozenset((token[args.pos] for sent in sentence_iter for token in sent))
             converter.add(AttributeExtractor(args.pos, postags, variant=args.variant))
 
         if ((args.suffixes and not os.path.exists(args.suffixes)) or

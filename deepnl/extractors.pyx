@@ -630,7 +630,7 @@ cdef class GazetteerExtractor(Extractor):
         :return: the list of codes for the given :param words:.
         """
         res = [GazetteerExtractor.absent] * len(words)
-        words[:] = [GazetteerExtractor.normalize(w, self.lowcase, self.noaccents) for w in words]
+        words = [GazetteerExtractor.normalize(w, self.lowcase, self.noaccents) for w in words]
         for start, token in enumerate(words):
             if token == WD.padding_left or token == WD.padding_right:
                 res[start] = GazetteerExtractor.padding

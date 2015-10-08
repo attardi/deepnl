@@ -167,7 +167,7 @@ and vocabulary from SENNA can be used:
 .. code-block:: bash
 
    cp -p senna/embeddings/embeddings.txt vectors.txt
-   cp -p senna/hash/words.txt vocab.txt
+   cp -p senna/hash/words.lst vocab.txt
 
 The gazetters from SENNA can be used to produce a single entity list as follows:
 

@@ -161,7 +161,7 @@ notation, by calling:
     sed '/-DOCSTART-/,+1d' testb | bin/toIOB.py | cut -f 1,2,4 > testb.iob
     cat train.iob testa.iob > train+dev.iob
 
-Assuming that the SENNA distribution is in directory ``senna``, the embeddgins
+Assuming that the SENNA distribution is in directory ``senna``, the embeddings
 and vocabulary from SENNA can be used:
 
 .. code-block:: bash
@@ -188,7 +188,7 @@ The tagger can then be trained as follows:
 
 .. code-block:: bash
 
-    bin/dl-ner.py ner.dnn -t train+dev \
+    bin/dl-ner.py ner.dnn -t train+dev.iob \
           --vocab vocab.txt --vectors vectors.txt \
           --caps --suffix --suffixes suffix.lst --gazetteer eng.list \
           -e 40 --variant senna \
@@ -198,7 +198,7 @@ The benchmark can be run as:
 
 .. code-block:: bash
 
-    bin/dl-ner.py model < testb.iob > testb.out.iob
+    bin/dl-ner.py ner.dnn < testb.iob > testb.out.iob
 
 The results I achieved are::
 

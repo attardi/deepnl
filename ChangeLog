@@ -1,3 +1,75 @@
+2015-10-14  Giuseppe Attardi  <attardi@di.unipi.it>
+
+	* bin/dl-sentiwords.py (main): pass minOccurr and vocab_size to reader.create_vocabulary.
+
+2015-10-08  Giuseppe Attardi  <attardi@di.unipi.it>
+
+	* deepnl/networkseq.pyx (SeqParameters.initialize): put back high to 1.0.
+
+2015-10-07  Giuseppe Attardi  <attardi@di.unipi.it>
+
+	* deepnl/trainerconv.pyx (ConvTrainer): holds a Classifier, which
+	saves to file after training.
+
+	* deepnl/utils.py (import_class): added.
+
+2015-10-05  Giuseppe Attardi  <attardi@di.unipi.it>
+
+	* deepnl/sentiwords.pyx (SentimentTrainer._train_pair_s): compute
+	also grads.input.
+
+2015-10-04  Giuseppe Attardi  <attardi@di.unipi.it>
+
+	* deepnl/tagger.pyx (Tagger.tag_sequence): return list of tags.
+
+	* deepnl/extractors.pyx (save): save also fields and use them in load.
+
+	* bin/dl-ner.py (main): pass whole tokens to tagger.
+
+	* deepnl/networkseq.pyx (_viterbi): preallocate prev_score_and_trans.
+
+	* deepnl/word_dictionary.py (WordDictionary.__setitem__): do not
+	insert normalized word if already present.
+
+2015-10-02  Giuseppe Attardi  <attardi@di.unipi.it>
+
+	* deepnl/networkseq.pyx (SeqParameters.initialize): high = 0.01
+
+2015-10-01  Giuseppe Attardi  <attardi@di.unipi.it>
+
+	* deepnl/network.pyx (Variables.addSquare): moved here from Gradients.
+
+	* deepnl/trainer.pyx (Trainer): turned adaEps, adaRo etc. into
+	Trainer attributes.
+
+2015-09-29  Giuseppe Attardi  <attardi@di.unipi.it>
+
+	* deepnl/network.pxd: use int32 instead of int64 which is weird
+	default for Python and Numpy.
+
+2015-09-27  Giuseppe Attardi  <attardi@di.unipi.it>
+
+	* deepnl/extractors.pyx (Converter): fully reworked: see below.
+
+	* deepnl/extractors.pyx (Converter.convert): It passes to each
+	extractor a sentence, which could be either a list of words or a list of
+	tokens. It then calls Extractor.extract() passing either the token
+	field index to use or -1 for the whole token.
+
+	* deepnl/extractors.pyx (Extractor.extract): the default behavior
+	is to perform a lookup in the extractor dictionary of the proper
+	word.
+	The method is specialized in derived classes.
+	Extractors are never called on padding tokens, which are dealt instead
+	by methods get_padding_left(), get_padding_right()
+
+	* deepnl/word_dictionary.py (WordDictionary.__init__): default is 'senna'.
+	(WordDictionary.check): eliminated.
+	(WordDictionary): turned left_padding, right_padding and rare into
+	indices, rather than strings. Strings are only needed at initialization.
+
+	* bin/dl-ner.py (main): variant None in POS extractor (no normalization).
+
 2015-09-26  Giuseppe Attardi  <attardi@di.unipi.it>
 
 	* deepnl/extractors.pyx (GazetteerExtractor.extract): no clobbering of words.

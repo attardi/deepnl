@@ -88,7 +88,7 @@ class TextReader(Reader):
 
 # ----------------------------------------------------------------------
 
-class TaggerReader(Reader):
+class TaggerReader(ConllReader):
     """
     Abstract class extending TextReader with useful functions
     for tagging tasks. 
@@ -166,35 +166,39 @@ class TweetReader(Reader):
     SID	UID	polarity	tokenized text
     264183816548130816      15140428        positive      Gas by my house hit $3.39!!!! I'm going to Chapel Hill on Sat. :)
     """
-    polarity_field = 2
-    text_field = 3
 
-    def __init__(self, ngrams=1, variant=None):
+    def __init__(self, text_field=3, label_field=2, ngrams=1, variant=None):
         """
 	:param ngrams: the length of ngrams to consider.
 	:param variant: whether to use native, or SENNA or Polyglot conventions.
         """
         super(TweetReader, self).__init__()
+        self.text_field = text_field
+        self.label_field = label_field
 	self.ngrams = ngrams
         self.variant = variant
         self.sentences = []
         self.polarities = []
 
-    def read(self, filename):
+    def __iter__(self):
+        for tweet in TsvReader(): # stdin
+            yield tweet
+
+    def read(self, filename=None):
         """
         Builds a list of sentences and a list corresponding polarities [-1, 0, 1]
         """
         for tweet in TsvReader(filename):
-            if len(tweet) <= TweetReader.text_field:
+            if len(tweet) <= self.text_field:
                 # drop empty tweets
                 continue
-            if tweet[TweetReader.polarity_field] == 'positive':
+            if tweet[self.label_field] == 'positive':
                 polarity = 1
-            elif tweet[TweetReader.polarity_field] == 'negative':
+            elif tweet[self.label_field] == 'negative':
                 polarity = -1
             else:
                 polarity = 0    # neutral or objective
-            self.sentences.append(tweet[TweetReader.text_field].split())
+            self.sentences.append(tweet[self.text_field].split())
             self.polarities.append(polarity)
         return self.sentences
                     
@@ -257,14 +261,12 @@ class ClassifyReader(TweetReader):
     """
     Variant of TweetReader with multiple labels.
     """
-    text_field = -1
-    label_field = -2
 
-    def read(self, filename):
+    def read(self, filename=None):
         """
         Builds a list of sentences.
         """
         for tweet in TsvReader(filename):
-            self.sentences.append(tweet[ClassifyReader.text_field].split())
-            self.polarities.append(tweet[ClassifyReader.label_field])
+            self.sentences.append(tweet[self.text_field].split())
+            self.polarities.append(tweet[self.label_field])
         return self.sentences

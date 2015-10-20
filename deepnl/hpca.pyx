@@ -27,9 +27,9 @@ from numpy.linalg import svd
 import logging
 logger = logging.getLogger(__name__)
 
-# ----------------------------------------------------------------------
+from network cimport float_t
 
-ctypedef np.float32_t FLOAT_t
+# ----------------------------------------------------------------------
 
 cdef extern from "HPCA.h" namespace "hpca" nogil:
     object cooccurrence_matrix(char* corpus, char* vocabFile, int top, int window)
@@ -45,7 +45,7 @@ def cooccurrences(char* corpus, char* vocabFile, unsigned top, unsigned window):
     """
     return cooccurrence_matrix(corpus, vocabFile, top, window)
 
-cpdef np.ndarray[FLOAT_t,ndim=2] fit(np.ndarray[FLOAT_t,ndim=2] dm,
+cpdef np.ndarray[float_t,ndim=2] fit(np.ndarray[float_t,ndim=2] dm,
                                      int n_components, bint covariance=False):
     """
     Compute SVD on :param dm:.
@@ -53,7 +53,7 @@ cpdef np.ndarray[FLOAT_t,ndim=2] fit(np.ndarray[FLOAT_t,ndim=2] dm,
     :return: the representation of dm reduced to :param n_components: dimensions.
     """
 
-    cdef np.ndarray[FLOAT_t,ndim=2] cov
+    cdef np.ndarray[float_t,ndim=2] cov
     cdef int cols = dm.shape[1]
 
     if covariance:

@@ -22,7 +22,7 @@ libdir = builddir + distutils.util.get_platform() + '-' + '.'.join(map(str, sys.
 sys.path.insert(0, libdir)      # DEBUG
 
 # local
-from deepnl.reader import ConllReader
+from deepnl.reader import TaggerReader
 from deepnl.corpus import ConllWriter
 from deepnl.extractors import *
 from deepnl.ner_tagger import NerReader, NerTagger
@@ -122,7 +122,7 @@ def main():
     train.add_argument('-n', '--hidden', type=int, default=200,
                         help='Number of hidden neurons (default %(default)s)',
                         dest='hidden')
-    train.add_argument('--eps', type=float, default=1e-8,
+    train.add_argument('--eps', type=float, default=1e-6,
                         help='Epsilon value for AdaGrad (default %(default)s)')
     train.add_argument('--ro', type=float, default=0.95,
                         help='Ro value for AdaDelta (default %(default)s)')
@@ -251,16 +251,18 @@ def main():
                 embeddings.save_vocabulary(args.vocab)
 
         converter = Converter()
-        converter.add(embeddings)
-
+        # pass just the formField from tokens to the extractor
+        converter.add(embeddings, reader.formField)
+        
         if args.caps:
             logger.info("Creating capitalization features...")
-            converter.add(CapsExtractor(args.caps))
+            converter.add(CapsExtractor(args.caps), reader.formField)
 
         if args.pos:
             logger.info("Creating POS features...")
             postags = frozenset((token[args.pos] for sent in sentence_iter for token in sent))
-            converter.add(AttributeExtractor(args.pos, postags, variant=args.variant))
+            # tell the extractor which field to use 
+            converter.add(AttributeExtractor(postags), args.pos) # no variant, preserve case
 
         if ((args.suffixes and not os.path.exists(args.suffixes)) or
             (args.prefixes and not os.path.exists(args.prefixes))):
@@ -271,11 +273,11 @@ def main():
             if os.path.exists(args.suffixes):
                 logger.info("Loading suffix list...")
                 extractor = SuffixExtractor(args.suffix, args.suffixes)
-                converter.add(extractor)
+                converter.add(extractor, reader.formField)
             else:
                 logger.info("Creating suffix list...")
                 extractor = SuffixExtractor(args.suffix, None, words)
-                converter.add(extractor)
+                converter.add(extractor, reader.formField)
                 if args.suffixes:
                     logger.info("Saving suffix list to: %s", args.suffixes)
                     extractor.write(args.suffixes)
@@ -284,11 +286,11 @@ def main():
             if os.path.exists(args.prefixes):
                 logger.info("Loading prefix list...")
                 extractor = PrefixExtractor(args.prefix, args.prefixes)
-                converter.add(extractor)
+                converter.add(extractor, reader.formField)
             else:
                 logger.info("Creating prefix list...")
                 extractor = PrefixExtractor(args.prefix, None, words)
-                converter.add(extractor)
+                converter.add(extractor, reader.formField)
                 if args.prefixes:
                     logger.info("Saving prefix list to: %s", args.prefixes)
                     extractor.write(args.prefixes)
@@ -297,12 +299,14 @@ def main():
             if os.path.exists(args.gazetteer):
                 logger.info("Loading gazetteers")
                 for extractor in GazetteerExtractor.create(args.gazetteer, args.gsize):
-                    converter.add(extractor)
+                    # tell the extractor which field to use 
+                    converter.add(extractor, reader.formField)
             else:
                 logger.info("Creating gazetteer")
                 tries = GazetteerExtractor.build(sentence_iter, reader.formField, reader.tagField)
                 for tag, trie in tries.items():
-                    converter.add(GazetteerExtractor(trie, args.gsize))
+                    # tell the extractor which field to use 
+                    converter.add(GazetteerExtractor(trie, args.gsize), reader.formField)
                 logger.info("Saving gazetteer list to: %s", args.gazetteer)
                 with open(args.gazetteer, 'wb') as file:
                     for tag, trie in tries.iteritems():
@@ -317,9 +321,9 @@ def main():
         sentences = []
         tags = []
         for sent in sentence_iter:
-            sentences.append(converter.convert([token[reader.formField] for token in sent]))
-            tags.append(np.array([tag_index[token[reader.tagField]] for token in sent]))
-    
+            sentences.append(converter.convert(sent))
+            tags.append(np.array([tag_index[token[reader.tagField]] for token in sent],
+                                 np.int32))
         logger.info("Vocabulary size: %d" % embeddings.dict.size())
         logger.info("Tagset size: %d" % len(tagset))
         trainer = create_trainer(args, converter, tag_index)
@@ -337,14 +341,13 @@ def main():
     else:
         with open(args.model) as file:
             tagger = NerTagger.load(file)
-        reader = ConllReader()
+        reader = TaggerReader()
         for sent in reader:
-            sent = [x[args.formField] for x in sent] # extract form
-            ConllWriter.write(tagger.tag(sent))
+            ConllWriter.write(tagger.tag(sent, reader.tagField))
 
 # ----------------------------------------------------------------------
 
-profile = True
+profile = False
 
 if __name__ == '__main__':
     if profile:

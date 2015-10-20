@@ -20,9 +20,6 @@ cimport cython
 # local
 from math cimport *
 
-# FIXME: why cant we share it?
-cdef float skipErr = 0.01
-
 # ----------------------------------------------------------------------
 
 cdef class Variables(object):
@@ -43,10 +40,10 @@ cdef class Parameters(object):
     """
     
     def __init__(self, int input_size, int hidden_size, int output_size):
-        self.output_weights = np.zeros((output_size, hidden_size), dtype=float)
-        self.output_bias = np.zeros(output_size, dtype=float)
-        self.hidden_weights = np.zeros((hidden_size, input_size), dtype=float)
-        self.hidden_bias = np.zeros(hidden_size, dtype=float)
+        self.output_weights = np.zeros((output_size, hidden_size))
+        self.output_bias = np.zeros(output_size)
+        self.hidden_weights = np.zeros((hidden_size, input_size))
+        self.hidden_bias = np.zeros(hidden_size)
 
     def initialize(self, int input_size, int hidden_size, int output_size):
         """
@@ -72,13 +69,21 @@ cdef class Parameters(object):
         self.output_bias = np.random.uniform(-high, high, (output_size))
 
     cdef copy(self, Parameters p):
-        np.copyto(self.output_weights, p.output_weights)
-        np.copyto(self.output_bias, p.output_bias)
-        np.copyto(self.hidden_weights, p.hidden_weights)
-        np.copyto(self.hidden_bias, p.hidden_bias)
+        """Used in ASGD"""
+        self.output_weights[:,:] = p.output_weights
+        self.output_bias[:] = p.output_bias
+        self.hidden_weights[:,:] = p.hidden_weights
+        self.hidden_bias[:] = p.hidden_bias
 
-    cpdef update(self, Gradients grads, float learning_rate,
-                 Gradients ada=None):
+    def addSquare(self, Gradients grads):
+        """For adaGrad"""
+        self.output_weights += grads.output_weights * grads.output_weights
+        self.output_bias += grads.output_bias * grads.output_bias
+        self.hidden_weights += grads.hidden_weights * grads.hidden_weights
+        self.hidden_bias += grads.hidden_bias * grads.hidden_bias
+
+    cpdef update(self, Gradients grads, float_t learning_rate,
+                 Parameters ada=None, float_t adaEps=1e-6):
         """
         Adjust the weights.
         :param ada: cumulative square gradients for performing AdaGrad.
@@ -92,16 +97,21 @@ cdef class Parameters(object):
 
         """
         if ada:
-            global adaEps
+            # print >> sys.stderr, 'ada', ada.hidden_weights[:5,:5], ada.hidden_weights[-5:,-5:] # DEBUG
             ada.addSquare(grads)
             self.output_weights += learning_rate * grads.output_weights / np.sqrt(ada.output_weights + adaEps)
             self.output_bias += learning_rate * grads.output_bias / np.sqrt(ada.output_bias + adaEps)
+
+            # print >> sys.stderr, 'ada', ada.hidden_weights[:5,:5], ada.hidden_weights[-5:,-5:] # DEBUG
+            # print >> sys.stderr, 'uhw', learning_rate, adaEps, self.hidden_weights[:5,:5], grads.hidden_weights[:5,:5], grads.hidden_weights[-5:,-5:] # DEBUG
+
             self.hidden_weights += learning_rate * grads.hidden_weights / np.sqrt(ada.hidden_weights + adaEps)
             self.hidden_bias += learning_rate * grads.hidden_bias / np.sqrt(ada.hidden_bias + adaEps)
         else:
             # divide by the fan-in
             self.output_weights += grads.output_weights * learning_rate / 100  # DEBUG / self.hidden_size
             self.output_bias += grads.output_bias * learning_rate / 100 # DEBUG self.hidden_size
+            # print >> sys.stderr, 'uhw', learning_rate, self.hidden_weights[:2,:2], grads.hidden_weights[:2,:2] # DEBUG
             self.hidden_weights += grads.hidden_weights * learning_rate / 100  # DEBUG self.input_size
             self.hidden_bias += grads.hidden_bias * learning_rate / 100 # DEBUG self.input_size
 
@@ -137,9 +147,12 @@ cdef class Gradients(Parameters):
     Gradients for all network Parameters, plus input gradients.
     """
     
+    # gradients for input variables
+    #cdef public np.ndarray input
+
     def __init__(self, int input_size, int hidden_size, int output_size):
         super(Gradients, self).__init__(input_size, hidden_size, output_size)
-        self.input = np.zeros(input_size, dtype=float)
+        self.input = np.zeros(input_size)
 
     def clear(self):
         self.output_weights.fill(0.0)
@@ -147,13 +160,6 @@ cdef class Gradients(Parameters):
         self.hidden_weights.fill(0.0)
         self.hidden_bias.fill(0.0)
         self.input.fill(0.0)
-
-    def addSquare(self, Gradients grads):
-        """For adaGrad"""
-        self.output_weights += grads.output_weights * grads.output_weights
-        self.output_bias += grads.output_bias * grads.output_bias
-        self.hidden_weights += grads.hidden_weights * grads.hidden_weights
-        self.hidden_bias += grads.hidden_bias * grads.hidden_bias
 
 # ----------------------------------------------------------------------
 
@@ -213,6 +219,11 @@ cdef class Network(object):
         """
         return Gradients(self.input_size, self.hidden_size, self.output_size)
 
+    cdef parameters(self):
+        """Allocate network parameters.
+        """
+        return Parameters(self.input_size, self.hidden_size, self.output_size)
+
     cpdef forward(self, Variables vars):
         """
         Runs the network on the given variables: hidden and visible. 
@@ -224,7 +235,7 @@ cdef class Network(object):
         self.p.output_weights.dot(vars.hidden, vars.output)
         vars.output += self.p.output_bias
 
-    cdef float backpropagate(self, int y, Variables vars, Gradients grads):
+    cdef float_t backpropagate(self, int y, Variables vars, Gradients grads):
         """
         Cost is the hinge loss.
         Compute the gradients of the cost for each layer.
@@ -241,16 +252,16 @@ cdef class Network(object):
         # m = argmax_t!=y f(x)[t]
         # dhl / df [y] = -1 if f(x)[m] - f(x)[y] > 1, else 0
         # dhl / df [t] = +1 if f(x)[t] - f(x)[y] > 1, else 0
-        cdef float fx_y = vars.output[y]
-        cdef float fx_m = np.NINF # negative infinity
+        cdef float_t fx_y = vars.output[y]
+        cdef float_t fx_m = np.NINF # negative infinity
         cdef int i
-        cdef float v
+        cdef float_t v
         for i, v in enumerate(vars.output):
             if i == y:
                 continue
             if v > fx_m:
                 fx_m = v
-        cdef float hinge_loss = max(0.0, 1 + fx_m - fx_y)
+        cdef float_t hinge_loss = max(0.0, 1 + fx_m - fx_y)
 
         if hinge_loss == 0.0:
             return hinge_loss
@@ -291,13 +302,14 @@ cdef class Network(object):
 
         return hinge_loss
 
-    cpdef update(self, Gradients grads, float learning_rate, Gradients ada=None):
-        self.p.update(grads, learning_rate, ada)
+    cpdef update(self, Gradients grads, float_t learning_rate,
+                 Parameters ada=None, float_t adaEps=1e-6):
+        self.p.update(grads, learning_rate, ada, adaEps)
 
     def save(self, file):
         """
         Saves the neural network to a file.
-        It saves the parameters
+        It saves the parameters.
         """
         self.p.save(file)
 

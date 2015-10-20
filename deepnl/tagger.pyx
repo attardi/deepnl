@@ -12,8 +12,10 @@ import cPickle as pickle
 import sys                      # DEBUG
 
 # local
+from network cimport *
 import network
 from networkseq import SequenceNetwork
+from numpy import int32 as INT
 
 # ----------------------------------------------------------------------
 
@@ -39,41 +41,31 @@ cdef class Tagger(object):
         self.converter = converter
         self.tag_index = tag_index
         self.tags = sorted(tag_index, key=tag_index.get)
-        cdef np.ndarray padding_left = converter.get_padding_left()
-        cdef np.ndarray padding_right = converter.get_padding_right()
-        self.pre_padding = np.array(left_context * [padding_left])
-        self.post_padding = np.array(right_context * [padding_right])
+        cdef np.ndarray[int_t] padding_left = converter.get_padding_left()
+        cdef np.ndarray[int_t] padding_right = converter.get_padding_right()
+        self.pre_padding = np.array(left_context * [padding_left], dtype=INT)
+        self.post_padding = np.array(right_context * [padding_right], dtype=INT)
 
-    def tag(self, sent):
-        return self.tag_sequence(sent, return_tokens=True)
-
-    cpdef tag_sequence(self, list tokens, bool return_tokens=False):
+    cpdef list tag(self, list tokens):
         """
         Tags a given list of tokens. 
         
-        Tokens should be produced a compatible tokenizer in order to 
+        Tokens should be produced by a compatible tokenizer in order to 
         match the entries in the vocabulary.
         
-        :param tokens: a list of strings.
-        :param return_tokens: whether to return also tokens.
-        :returns: a list of tags or a list of pairs (token, tag) if
-            :param return_tokens: is True.
+        :param tokens: a list of tokens, each a list of attributes.
+        :returns: the list of tags for each token.
         """
-        cdef np.ndarray[INT_t,ndim=2] seq = self.converter.convert(tokens)
+        cdef np.ndarray[int_t,ndim=2] seq = self.converter.convert(tokens)
         # add padding
         seq = np.concatenate((self.pre_padding, seq, self.post_padding))
 
-        cdef np.ndarray[FLOAT_t,ndim=2] scores = self._tag_sequence(seq)
+        cdef np.ndarray[float_t,ndim=2] scores = self._tag_sequence(seq)
         # computes full score, combining ftheta and A (if SLL)
         answer = self.nn._viterbi(scores)
-        tags = [self.tags[tag] for tag in answer]
+        return [self.tags[tag] for tag in answer]
 
-        if return_tokens:
-            return zip(tokens, tags)
-        else:
-            return tags
-
-    cpdef np.ndarray[FLOAT_t,ndim=2] _tag_sequence(self,
+    cpdef np.ndarray[float_t,ndim=2] _tag_sequence(self,
                                                    np.ndarray sentence,
                                                    bool train=False):
         """
@@ -91,7 +83,7 @@ cdef class Tagger(object):
         cdef slen = len(sentence) - window_size + 1 # without padding
 
         # scores[t, i] = ftheta_i,t = score for i-th tag, t-th word
-        cdef np.ndarray[FLOAT_t,ndim=2] scores = np.empty((slen, nn.output_size))
+        cdef np.ndarray[float_t,ndim=2] scores = np.empty((slen, nn.output_size))
         
         # container for network variables
         #vars = nn.variables()
@@ -107,7 +99,8 @@ cdef class Tagger(object):
             vars.input = np.empty(nn.input_size)
             vars.hidden = np.empty(nn.hidden_size)
 
-        # print >> sys.stderr, sentence[:4,0]   # DEBUG
+        # print >> sys.stderr, sentence[:,:3]   # DEBUG
+        # #print >> sys.stderr, self.converter.extractors[0].sentence(sentence[:4]) # DEBUG
         # print >> sys.stderr, 'hweights', nn.p.hidden_weights[:4,:4] # DEBUG
         # print >> sys.stderr, 'hbias', nn.p.hidden_bias[:4]          # DEBUG
 
@@ -129,10 +122,10 @@ cdef class Tagger(object):
             nn.forward(vars)
             # DEBUG
             # if train:
-            #     print >> sys.stderr, 'window:', self.converter.extractors[0].sentence(window)
-            #     print >> sys.stderr, 'sent:', window[:4], window[-4:]
+            #     # print >> sys.stderr, 'window:', self.converter.extractors[0].sentence(window)
+            #     # print >> sys.stderr, 'sent:', window[:4], window[-4:]
             #     print >> sys.stderr, 'input', vars.input[:4], vars.input[-4:]
-            #     print >> sys.stderr, 'iw', self.nn.p.hidden_weights[0,:4], self.nn.p.hidden_weights[-1,-4:]
+            #     #print >> sys.stderr, 'iw', self.nn.p.hidden_weights[0,:4], self.nn.p.hidden_weights[-1,-4:]
             #     print >> sys.stderr, 'hidden', vars.hidden[:4], vars.hidden[-4:]
             #     print >> sys.stderr, 'output', vars.output[:4], vars.output[-4:]
         

@@ -18,7 +18,8 @@ cdef class ConvParameters(Parameters):
     # the second hidden layer
     cdef public np.ndarray hidden2_weights, hidden2_bias
 
-    cpdef update(self, Gradients grads, float learning_rate, Gradients ada=*)
+    cpdef update(self, Gradients grads, float_t learning_rate, Parameters ada=*,
+    	  	 float_t adaEps=*)
 
 cdef class ConvGradients(Gradients):
     
@@ -30,6 +31,6 @@ cdef class ConvolutionalNetwork(Network):
     cdef public int hidden2_size
     cdef public int pool_size
 
-    cdef np.ndarray[FLOAT_t,ndim=1] predict(self, list tokens)
+    cdef np.ndarray[float_t] predict(self, list tokens)
 
-    cdef float backpropagate(self, int y, Variables vars, Gradients grads)
+    cdef float_t backpropagate(self, int y, Variables vars, Gradients grads)

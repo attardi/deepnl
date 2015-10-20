@@ -6,6 +6,7 @@ Train a sentiment specific language model.
 """
 
 import numpy as np
+from numpy import int32 as INT
 import sys                      # DEBUG
 
 # for decorations
@@ -25,14 +26,14 @@ cdef class SentGradients(Gradients):
     #cdef public np.ndarray input_pos: as Gradients.input
     cdef public np.ndarray input_neg
     
-    def __init__(self, int input_size, int hidden_size, int output_size):
+    def __init__(self, int_t input_size, int_t hidden_size, int_t output_size):
         super(SentGradients, self).__init__(input_size, hidden_size, output_size)
         # gradients for positive hidden variables
-        self.hidden_pos = np.zeros(hidden_size, dtype=float)
+        self.hidden_pos = np.zeros(hidden_size)
         # gradients for negative hidden variables
-        self.hidden_neg = np.zeros(hidden_size, dtype=float)
+        self.hidden_neg = np.zeros(hidden_size)
         # gradients for negative input variables
-        self.input_neg = np.zeros(input_size, dtype=float)
+        self.input_neg = np.zeros(input_size)
 
     def clear(self):
         super(SentGradients, self).clear()
@@ -89,8 +90,8 @@ cdef class SentimentTrainer(LmTrainer):
         self.alpha = options.get('alpha', 0.5)
 
     @cython.boundscheck(False)
-    cdef _train_pair_s(self, np.ndarray[INT_t,ndim=2] example, Gradients grads,
-                       int size=1, int polarity=0):
+    cdef _train_pair_s(self, np.ndarray[int_t,ndim=2] example, Gradients grads,
+                       int_t size=1, int_t polarity=0):
         """
         Trains the network with a pair of positive/negative examples.
         The negative one is randomly generated.
@@ -103,9 +104,9 @@ cdef class SentimentTrainer(LmTrainer):
         
         # a token is a list of feature IDs.
         # token[0] is the list with the WordDictionary index of the word,
-        cdef int left_context = len(self.pre_padding)
-        cdef np.ndarray[INT_t,ndim=1] middle_token = example[left_context]
-        cdef np.ndarray[INT_t,ndim=1] variant
+        cdef int_t left_context = len(self.pre_padding)
+        cdef np.ndarray[int_t] middle_token = example[left_context]
+        cdef np.ndarray[int_t] variant
 
         # ensure to generate a different word
         while True:
@@ -121,7 +122,7 @@ cdef class SentimentTrainer(LmTrainer):
         nn.forward(vars_pos)
 
         vars_neg = nn.variables()
-        cdef np.ndarray[INT_t,ndim=1] negative_token = np.array(variant, dtype=int)
+        cdef np.ndarray[int_t] negative_token = np.array(variant, dtype=INT)
         #print >> sys.stderr, 'pos', self.converter.extractors[0].sentence(example).encode('utf-8') # DEBUG
         #print >> sys.stderr, vars_pos.input[128:132] # DEBUG
         example[left_context] = negative_token
@@ -130,9 +131,9 @@ cdef class SentimentTrainer(LmTrainer):
         #print >> sys.stderr, vars_neg.input[128:132] # DEBUG
         nn.forward(vars_neg)
         
-        cdef float errorCW = max(0, 1 - vars_pos.output[0] + vars_neg.output[0])
-        cdef float errorUS = max(0, 1 - polarity * vars_pos.output[1] + polarity * vars_neg.output[1])
-        cdef float error = self.alpha * errorCW + (1 - self.alpha) * errorUS
+        cdef float_t errorCW = max(0, 1 - vars_pos.output[0] + vars_neg.output[0])
+        cdef float_t errorUS = max(0, 1 - polarity * vars_pos.output[1] + polarity * vars_neg.output[1])
+        cdef float_t error = self.alpha * errorCW + (1 - self.alpha) * errorUS
         #print >> sys.stderr, 'error', errorCW, errorUS, error # DEBUG
         self.error += error
         self.avg_error.add(error) # moving average
@@ -147,8 +148,8 @@ cdef class SentimentTrainer(LmTrainer):
         # (remember the network still has the values of the negative example) 
 
         # @see A.8 in Collobert et al. 2011.
-        cdef np.ndarray[FLOAT_t,ndim=1] grads_pos_score = np.array([0.0, 0.0])
-        cdef np.ndarray[FLOAT_t,ndim=1] grads_neg_score = np.array([0.0, 0.0])
+        cdef np.ndarray[float_t] grads_pos_score = np.array([0.0, 0.0])
+        cdef np.ndarray[float_t] grads_neg_score = np.array([0.0, 0.0])
         if (errorCW > 0):
             grads_pos_score[0] = 1.0
             grads_neg_score[0] = -1.0
@@ -156,6 +157,7 @@ cdef class SentimentTrainer(LmTrainer):
             grads_pos_score[1] = 1.0
             grads_neg_score[1] = -1.0
         
+        # Summary:
         # grads.output_bias = grads_score
         # grads.output_weights = grads_score.T * hidden_values
         # grads_hidden = activationError(hidden_values) * grads_score.T.dot(output_weights)
@@ -184,23 +186,28 @@ cdef class SentimentTrainer(LmTrainer):
         #print >> sys.stderr, 'ghw', grads.hidden_weights[0,128:132] # DEBUG
         grads.hidden_bias = grads.hidden_pos + grads.hidden_neg
 
+        # Lookup layer
+	# (hidden_size) x (hidden_size, input_size) = (input_size)
+        grads.hidden_pos.dot(p.hidden_weights, grads.input)
+        grads.hidden_neg.dot(p.hidden_weights, grads.input_neg)
+
         return error, variant
 
-    cdef _update(self, Gradients grads, float remaining,
-                 np.ndarray[INT_t,ndim=2] example,
-                 np.ndarray[INT_t,ndim=1] middle_token,
-                 np.ndarray[INT_t,ndim=1] negative_token):
+    cdef _update(self, Gradients grads, float_t remaining,
+                 np.ndarray[int_t,ndim=2] example,
+                 np.ndarray[int_t] middle_token,
+                 np.ndarray[int_t] negative_token):
         """
         Update the weights along the gradients :param grads:
         """
-        #cdef float LR_0 = max(0.001, self.learning_rate * remaining)
-        cdef float LR_0 = self.learning_rate
-        cdef float LR_1 = max(0.001, self.learning_rate / self.nn.input_size * remaining)
-        cdef float LR_2 = max(0.001, self.learning_rate / self.nn.hidden_size * remaining)
+        #cdef float_t LR_0 = max(0.001, self.learning_rate * remaining)
+        cdef float_t LR_0 = self.learning_rate
+        cdef float_t LR_1 = max(0.001, self.learning_rate / self.nn.input_size * remaining)
+        cdef float_t LR_2 = max(0.001, self.learning_rate / self.nn.hidden_size * remaining)
 
         cdef Network nn = self.nn
         cdef Parameters p = nn.p
-        cdef int left_context = len(self.pre_padding)
+        cdef int_t left_context = len(self.pre_padding)
 
         p.output_weights += LR_2 * grads.output_weights
         p.output_bias += LR_2 * grads.output_bias
@@ -211,14 +218,18 @@ cdef class SentimentTrainer(LmTrainer):
         # tokens where changes apply
         cdef np.ndarray tokens = np.vstack((example, negative_token))
         # both changes apply to all tokens except the middle
-        cdef np.ndarray[FLOAT_t,ndim=1] deltas = grads.input + grads.input_neg
-        deltas[left_context] = grads.input[left_context] # positive token
-        deltas = np.vstack((deltas, grads.input_neg[left_context])) # negative token
+        cdef np.ndarray[float_t] deltas = grads.input + grads.input_neg
+        cdef int_t features = self.converter.size()
+        cdef int_t start = left_context * features
+        cdef int_t end = start + features
+        deltas[start:end] = grads.input[start:end] # positive token
+        # add the change to the negative token
+        deltas = np.concatenate((deltas, grads.input_neg[start:end])) # negative token
         
-        self.converter.update(deltas, self.learning_rate, tokens)
+        self.converter.update(deltas, tokens, self.learning_rate, self.adaEps)
 
     def train(self, Iterable sentences, list polarities, trie,
-              int epochs, int report_freq):
+              int_t epochs, int_t report_freq):
         """
         Trains the sentiment language model on the given sentences.
         :param sentences: an iterable on a list of token features for each sentence
@@ -229,9 +240,8 @@ cdef class SentimentTrainer(LmTrainer):
         # FIXME: parallelize using ASGD.
 
         # prepare for AdaGrad
-        global adaEps
-        if adaEps:
-            self.converter.clearAdaGrad()
+        if self.adaEps:
+            self.converter.adaGradInit()
 
         # generate 1000 random indices at a time to save time
         # (generating 1000 integers at once takes about ten times the time for a single one)
@@ -241,20 +251,20 @@ cdef class SentimentTrainer(LmTrainer):
         self.total_pairs = 0
 
         # how often to save model
-        cdef int save_period = 1000 * 1000 # FIXME
+        cdef int_t save_period = 1000 * 1000 # FIXME
 
-        cdef float all_cases = float(sum([len(sen) for sen in sentences]) * epochs * self.ngram_size)
+        cdef float_t all_cases = float(sum([len(sen) for sen in sentences]) * epochs * self.ngram_size)
 
-        cdef int epoch, num, pos
-        cdef float remaining
+        cdef int_t epoch, num, pos
+        cdef float_t remaining
 
-        cdef int left_context = len(self.pre_padding)
-        cdef int right_context = len(self.post_padding)
-        cdef int window_size = left_context + 1 + right_context
+        cdef int_t left_context = len(self.pre_padding)
+        cdef int_t right_context = len(self.post_padding)
+        cdef int_t window_size = left_context + 1 + right_context
         # FIXME: might use len(self.example) instead of window_size?
-        cdef np.ndarray window = np.empty((window_size, 1), dtype=np.int)
+        cdef np.ndarray window = np.empty((window_size, 1), dtype=INT)
         cdef np.ndarray token, neg_token
-        cdef int size = 1
+        cdef int_t size = 1
 
         grads = SentGradients(self.nn.input_size, self.nn.hidden_size, self.nn.output_size)
 

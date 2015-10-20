@@ -7,6 +7,7 @@ Train a DL Neural Network.
 """
 
 import numpy as np
+from numpy import int32 as INT
 import logging
 from itertools import izip
 import sys
@@ -32,14 +33,16 @@ cdef class MovingAverage(object):
         self.variance = 0.0
         self.count = 0
 
-    cdef add(self, float v):
+    cdef add(self, float_t v):
         """Add value :param v: to the moving average."""
         self.count += 1
         self.mean += (2. / self.count) * (v - self.mean)
-        cdef float this_variance = (v - self.mean) * (v - self.mean)
+        cdef float_t this_variance = (v - self.mean) * (v - self.mean)
         self.variance += (2. / self.count) * (this_variance - self.variance)
 
 # ----------------------------------------------------------------------
+
+cdef float_t skipErr = 0.01          # minimum error worth an update
 
 cdef class Trainer(object):
     """
@@ -50,12 +53,12 @@ cdef class Trainer(object):
 
     # cdef np.ndarray pre_padding, post_padding
     # size of ngrams
-    # cdef int ngram_size
-    # cdef public float learning_rate
+    # cdef int_t ngram_size
+    # cdef public float_t learning_rate
     # cdef public object saver
-    # cdef int total_items, epoch_items, epoch_hits, skips
+    # cdef int_t total_items, epoch_items, epoch_hits, skips
     # data for statistics
-    # cdef float error, accuracy
+    # cdef float_t error, accuracy
     # cdef readonly MovingAverage avg_error
     # cdef public bool verbose
     
@@ -74,14 +77,11 @@ cdef class Trainer(object):
 
         # options
         self.learning_rate = options.get('learning_rate', 0.01)
-
-        global l1_decay, l2_decay, momentum, adaRo, adaEps
-        l1_decay = options.get('l1_decay', 0.0)
-        l2_decay = options.get('l2_decay', 0.0)
-        momentum = options.get('momentum', 0.9)
-        adaRo = options.get('ro', 0.95)
-        adaEps = options.get('eps', 1e-8)
-
+        self.adaEps = options.get('eps', 1e-6) # 1e-8
+        self.adaRo = options.get('ro', 0.95)
+        self.l1_decay = options.get('l1_decay', 0.0)
+        self.l2_decay = options.get('l2_decay', 0.0)
+        self.momentum = options.get('momentum', 0.9)
         self.skipErr = skipErr     # skip errors < this value
 
         self.verbose = options.get('verbose', False)
@@ -91,12 +91,12 @@ cdef class Trainer(object):
         right_context = options.get('right_context', 2)
         cdef np.ndarray padding_left = converter.get_padding_left()
         cdef np.ndarray padding_right = converter.get_padding_right()
-        self.pre_padding = np.array(left_context * [padding_left])
-        self.post_padding = np.array(right_context * [padding_right])
+        self.pre_padding = np.array(left_context * [padding_left], dtype=INT)
+        self.post_padding = np.array(right_context * [padding_right], dtype=INT)
 
     def train(self, list examples, list outcomes, 
-              int epochs, int report_frequency=0,
-              float desired_accuracy=0, threads=1):
+              int_t epochs, int_t report_frequency=0,
+              float_t desired_accuracy=0, threads=1):
         """
         Trains the network to tag examples.
         
@@ -109,22 +109,24 @@ cdef class Trainer(object):
             is reached. Ignored if 0.
         """
         logger = logging.getLogger("Logger")
-        global adaEps, adaRo
-        logger.info("Parameters: lr=%f, eps=%f, ro=%f" % (self.learning_rate,
-                                                          adaEps, adaRo))
+        logger.info("Parameters: lr=%f, eps=%.2e, ro=%f" %
+                    (self.learning_rate, self.adaEps, self.adaRo))
         logger.info("Training for up to %d epochs" % epochs)
         
         # prepare for AdaGrad
-        if adaEps:
-            self.converter.clearAdaGrads()
+        if self.adaEps:
+            self.ada = self.nn.parameters()
+            self.converter.adaGradInit()
+        else:
+            self.ada = None
 
         self.total_items = 0
-        cdef float top_accuracy = 0
-        cdef float last_accuracy = 0
-        cdef float min_error = np.Infinity 
-        cdef float last_error = np.Infinity
+        cdef float_t top_accuracy = 0
+        cdef float_t last_accuracy = 0
+        cdef float_t min_error = np.Infinity 
+        cdef float_t last_error = np.Infinity
         
-        cdef int no_progress = 0 # how many epochs without progress
+        cdef int_t no_progress = 0 # how many epochs without progress
 
         np.seterr(all='raise')
 
@@ -188,12 +190,7 @@ cdef class Trainer(object):
 
         nn = self.nn
         vars = nn.variables()   # allocate variables
-        global adaEps
-        if adaEps:
-            ada = nn.gradients()
-        else:
-            ada = None
-        cdef int i = 0
+        cdef int_t i = 0
         for sent, label in izip(sentences, labels):
             # add padding
             sent = np.concatenate((self.pre_padding, sent, self.post_padding))
@@ -203,7 +200,7 @@ cdef class Trainer(object):
             loss = nn.backpropagate(label, vars, grads)
             if loss > self.skipErr:
                 self.error += loss
-                self.update(grads, self.learning_rate, sent, ada)
+                self.update(grads, sent)
             else:
                 self.skips += 1
             self.epoch_items += 1
@@ -224,15 +221,15 @@ cdef class Trainer(object):
         self.accuracy = self._validate(sentences, labels, validation)
 
     @cython.boundscheck(False)
-    cdef float _validate(self, list sentences, labels, int idx):
+    cdef float_t _validate(self, list sentences, labels, int_t idx):
         """Perform validation on held out data and estimate accuracy
         :param idx: index of first sentence in validation set.
         """
-        cdef int tokens = 0
-        cdef int hits = 0
+        cdef int_t tokens = 0
+        cdef int_t hits = 0
 
-        cdef int i, label
-        cdef np.ndarray[INT_t,ndim=2] sent
+        cdef int_t i, label
+        cdef np.ndarray[int_t,ndim=2] sent
         cdef Variables vars = self.nn.variables()
 
         for i in xrange(idx, len(sentences)):
@@ -250,7 +247,7 @@ cdef class Trainer(object):
         else:
             return 0.0
 
-    def _epoch_report(self, int num):
+    def _epoch_report(self, int_t num):
         """
         Reports the status of the network in the given training epoch,
         including error and accuracy.
@@ -262,20 +259,18 @@ cdef class Trainer(object):
         logger.info("%d epochs   Examples: %d   Error: %f   Accuracy: %f%s" \
                         % (num, self.total_items, self.error, self.accuracy, msg))
 
-    cpdef update(self, Gradients grads, float learning_rate,
-                     np.ndarray[INT_t,ndim=2] sequence, Gradients ada=None):
+    cpdef update(self, Gradients grads, np.ndarray[int_t,ndim=2] sequence):
         """
         Adjust the weights.
         :param grads: gradients to apply.
-        :param larning_rate: learning rate multiplier.
         :param sequence: portion of padded sentence.
-        :param ada: cumulative square gradients for performing AdaGrad.
         """
 
         # update network weights.
-        self.nn.update(grads, learning_rate, ada)
+        self.nn.update(grads, self.learning_rate, self.ada, self.adaEps)
 
-        self.converter.update(grads.input, learning_rate, sequence)
+        self.converter.update(grads.input, sequence,
+                              self.learning_rate, self.adaEps)
 
     def save(self, file):
         np.save(file, (self.pre_padding, self.post_padding, self.ngram_size))
@@ -291,7 +286,7 @@ cdef class Trainer(object):
         Resume training from previous dump.
         """
         # use __new__() to skip initialiazation
-        trainer = Trainer.__new__(cls)
+        trainer = __new__(cls)
         trainer.pre_padding, trainer.post_padding, trainer.ngram_size = np.load(file)
         trainer.nn = Network.load(file)
         trainer.converter = Converter()
@@ -335,26 +330,24 @@ cdef class TaggerTrainer(Trainer):
         np.random.set_state(random_state)
         np.random.shuffle(tags)
         
-        global adaEps
-        cdef SeqGradients grads, ada = None
+        cdef SeqGradients grads
 
         # keep last 2% for validation
-        cdef int validation = int((len(sentences) - 1) * 0.98) + 1 # at least 1
+        cdef int_t validation = int((len(sentences) - 1) * 0.98) + 1 # at least 1
 
-        cdef float error
-        cdef int i = 0, slen
+        cdef float_t error
+        cdef int_t i = 0, slen
+        cdef np.ndarray[int_t,ndim=2] sent
         for sent, sent_tags in izip(sentences, tags):
             slen = len(sent)    # sequence length
             # add padding
             sent = np.concatenate((self.pre_padding, sent, self.post_padding))
             scores = self.tagger._tag_sequence(sent, True)
             grads = nn.gradients(slen) # one for each item
-            if adaEps:
-                ada = nn.gradients(slen) # one for each item
             error = nn.backpropagateSeq(sent_tags, scores, grads, self.skipErr)
             if error > self.skipErr:
                 self.error += error
-                self.update(grads, self.learning_rate, sent, ada)
+                self.update(grads, sent)
             else:
                 self.skips += 1
 
@@ -380,17 +373,19 @@ cdef class TaggerTrainer(Trainer):
         # print >> sys.stderr, 'ow', nn.output_weights[0:4,:4]
 
     @cython.boundscheck(False)
-    cdef float _validate(self, list sentences, tags, int idx):
+    cdef float_t _validate(self, list sentences, tags, int_t idx):
         """Perform validation on held out data and estimate accuracy
+        :para sentences: full training set.
+        :para tags: tags for all sentences.
         :param idx: index of first sentence in validation set.
         """
-        cdef int tokens = 0
-        cdef int hits = 0
+        cdef int_t tokens = 0
+        cdef int_t hits = 0
 
-        cdef int i
-        cdef np.ndarray[INT_t,ndim=2] sent
-        cdef np.ndarray[INT_t,ndim=1] answer
-        cdef np.ndarray[FLOAT_t,ndim=2] scores
+        cdef np.ndarray[int_t,ndim=2] sent
+        cdef np.ndarray[int_t] answer
+        cdef np.ndarray[float_t,ndim=2] scores
+        cdef int_t i, pred_tag, gold_tag
 
         for i in xrange(idx, len(sentences)):
             sent = sentences[i]
@@ -403,22 +398,16 @@ cdef class TaggerTrainer(Trainer):
                 if pred_tag == gold_tag:
                     hits += 1
                 tokens += 1
-        if tokens:
-            return float(hits) / tokens
-        else:
-            return 0.0
+        return float(hits) / tokens if tokens else 0.0
 
-    cpdef update(self, Gradients grads, float learning_rate,
-                 np.ndarray[INT_t,ndim=2] sentence, Gradients ada=None):
+    cpdef update(self, Gradients grads, np.ndarray[int_t,ndim=2] sentence):
 
         """
         :param grads: gradients to apply.
-        :param larning_rate: learning rate multiplier.
         :param sentence: the padded sentence.
-        :param ada: cumulative square gradients for performing AdaGrad.
         """
         # update network weights and transition weights.
-        self.nn.update(grads, learning_rate, ada)
+        self.nn.update(grads, self.learning_rate, self.ada, self.adaEps)
         #
         # Adjust the features indexed by the input windows.
         #
@@ -428,10 +417,18 @@ cdef class TaggerTrainer(Trainer):
         # e.g. num features = 50 (embeddings) + 5 (caps) + 5 (suffix) = 60
         # input_size = num features * window (e.g. 60 * 5).
 
-        cdef int window_size = len(self.pre_padding) + 1 + len(self.post_padding)
-        cdef int i, slen = len(sentence) - window_size + 1 # without padding
+        cdef int_t window_size = len(self.pre_padding) + 1 + len(self.post_padding)
+        cdef int_t i, slen = len(sentence) - window_size + 1 # without padding
 
-        cdef np.ndarray[INT_t,ndim=2] window
+        # DEBUG: Old version
+        # if ada:
+        #     # accumulate in first position
+        #     for i in xrange(slen):
+        #         ada.input[0] += np.square(grads.input[i])
+        #     grads.input /= np.sqrt(ada.input[0] + adaEps)
+
+        cdef np.ndarray[int_t,ndim=2] window
         for i in xrange(slen):
             window = sentence[i: i+window_size]
-            self.converter.update(grads.input[i], learning_rate, window)
+            self.converter.update(grads.input[i], window, self.learning_rate,
+                                  self.adaEps)

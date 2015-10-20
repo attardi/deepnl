@@ -5,9 +5,7 @@ Feature extractors.
 
 cimport numpy as np
 
-# use double floats
-ctypedef np.double_t FLOAT_t
-ctypedef np.int_t INT_t
+from network cimport float_t, int_t
 from cpython cimport bool
 
 # ----------------------------------------------------------------------
@@ -27,34 +25,38 @@ cdef class Converter(Iterable):
     """
     
     cdef readonly list extractors
+    cdef readonly list fields
 
-    cdef np.ndarray[INT_t,ndim=1] get_padding_left(self)
+    cdef np.ndarray[int_t] get_padding_left(self)
+    cdef np.ndarray[int_t] get_padding_right(self)
 
-    cdef np.ndarray[INT_t,ndim=1] get_padding_right(self)
+    cpdef int_t size(self)
 
-    cpdef int size(self)
+    cpdef np.ndarray[int_t,ndim=2] convert(self, list sent)
 
-    cpdef np.ndarray[INT_t,ndim=2] convert(self, list sent)
+    cpdef np.ndarray[float_t] lookup(self,
+                                     np.ndarray[int_t,ndim=2] sentence,
+                                     np.ndarray out=*)
 
-    cpdef np.ndarray[FLOAT_t,ndim=1] lookup(self,
-                                            np.ndarray[INT_t,ndim=2] sentence,
-                                            np.ndarray out=*)
+    cpdef adaGradInit(self)
 
-    cpdef clearAdaGrads(self)
-
-    cpdef update(self, np.ndarray[FLOAT_t,ndim=1] grads, float learning_rate,
-                 np.ndarray[INT_t,ndim=2] sentence)
+    cpdef update(self, np.ndarray[float_t] grads, np.ndarray[int_t,ndim=2] sentence,
+    	  	 float_t learning_rate, float_t adaEps=*)
 
 cdef class Extractor(object):
 
     cdef readonly dict dict
-
     cdef readonly np.ndarray table
     cdef readonly np.ndarray adaGrads
 
-    cpdef int size(self)
+    cpdef int_t size(self)
 
-    cpdef clearAdaGrads(self)
+    cpdef adaGradInit(self)
+
+    cpdef int_t get_padding_left(self)
+    cpdef int_t get_padding_right(self)
+
+    cpdef extract(self, list tokens, int_t field)
 
 cdef class Embeddings(Extractor):
     pass
@@ -76,4 +78,4 @@ cdef class GazetteerExtractor(Extractor):
     cdef bool noaccents
 
 cdef class AttributeExtractor(Extractor):
-    cdef int idx
+    pass

@@ -234,7 +234,14 @@ def boundaries_to_arg_limits(boundaries):
         elif tag == 'E':
             limits.append([start, i])
     
-    return np.array(limits, np.int)
+    return np.array(limits, int)
+
+# ----------------------------------------------------------------------
+
+def import_class(name):
+    modulename, classname = name.rsplit('.', 1)
+    m = __import__(modulename, globals(), locals(), [classname])
+    return getattr(m, classname)
 
 # ----------------------------------------------------------------------
 

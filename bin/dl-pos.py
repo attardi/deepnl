@@ -12,10 +12,6 @@ import numpy as np
 import argparse
 from ConfigParser import ConfigParser
 
-# profling
-import pstats, cProfile
-import pyximport
-
 # allow executing from anywhere without installing the package
 import sys
 import os
@@ -26,7 +22,7 @@ sys.path.append(libdir)
 
 # local
 from deepnl.corpus import ConllWriter
-from deepnl.reader import PosReader, ConllReader
+from deepnl.reader import PosReader
 from deepnl.extractors import *
 from deepnl.tagger import Tagger
 from deepnl.trainer import TaggerTrainer
@@ -312,10 +308,11 @@ def main():
     else:
         with open(args.model) as file:
             tagger = Tagger.load(file)
-        reader = ConllReader()
+        reader = PosReader()
         for sent in reader:
-            sent = [x[args.formField] for x in sent] # extract form
-            ConllWriter.write(tagger.tag_sequence(sent, return_tokens=True))
+            for tok, tag in tagger.tag(sent):
+                tok[reader.tagField] = tag
+            ConllWriter.write(sent)
 
 # ----------------------------------------------------------------------
 
@@ -323,9 +320,7 @@ profile = False
 
 if __name__ == '__main__':
     if profile:
-        pyximport.install()
+        import cProfile
         cProfile.runctx("main()", globals(), locals(), "Profile.prof")
-        s = pstats.Stats("Profile.prof")
-        s.strip_dirs().sort_stats("time").print_stats()
     else:
         main()

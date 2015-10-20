@@ -36,6 +36,7 @@ cimport cython
 # local
 from math cimport *
 from network cimport *
+from numpy import int32 as INT
 from trainer cimport Trainer
 from extractors cimport Iterable
 from word_dictionary import WordDictionary as WD
@@ -60,7 +61,7 @@ cdef class RandomPool(object):
         # so that each row represents a token, e.g.
         # [[rnd0_t1 rnd0_tn], ..., [rnd999_t1 rnd999_tn]]
         self.pool = np.array([np.random.random_integers(0, dim - 1, self.size)
-                                    for dim in self.dims], dtype=np.int).T
+                              for dim in self.dims], dtype=INT).T
         self.current = 0
 
     def next(self):
@@ -99,10 +100,10 @@ cdef class LmNetwork(Network):
 # ----------------------------------------------------------------------
 
 # minimum hinge loss worth considering
-cdef FLOAT_t minError = 1.e-5
+cdef float minError = 1.e-5
 
 # minimum delay between reports
-cdef FLOAT_t report_interval = 10.0
+cdef float report_interval = 10.0
 
 cdef class LmTrainer(Trainer): 
     """
@@ -112,7 +113,7 @@ cdef class LmTrainer(Trainer):
     # cdef list feature_tables
     # # data for statistics during training. 
     # cdef int total_pairs
-    # cdef FLOAT_t error
+    # cdef float error
 
     def __init__(self, nn, Converter converter, dict options):
         """
@@ -126,7 +127,7 @@ cdef class LmTrainer(Trainer):
         super(LmTrainer, self).__init__(nn, converter, options)
         self.feature_tables = [e.table for e in converter.extractors]
 
-    cdef _update_weights(self, worker, LmGradients grads, FLOAT_t remaining):
+    cdef _update_weights(self, worker, LmGradients grads, float remaining):
         """
         Adjust the weights along the gradients and copy them back to worker.
         :param worker: worker thread.
@@ -136,7 +137,7 @@ cdef class LmTrainer(Trainer):
         cdef Network nn = self.nn
 
         # decrease linearly by remaining percentage
-        cdef FLOAT_t LR = max(0.001, self.learning_rate * remaining)
+        cdef float LR = max(0.001, self.learning_rate * remaining)
 
         nn.p.update(grads, LR)
 
@@ -144,12 +145,12 @@ cdef class LmTrainer(Trainer):
         worker.nn.p.copy(nn.p)
 
     cdef _update_embeddings(self,
-                            np.ndarray[FLOAT_t,ndim=1] grads_input_pos,
-                            np.ndarray[FLOAT_t,ndim=1] grads_input_neg,
-                            FLOAT_t remaining,
-                            np.ndarray[INT_t,ndim=2] example,
-                            np.ndarray[INT_t,ndim=1] token_pos,
-                            np.ndarray[INT_t,ndim=1] token_neg):
+                            np.ndarray[float_t] grads_input_pos,
+                            np.ndarray[float_t] grads_input_neg,
+                            float_t remaining,
+                            np.ndarray[int_t,ndim=2] example,
+                            np.ndarray[int_t] token_pos,
+                            np.ndarray[int_t] token_neg):
         """
         Update the weight vectors.
         :param grads_input_pos: gradients from the positive example.
@@ -168,10 +169,10 @@ cdef class LmTrainer(Trainer):
         Stochastic Gradient Descent.
         """
         # decrease linearly by remaining
-        cdef FLOAT_t LR_0 = max(0.001, self.learning_rate * remaining)
+        cdef float LR_0 = max(0.001, self.learning_rate * remaining)
 
-        cdef np.ndarray[INT_t,ndim=1] token
-        cdef np.ndarray[FLOAT_t,ndim=2] table
+        cdef np.ndarray[int_t] token
+        cdef np.ndarray[float_t,ndim=2] table
         cdef int i, j
         cdef int start = 0, end
 
@@ -218,7 +219,7 @@ cdef class LmTrainer(Trainer):
         if epoch_pairs == 0:
             logging.info("Estimating max number of pairs")
             epoch_pairs = sum([len(sen) for sen in sentences])
-        cdef FLOAT_t max_pairs = float(epoch_pairs * epochs)
+        cdef float max_pairs = float(epoch_pairs * epochs)
 
         # perform “asynchronous stochastic gradient descent” without locking.
 
@@ -230,7 +231,7 @@ cdef class LmTrainer(Trainer):
         jobs = Queue(maxsize= 2 * threads)  # limit number of queued jobs
         lock = threading.Lock()  # for protecting shared state.
 
-        cdef FLOAT_t now, start = time.time()
+        cdef float now, start = time.time()
         # use a list, so that each thread may update the value.
         next_report = [start + report_interval] # when to report
 
@@ -247,8 +248,8 @@ cdef class LmTrainer(Trainer):
                               self.left_context, self.right_context,
                               dims, nn.hidden_size, ngrams=self.ngram_size)
 
-            cdef INT_t total_pairs
-            cdef FLOAT_t remaining, error
+            cdef int total_pairs
+            cdef float remaining, error
 
             try:
                 while True:
@@ -317,10 +318,10 @@ cdef class LmTrainer(Trainer):
         #train_worker(0)           # DEBUG
 
     @cython.boundscheck(False)
-    cdef np.ndarray[INT_t,ndim=1] _extract_window(self,
-                                                  np.ndarray[INT_t,ndim=2] window,
-                                                  np.ndarray[INT_t,ndim=2] sentence,
-                                                  int position, int size=1):
+    cdef np.ndarray[int_t] _extract_window(self,
+                                                  np.ndarray[int_t,ndim=2] window,
+                                                  np.ndarray[int_t,ndim=2] sentence,
+                                                  int_t position, int_t size=1):
         """
         Extracts a window of tokens from the sentence, consisting of
         left_context tokens before :param position:,
@@ -355,7 +356,7 @@ cdef class LmTrainer(Trainer):
             ngramIDs = [sentence[i][0] for i in xrange(position, position + size)]
             # get the embeddings extractor
             extractor = self.converter.extractors[0]
-            ngram = np.array([extractor.lookup_ngram(ngramIDs)]) # single feature_table
+            ngram = np.array([extractor.lookup_ngram(ngramIDs)], dtype=INT) # single feature_table
 
         window[left_context] = ngram
 
@@ -434,7 +435,7 @@ cdef class LmWorker(LmTrainer):
 
     # cdef WordsTrainer* trainer
 
-    def __init__(self, Converter converter, FLOAT_t learning_rate,
+    def __init__(self, Converter converter, float learning_rate,
                  int left_context, int right_context,
                  dims, int hidden_size, int output_size=1, int ngrams=1):
 
@@ -453,41 +454,41 @@ cdef class LmWorker(LmTrainer):
         self.vars_pos = Variables(input_size, hidden_size, output_size)
         self.vars_neg = Variables(input_size, hidden_size, output_size)
 
-        cdef INT_t window_size = left_context + 1 + right_context
-        self.example = np.empty((window_size, 1), dtype=np.int)
+        cdef int window_size = left_context + 1 + right_context
+        self.example = np.empty((window_size, 1), dtype=INT)
 
         # build Eigen trainer, sharing arrays with Python
         self.trainer = new WordsTrainer(
             input_size, hidden_size, output_size,
-            <FLOAT_t*>np.PyArray_DATA(self.nn.hidden_weights),
-            <FLOAT_t*>np.PyArray_DATA(self.nn.hidden_bias),
-            <FLOAT_t*>np.PyArray_DATA(self.nn.output_weights),
-            <FLOAT_t*>np.PyArray_DATA(self.nn.output_bias),
-            <FLOAT_t*>np.PyArray_DATA(self.vars_pos.input),
-            <FLOAT_t*>np.PyArray_DATA(self.vars_neg.input),
+            <double*>np.PyArray_DATA(self.nn.hidden_weights),
+            <double*>np.PyArray_DATA(self.nn.hidden_bias),
+            <double*>np.PyArray_DATA(self.nn.output_weights),
+            <double*>np.PyArray_DATA(self.nn.output_bias),
+            <double*>np.PyArray_DATA(self.vars_pos.input),
+            <double*>np.PyArray_DATA(self.vars_neg.input),
             # grads
-            <FLOAT_t*>np.PyArray_DATA(self.grads.hidden_weights),
-            <FLOAT_t*>np.PyArray_DATA(self.grads.hidden_bias),
-            <FLOAT_t*>np.PyArray_DATA(self.grads.output_weights),
-            <FLOAT_t*>np.PyArray_DATA(self.grads.output_bias),
-            <FLOAT_t*>np.PyArray_DATA(self.grads.input),
-            <FLOAT_t*>np.PyArray_DATA(self.grads.input_neg),
+            <double*>np.PyArray_DATA(self.grads.hidden_weights),
+            <double*>np.PyArray_DATA(self.grads.hidden_bias),
+            <double*>np.PyArray_DATA(self.grads.output_weights),
+            <double*>np.PyArray_DATA(self.grads.output_bias),
+            <double*>np.PyArray_DATA(self.grads.input),
+            <double*>np.PyArray_DATA(self.grads.input_neg),
             <int*>np.PyArray_DATA(self.example),
             window_size,
-            <FLOAT_t*>np.PyArray_DATA(self.feature_tables[0]),
+            <double*>np.PyArray_DATA(self.feature_tables[0]),
             self.feature_tables[0].shape[0],
             self.feature_tables[0].shape[1])
 
     @cython.boundscheck(False)
-    cdef _train_batch(self, sentences, FLOAT_t remaining):
+    cdef _train_batch(self, sentences, float remaining):
         """
         :param sentences: list of sentences on which to train
         :param remaining: percentage used for progressively decreasing learning rate.
         :return: the number of pairs generated and the average error
         """
         cdef int pos, pairs = 0
-        cdef FLOAT_t error, batch_error = 0.0
-        cdef np.ndarray[INT_t,ndim=1] pos_token, neg_token
+        cdef float error, batch_error = 0.0
+        cdef np.ndarray[int_t] pos_token, neg_token
         self.grads.clear()
         cdef int left_context = len(self.pre_padding)
 
@@ -516,25 +517,25 @@ cdef class LmWorker(LmTrainer):
 
         return pairs, batch_error/pairs
    
-    cdef FLOAT_t _train_step(self, example, pos_token, neg_token,
-                             FLOAT_t remaining):
+    cdef float _train_step(self, example, pos_token, neg_token,
+                             float remaining):
         """
         Perform a training step on a single pair of examples and update weight
         vectors.
         :return: the loss.
         """
         # Eigen version
-        cdef FLOAT_t error, LR_0
-        cdef INT_t pos_tok = pos_token[0]
-        cdef INT_t neg_tok = neg_token[0]
+        cdef float error, LR_0
+        cdef int pos_tok = pos_token[0]
+        cdef int neg_tok = neg_token[0]
         with nogil:
             error = self.trainer.train_pair()
             if error > minError:
                 LR_0 = max(0.001, self.learning_rate * remaining)
                 # update immediately, making embeddings visible to other workers
-                self.trainer.update_embeddings(<FLOAT_t>LR_0, pos_tok, neg_tok)
+                self.trainer.update_embeddings(<float>LR_0, pos_tok, neg_tok)
         # Python version
-        # cdef FLOAT_t error = self._train_pair(self.vars_pos,
+        # cdef float error = self._train_pair(self.vars_pos,
         #                                       self.vars_neg, grads)
 
         # immediately update the embeddings which are shared among
@@ -549,7 +550,7 @@ cdef class LmWorker(LmTrainer):
         return error
 
     @cython.boundscheck(False)
-    cdef FLOAT_t _train_pair(self, Variables vars_pos, Variables vars_neg,
+    cdef float _train_pair(self, Variables vars_pos, Variables vars_neg,
                              LmGradients grads):
         """
         Trains the network with a pair of positive/negative examples.
@@ -565,9 +566,9 @@ cdef class LmWorker(LmTrainer):
         nn.forward(vars_neg)
         
         # hinge loss
-        cdef FLOAT_t score_pos = vars_pos.output[0]
-        cdef FLOAT_t score_neg = vars_neg.output[0]
-        cdef FLOAT_t error = max(0.0, 1.0 - score_pos + score_neg)
+        cdef float score_pos = vars_pos.output[0]
+        cdef float score_neg = vars_neg.output[0]
+        cdef float error = max(0.0, 1.0 - score_pos + score_neg)
         
         if error < minError:
             return error

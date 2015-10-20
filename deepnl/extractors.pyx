@@ -18,13 +18,14 @@ import re
 from collections import Counter, OrderedDict
 import cPickle as pickle
 from itertools import izip
+from numpy import int32 as INT
 import sys                      # modules
 
 # local
 from word_dictionary import WordDictionary as WD
-from network cimport adaEps
 import embeddings
 from utils import Trie, strip_accents
+#from network cimport adaEps
 
 # ----------------------------------------------------------------------
 
@@ -48,8 +49,8 @@ cdef class ConvertGenerator(Iterable):
         """
         :param sentences: an iterable over sentences.
         :param cache: if this is True, caches converted sentences,
-        avoiding repeated conversion. Useful if sentences is small enough to
-        fit in memory.
+           avoiding repeated conversion. Useful if sentences are few enough to
+           fit in memory.
         """
         self.converter = converter
         self.sentences = sentences
@@ -80,22 +81,28 @@ cdef class Converter(object):
 
     def __init__(self):
         self.extractors = []
+        self.fields = []
     
-    cpdef int size(self):
+    cpdef int_t size(self):
         #return sum(e.size() for e in self.extractors)
-        cdef int s = 0
+        cdef int_t s = 0
         for e in self.extractors:
             s += e.size()
         return s
 
-    def add(self, extractor):
+    def add(self, extractor, field=-1):
         """
-        Adds an extractor function to the SentenceConverter.
+        Adds an extractor function to this Converter.
         In order to get a token's feature indices, the Converter will call
         each of its extraction functions passing the token as a parameter.
 
+        :param extractor: the extractor to add.
+        :param field: which token field to pass to the extractor. The whole token if -1.
+
+        # If an extractor needs all token fields, it must redefine method extract()
         """
         self.extractors.append(extractor)
+        self.fields.append(field)
     
     def generator(self, sentences, cache=False):
         """
@@ -103,45 +110,43 @@ cdef class Converter(object):
         """
         return ConvertGenerator(self, sentences, cache)
 
-    cdef np.ndarray[INT_t,ndim=1] get_padding_left(self):
+    cdef np.ndarray[int_t] get_padding_left(self):
         """
-        :return: the features of the left padding token for the sentence.
+        :return: the features of the left padding token.
         
         """
-        pad = WD.padding_left
-        return self.convert([pad])[0] # features of first token
+        return INT([e.get_padding_left() for e in self.extractors])
     
-    cdef np.ndarray[INT_t,ndim=1] get_padding_right(self):
+    cdef np.ndarray[int_t] get_padding_right(self):
         """
-        :return: the features of the right padding token for the sentence.
+        :return: the features of the right padding token.
         """
-        pad = WD.padding_right
-        return self.convert([pad])[0] # features of first token
+        return INT([e.get_padding_right() for e in self.extractors])
     
-    cpdef np.ndarray[INT_t,ndim=2] convert(self, list sent):
+    cpdef np.ndarray[int_t,ndim=2] convert(self, list sent):
         """
         Converts a sentence into an array of feature indices.
-        :param sent: a list of words.
+        :param sent: a list of tokens.
         :return: an array of all extractors' results.
         """
-        return np.array(zip(*[extractor.extract(sent) for extractor in self.extractors]))
+        return INT(zip(*[(<Extractor>e).extract(sent, field) for e, field in zip(self.extractors, self.fields)]))
         # CHECKME: is this faster?
         # return np.array([extractor.extract(sent) for extractor in self.extractors]).T
 
-    cpdef np.ndarray[FLOAT_t,ndim=1] lookup(self,
-                                            np.ndarray[INT_t,ndim=2] sentence,
-                                            np.ndarray out=None):
+    cpdef np.ndarray[float_t] lookup(self,
+                                     np.ndarray[int_t,ndim=2] sentence,
+                                     np.ndarray out=None):
         """
         Collect the feature vectors of all sentence tokens.
         :param sentence: Each row represents a token through its indices into
-            each feature table.
+            the corresponding feature table.
         :param out: vector where to store result.
         :return: a single feature vector, combining the vectors of all features
             of eack token in :param sentence:
         """
         if out is None:
             out = np.empty(self.size() * len(sentence))
-        cdef int start = 0, end
+        cdef int_t start = 0, end
         for token in sentence:
             for feature, extractor in izip(token, self.extractors):
                 end = start + extractor.size()
@@ -149,40 +154,40 @@ cdef class Converter(object):
                 start = end
         return out
 
-    cpdef clearAdaGrads(self):
+    cpdef adaGradInit(self):
         """
         Initialize AdaGrad.
         """
         for e in self.extractors:
-            e.clearAdaGrads()
+            e.adaGradInit()
 
-    cpdef update(self, np.ndarray[FLOAT_t,ndim=1] grads, float learning_rate,
-                 np.ndarray[INT_t,ndim=2] sentence):
+    cpdef update(self, np.ndarray[float_t] grads, np.ndarray[int_t,ndim=2] sequence,
+                 float_t learning_rate, float_t adaEps=1e-6):
         """
         Update the features according to the given gradients.
         :param grads: vector of feature gradients.
         :param larning_rate: learning rate multiplier.
-        :param sentence: Each row represents a token through its indices into
-            each feature table.
+        :param sequence: each row represents a token through its indices into
+            each feature table. Includes padding.
         """
-        global adaEps
-        cdef int start = 0, end
-        for token in sentence:
+        cdef int_t start = 0, end
+        for token in sequence:
             for feature, extractor in izip(token, self.extractors):
                 end = start + extractor.size()
-                if extractor.adaGrads is not None:
+                if extractor.adaGrads is None:
+                    extractor.table[feature] += learning_rate * grads[start:end]
+                else:
                     # AdaGrad
                     extractor.adaGrads[feature] += grads[start:end] * grads[start:end]
                     extractor.table[feature] += learning_rate * grads[start:end] / np.sqrt(extractor.adaGrads[feature] + adaEps)
-                else:
-                    extractor.table[feature] += learning_rate * grads[start:end]
-
                 start = end
 
     def save(self, file):
         """
         Save all extractors' data to file.
         """
+        # save fields
+        pickle.dump(self.fields, file)
         # save class names
         class_names = [type(e).__name__ for e in self.extractors]
         pickle.dump(class_names, file)
@@ -193,13 +198,15 @@ cdef class Converter(object):
         """
         Load all extractors' data from file.
         """
+        # load fields
+        self.fields = pickle.load(file)
         class_names = pickle.load(file)
         # FIXME: this will recognize only classes defined in this file
         #m = __import__("extractors")
         m = sys.modules['deepnl.extractors']
-        for c in class_names:
+        for c,f in izip(class_names, self.fields):
             cls = getattr(m, c)
-            self.add(cls.__new__(cls))
+            self.add(cls.__new__(cls), f)
         for extractor in self.extractors:
             extractor.load(file)
 
@@ -211,12 +218,13 @@ cdef class Extractor(object):
 
     Each extractor deals with one kind of features, e.g. embeddings,
     pos, caps, etc.
-    Each one is responsible for saving and loading its own data to a
-    single model file.
+    Each one is responsible for saving and loading its own data to/from a
+    common model file.
     """
 
-    # cpdef readonly dict dict
-    # cpdef readonly np.ndarray table
+    # cdef readonly dict dict
+    # cdef readonly np.ndarray table
+    # cdef readonly np.ndarray adaGrads # volatile
 
     def __init__(self):
         self.adaGrads = None
@@ -233,17 +241,35 @@ cdef class Extractor(object):
         """
         self.table[feature] = value
 
-    cpdef int size(self):
+    cpdef int_t get_padding_left(self):
+        ":return: the feature representing the token used as left padding"
+        return <int_t>self.dict.padding_left
+
+    cpdef int_t get_padding_right(self):
+        ":return: the feature representing the token used as right padding"
+        return <int_t>self.dict.padding_right
+
+    cpdef extract(self, list tokens, int_t field):
+        """
+        Extract the features representing each token.
+        :param tokens: list of tokens.
+        :param field: which token field to use, the whole token if None.
+
+        Override this if the extractor needs to deal differently with tokens.
+        """
+        if field >= 0:
+            return [self.dict[token[field]] for token in tokens]
+        else:
+            return [self.dict[token] for token in tokens]
+
+    cpdef int_t size(self):
         """
         :return: dimension of embeddings space
         """
         return self.table.shape[1]
 
-    cpdef clearAdaGrads(self):
-        if self.adaGrads:
-            self.adaGrads.fill(0.0)
-        else:
-            self.adaGrads = np.zeros_like(self.table);
+    cpdef adaGradInit(self):
+        self.adaGrads = np.zeros_like(self.table);
 
     def save(self, file):
         pickle.dump(self.dict, file)
@@ -300,7 +326,7 @@ cdef class Embeddings(Extractor):
             self.dict.add(word) # add if not present
         # generate vectors for added words
         extra = len(self.dict) - len(self.table)
-        if extra:
+        if extra > 0:
             self.table = np.concatenate((self.table, embeddings.generate_vectors(extra, self.table.shape[1])))
 
     def save(self, file):
@@ -328,12 +354,6 @@ cdef class Embeddings(Extractor):
         else:
             embeddings.Plain.write_vectors(filename, self.table)
 
-    def extract(self, words):
-        """
-        Extract the features representing each word.
-        """
-        return [self.dict[token] for token in words]
-
     def lookup_ngram(self, ngramIDs):
         """
         Lookup an ngrams.
@@ -345,6 +365,7 @@ cdef class Embeddings(Extractor):
     def sentence(self, feats):
         """
         Get sentence back from features.
+        Only for debugging.
         """
         # lookup ngram IDs to obtain back words
         tokens = self.dict.get_words([tok[0] for tok in feats])
@@ -372,14 +393,8 @@ cdef class Caps(object):                     # Caps(Enumeration)
     nocaps = 4
     num_values = 5              # extractor values
 
-cdef class CapsExtractor(Extractor):
-
-    def __init__(self, size):
-        super(CapsExtractor, self).__init__()
-        self.table = embeddings.generate_vectors(Caps.num_values, size)
-
     @staticmethod
-    def type(word):
+    def code(word):
         """
         Returns a code describing the capitalization of the word:
         lower, title, upper, other or non-alpha (numbers and other tokens that can't be
@@ -399,10 +414,6 @@ cdef class CapsExtractor(Extractor):
 
         # return Caps.other
 
-        # SENNA
-        if word == WD.padding_left or word == WD.padding_right:
-            return Caps.padding
-
         if word.isupper():
             return Caps.upper
 
@@ -416,11 +427,33 @@ cdef class CapsExtractor(Extractor):
 
         return Caps.nocaps
 
-    def extract(self, words):
+cdef class CapsExtractor(Extractor):
+
+    def __init__(self, size):
         """
-        :return: the list of capitalization codes for the given list of words.
+        :param size: dimension of vectors.
         """
-        return map(CapsExtractor.type, words)
+        super(CapsExtractor, self).__init__()
+        self.table = embeddings.generate_vectors(Caps.num_values, size)
+
+    cpdef int_t get_padding_left(self):
+        ":return: the feature representing the token used as left padding"
+        return Caps.padding
+
+    cpdef int_t get_padding_right(self):
+        ":return: the feature representing the token used as right padding"
+        return Caps.padding
+
+    cpdef extract(self, list tokens, int_t field):
+        """
+        :param tokens: list of tokens.
+        :param field: which token field to use, the whole token if -1.
+        :return: the list of capitalization codes for the given list of tokens.
+        """
+        if field >= 0:
+            return [Caps.code(tok[field]) for tok in tokens]
+        else:
+            return [Caps.code(w) for w in tokens]
 
     def save(self, file):
         # no dictionary
@@ -450,13 +483,15 @@ def capitalize(word, capitalization):
 cdef class AffixExtractor(Extractor):
     """Abstract class for prefix or suffix extractors."""
 
-    other = 1                   # NOSUFFIX
     padding = 0
+    other = 1                   # NOSUFFIX
     specials = 2                # number of specials (other, padding)
 
     def __init__(self, size, filename=None, wordlist=[], lowcase=True):
         """
         :param size: the dimension of the embeddings space
+        :param filename: load affixes from this file, if given.
+        :param wordlist: extract affixes from these words, if given.
         :param lowcase: set the affix in lowercase
         """
         super(AffixExtractor, self).__init__()
@@ -471,11 +506,24 @@ cdef class AffixExtractor(Extractor):
         # create vectors for possible values
         self.table = embeddings.generate_vectors(len(self.dict)+specials, size)
 
-    def extract(self, words):
+    cpdef int_t get_padding_left(self):
+        ":return: the feature representing the token used as left padding"
+        return AffixExtractor.padding
+
+    cpdef int_t get_padding_right(self):
+        ":return: the feature representing the token used as right padding"
+        return AffixExtractor.padding
+
+    cpdef extract(self, list tokens, int_t field):
         """
-        :return: the list of prefix/suffix codes for the given :param words:.
+        :param tokens: list of tokens.
+        :param field: which token field to use, the whole token if None.
+        :return: the list of prefix/suffix codes for the given :param tokens:.
         """
-        return [self.affix(w) for w in words]
+        if field >= 0:
+            return [self.affix(tok[field]) for tok in tokens]
+        else:
+            return [self.affix(w) for w in tokens]
 
     def load_affixes(self, filename):
         """
@@ -483,13 +531,15 @@ cdef class AffixExtractor(Extractor):
         """
         logger = logging.getLogger("Logger")
         specials = AffixExtractor.specials
+        self.dict = {}
+        # leave reserved values for specials
+        cdef int_t i = specials
         try:
             with open(filename, 'rb') as f:
-                self.dict = {}
                 for line in f:
                     affix = unicode(line.strip(), 'utf-8')
-                    # leave reserved values for specials
-                    self.dict[affix] = len(self.dict) + specials
+                    self.dict[affix] = i
+                    i += 1
         except IOError:
             logger.error("File %s doesn't exist." % filename)
             raise
@@ -517,9 +567,6 @@ cdef class SuffixExtractor(AffixExtractor):
         """
         Return the suffix code for the given word.
         """
-        if word == WD.padding_left or word == WD.padding_right:
-            return AffixExtractor.padding
-
         # as in SENNA, we use the whole word in this case:
         # if len(word) <= SuffixExtractor.max_length:
         #     return Affix.other
@@ -560,8 +607,6 @@ cdef class PrefixExtractor(AffixExtractor):
         """
         Return the prefix code for the given :param word:.
         """
-        if word == WD.padding_left or word == WD.padding_right:
-            return AffixExtractor.padding
 
         # as in SENNA, we use the whole word in this case:
         # if len(word) <= PrefixExtractor.max_length:
@@ -601,6 +646,9 @@ cdef class GazetteerExtractor(Extractor):
     padding = 2
     num_values = 3              # extractor values
 
+    # cdef bool lowcase
+    # cdef bool noaccents
+
     def __init__(self, ngrams=None, size=5, lowcase=True, noaccents=True):
         """
         :param ngrams: iterator on ngrams (list of words) to add to gazeetteer.
@@ -617,31 +665,41 @@ cdef class GazetteerExtractor(Extractor):
                 self.dict.add(ngram)
             self.table = embeddings.generate_vectors(GazetteerExtractor.num_values, size)
 
+    cpdef int_t get_padding_left(self):
+        ":return: the feature representing the token used as left padding"
+        return GazetteerExtractor.padding
+
+    cpdef int_t get_padding_right(self):
+        ":return: the feature representing the token used as right padding"
+        return GazetteerExtractor.padding
+
     @classmethod
     def normalize(cls, w, lowcase, noaccents):
         if lowcase: w = w.lower()
         if noaccents: w = strip_accents(w)
         return w 
 
-    def extract(self, words):
+    cpdef extract(self, list tokens, int_t field):
         """
         Check presence in dictionary possibly as multiword.
-        Set to 'present' items corresponding to words present in dictionary
-        :return: the list of codes for the given :param words:.
+        Set to 'present' items corresponding to tokens present in dictionary
+        :param tokens: list of tokens.
+        :param field: which token field to use, the whole token if -1.
+        :return: the list of codes for the given :param tokens:.
         """
-        res = [GazetteerExtractor.absent] * len(words)
-        words = [GazetteerExtractor.normalize(w, self.lowcase, self.noaccents) for w in words]
+        res = [GazetteerExtractor.absent] * len(tokens)
+        if field >= 0:
+            words = [GazetteerExtractor.normalize(w[field], self.lowcase, self.noaccents) for w in tokens]
+        else:
+            words = [GazetteerExtractor.normalize(w, self.lowcase, self.noaccents) for w in tokens]
         for start, token in enumerate(words):
-            if token == WD.padding_left or token == WD.padding_right:
-                res[start] = GazetteerExtractor.padding
-                continue
             for end in self.dict.iter(words, start, self.lowcase, self.noaccents):
                 for k in range(start, end):
                     res[k] = GazetteerExtractor.present
         return res
 
     @classmethod
-    def create(cls, filename, size=5, lowcase=True, noaccents=True):
+    def create(cls, filename, size, lowcase=True, noaccents=True):
         """
         Create extractors from gazeeteer file, consisting of lines:
           TYPE\tentity
@@ -659,7 +717,7 @@ cdef class GazetteerExtractor(Extractor):
                 if c not in classes:
                     classes[c] = Trie()
                 classes[c].add(words)
-        extractors = [cls(ws, size, lowcase, noaccents) for ws in classes.values()]
+        extractors = [cls(trie, size, lowcase, noaccents) for trie in classes.values()]
         return extractors
 
     # min number of occurrences in corpus to put in gazetteer
@@ -708,14 +766,15 @@ cdef class GazetteerExtractor(Extractor):
         return tries
 
     def save(self, file):
-        pickle.dump(self.dict, file)
-        pickle.dump(self.table, file)
+        super(GazetteerExtractor, self).save(file)
         pickle.dump(self.lowcase, file)
+        pickle.dump(self.noaccents, file)
 
     def load(self, file):
         self.dict = <dict>pickle.load(file)
         self.table = pickle.load(file)
         self.lowcase = pickle.load(file)
+        self.noaccents = pickle.load(file)
 
 # ----------------------------------------------------------------------
 
@@ -725,41 +784,20 @@ cdef class AttributeExtractor(Extractor):
     """
 
     padding = 0
-    num_values = 5              # extractor values
 
-    def __init__(self, idx, values, size=5, variant=None):
+    def __init__(self, values, size=5):
         """
-        :param idx: index of token attribute to use.
-        :param values: attribute values.
+        :param values: set of attribute values.
         :param size: vector dimension.
-        :param variant: style of embeddings (senna, polyglot, word2vect)
         """
         super(AttributeExtractor, self).__init__()
-        self.idx = idx
-        self.dict = <dict>WD(None, wordlist=values, variant=variant)
-        self.table = embeddings.generate_vectors(len(self.dict), size)
+        self.dict =  { x:i+1 for i,x in enumerate(values) }
+        self.table = embeddings.generate_vectors(len(self.dict)+1, size)
 
-    def extract(self, words):
-        """
-        :return: the list of POS codes for the given :param words:.
-        """
-        res = [0] * len(words)
-        for i, token in enumerate(words):
-            if token == WD.padding_left or token == WD.padding_right:
-                res[i] = AttributeExtractor.padding
-                continue
-            attr = token[self.idx]
-            if attr not in self.dict:
-                self.dict[attr] = len(self.dict)
-            res[i] = self.dict[attr]
-        return res
+    cpdef int_t get_padding_left(self):
+        ":return: the feature representing the token used as left padding"
+        return AttributeExtractor.padding
 
-    def save(self, file):
-        pickle.dump(self.dict, file)
-        pickle.dump(self.table, file)
-        pickle.dump(self.lowcase, file)
-
-    def load(self, file):
-        self.dict = pickle.load(file)
-        self.table = pickle.load(file)
-        self.lowcase = pickle.load(file)
+    cpdef int_t get_padding_right(self):
+        ":return: the feature representing the token used as right padding"
+        return AttributeExtractor.padding

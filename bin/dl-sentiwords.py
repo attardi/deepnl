@@ -129,6 +129,11 @@ if __name__ == '__main__':
                         help='File where to save the model')
     parser.add_argument('--vocab', type=str, required=True,
                         help='Vocabulary file, either read and updated or created')
+    parser.add_argument('--min-occurr', type=int, default=3,
+                        help='Minimum occurrences for inclusion in vocabulary (default %(default)s',
+                        dest='minOccurr')
+    parser.add_argument('--vocab-size', type=int, default=0,
+                        help='Maximum size of vocabulary from corpus (default %(default)s)')
     parser.add_argument('--vectors', type=str, required=True,
                         help='Embeddings file, either read and updated or created')
     parser.add_argument('--load', type=str, default=None,
@@ -156,7 +161,8 @@ if __name__ == '__main__':
     reader = TweetReader(args.ngrams)
     reader.read(args.train)
     vocab, bigrams, trigrams = reader.create_vocabulary(reader.sentences,
-                                                        min_occurrences=2)
+                                                        args.vocab_size,
+                                                        min_occurrences=args.minOccurr)
     if args.variant == 'word2vec' and os.path.exists(args.vectors):
         embeddings = Embeddings(vectors=args.vectors, variant=args.variant)
         embeddings.merge(vocab)

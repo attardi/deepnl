@@ -15,8 +15,8 @@ cdef class RandomPool:
 
     cdef np.ndarray pool
     cdef dims
-    cdef int current
-    cdef int size
+    cdef int_t current
+    cdef int_t size
 
 cdef class LmGradients(Gradients):
     
@@ -30,22 +30,22 @@ cdef class LmTrainer(Trainer):
     cdef list feature_tables
 
     # data for statistics during training. 
-    cdef int total_pairs
+    cdef int_t total_pairs
     
-    cdef np.ndarray[INT_t,ndim=1] _extract_window(self,
-                                        np.ndarray[INT_t,ndim=2] window,
-                                        np.ndarray[INT_t,ndim=2] sentence,
-                                                  int position, int size=*)
+    cdef np.ndarray[int_t] _extract_window(self,
+                                        np.ndarray[int_t,ndim=2] window,
+                                        np.ndarray[int_t,ndim=2] sentence,
+                                                  int_t position, int_t size=*)
 
-    cdef _update_weights(self, worker, LmGradients grads, FLOAT_t remaining)
+    cdef _update_weights(self, worker, LmGradients grads, float remaining)
 
     cdef _update_embeddings(self,
-                            np.ndarray[FLOAT_t,ndim=1] grads_input_pos,
-                            np.ndarray[FLOAT_t,ndim=1] grads_input_neg,
-                            FLOAT_t remaining,
-                            np.ndarray[INT_t,ndim=2] example,
-                            np.ndarray[INT_t,ndim=1] token_pos,
-                            np.ndarray[INT_t,ndim=1] token_neg)
+                            np.ndarray[float_t] grads_input_pos,
+                            np.ndarray[float_t] grads_input_neg,
+                            float_t remaining,
+                            np.ndarray[int_t,ndim=2] example,
+                            np.ndarray[int_t] token_pos,
+                            np.ndarray[int_t] token_neg)
 
 # ----------------------------------------------------------------------
 
@@ -76,11 +76,11 @@ cdef class LmWorker(LmTrainer):
 
     cdef WordsTrainer* trainer
 
-    cdef _train_batch(self, sentences, FLOAT_t remaining)
+    cdef _train_batch(self, sentences, float remaining)
 
-    cdef FLOAT_t _train_step(self, example, pos_token, neg_token,
-                             FLOAT_t remaining)
+    cdef float _train_step(self, example, pos_token, neg_token,
+                             float remaining)
 
-    cdef FLOAT_t _train_pair(self, Variables vars_pos, Variables vars_neg,
+    cdef float _train_pair(self, Variables vars_pos, Variables vars_neg,
                              LmGradients grads)
 

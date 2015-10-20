@@ -13,6 +13,8 @@ from itertools import izip
 # local
 from networkconv cimport *
 from trainer cimport Trainer
+from extractors cimport Converter
+from classifier import Classifier
 
 # for decorations
 cimport cython
@@ -22,8 +24,16 @@ cdef class ConvTrainer(Trainer):
     Trainer for a convolutional network.
     """
 
-    def __init__(self, nn, Converter converter, dict options):
+    cdef readonly classifier
+
+    def __init__(self, nn, Converter converter, list labels, dict options):
+        """
+        :param labels: list of labels.
+        """
         super(ConvTrainer, self).__init__(nn, converter, options)
+        left_context = options.get('left_context', 2)
+        right_context = options.get('right_context', 2)
+        self.classifier = Classifier(converter, labels, left_context, right_context, nn)
     
     def _train_epoch(self, list sentences, list labels):
         """
@@ -31,7 +41,7 @@ cdef class ConvTrainer(Trainer):
         :param sentences: a list of 2-dim numpy arrays, where each array 
             encodes a sentence. Each array row represents a token through the
             indices to its features.
-        :param labels: a list of id of labels of each corresponding sentence.
+        :param labels: a list of id of labels for each corresponding sentence.
         """
 
         self.error = 0
@@ -51,9 +61,8 @@ cdef class ConvTrainer(Trainer):
         validation = int(len(sentences) * 0.98)
 
         nn = self.nn
-        global adaEps
-        cdef ConvGradients grads, ada = None
-        cdef int i = 0, slen
+        cdef ConvGradients grads
+        cdef int_t i = 0, slen
         for i in xrange(validation):
             sent = sentences[i]
             label = labels[i]
@@ -64,12 +73,10 @@ cdef class ConvTrainer(Trainer):
             self.converter.lookup(sent, vars.input)
             nn.forward(vars)
             grads = nn.gradients(slen) # allocate gradients
-            if adaEps:
-                ada = nn.gradients(slen) # allocate ada gradients
             loss = nn.backpropagate(label, vars, grads)
             if loss > 0.0:
                 self.error += loss
-                self.update(grads, self.learning_rate, sent, ada)
+                self.update(grads, sent)
                 # # DEBUG. verify
                 # nn.forward(vars) # DEBUG
                 # loss2 = nn.backpropagate(label, vars, grads) # DEBUG
@@ -95,15 +102,15 @@ cdef class ConvTrainer(Trainer):
         self.accuracy = self._validate(sentences, labels, validation)
 
     @cython.boundscheck(False)
-    cdef float _validate(self, list sentences, labels, int idx):
+    cdef float_t _validate(self, list sentences, labels, int_t idx):
         """Perform validation on held out data and estimate accuracy
         :param idx: index of first sentence in validation set.
         """
-        cdef int count = 0
-        cdef int hits = 0
+        cdef int_t count = 0
+        cdef int_t hits = 0
 
-        cdef int i, label
-        cdef np.ndarray[INT_t,ndim=2] sent
+        cdef int_t i, label
+        cdef np.ndarray[int_t,ndim=2] sent
         cdef Variables vars
 
         for i in xrange(idx, len(sentences)):
@@ -136,9 +143,9 @@ cdef class ConvTrainer(Trainer):
         Resume training from previous dump.
         """
         # use __new__() to skip initialiazation
-        trainer = ConvTrainer.__new__(cls)
+        trainer = ConvTrainer.__new__(cls) # CHECKME: ConvTrainer is redundant?
         trainer.pre_padding, trainer.post_padding, trainer.ngram_size = np.load(file)
-        trainer.nn = ConvolutionalNetwork.load(file)
+        trainer.nn = ConvolutionalNetwork.load(file) # different from super
         trainer.converter = Converter()
         trainer.converter.load(file)
         return trainer

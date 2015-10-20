@@ -11,7 +11,6 @@ import logging
 import numpy as np
 import argparse
 from ConfigParser import ConfigParser
-from itertools import chain
 
 # allow executing from anywhere without installing the package
 import sys
@@ -28,6 +27,7 @@ from deepnl.extractors import *
 from deepnl.networkconv import ConvolutionalNetwork
 from deepnl.trainerconv import ConvTrainer
 from deepnl.reader import ClassifyReader
+from deepnl.classifier import Classifier
 
 # ----------------------------------------------------------------------
 # Auxiliary functions
@@ -35,7 +35,7 @@ from deepnl.reader import ClassifyReader
 def create_trainer(args, converter, labels):
     """
     Creates or loads a neural network according to the specified args.
-    :param labels: dict of labels.
+    :param labels: list of labels.
     """
 
     logger = logging.getLogger("Logger")
@@ -59,7 +59,7 @@ def create_trainer(args, converter, labels):
             'left_context': args.window/2,
             'right_context': args.window/2
         }
-        trainer = ConvTrainer(nn, converter, options)
+        trainer = ConvTrainer(nn, converter, labels, options)
 
     trainer.saver = saver(args.model, args.vectors, args.variant)
 
@@ -76,7 +76,7 @@ def saver(model_file, vectors_file, variant):
             trainer.save_vectors(vectors_file, variant)
         if model_file:
             with open(model_file, 'wb') as file:
-                trainer.save(file)
+                trainer.classifier.save(file)
     return save
 
 # ----------------------------------------------------------------------
@@ -176,7 +176,7 @@ def main():
     # merge args with config
 
     if args.train:
-        reader = ClassifyReader()
+        reader = ClassifyReader(text_field=2, label_field=1)
         # a generator (can be iterated several times)
         sentences = reader.read(args.train)
 
@@ -242,7 +242,7 @@ def main():
         if ((args.suffixes and not os.path.exists(args.suffixes)) or
             (args.prefixes and not os.path.exists(args.prefixes))):
             # collect the forms once
-            words = chain(tok[reader.formField].split() for sent in sentence_iter for tok in sent)
+            words = (tok for sent in sentences for tok in sent)
 
         if args.suffix:
             if os.path.exists(args.suffixes):
@@ -271,19 +271,18 @@ def main():
                     extractor.write(args.prefixes)
 
         # labels from all examples
-        examples = []
-        for example in sentences:
-            examples.append(converter.convert(example))
+        examples = [converter.convert(example) for example in sentences]
         # assign index to labels
-        labels = reader.polarities
-        labels_index = {c:i for i,c in enumerate(set(labels))}
-        labels_ids = [labels_index[i] for i in labels]
+        sent_labels = reader.polarities
+        labels_index = {c:i for i,c in enumerate(set(sent_labels))}
 
-        trainer = create_trainer(args, converter, labels_index)
+        labels = sorted(labels_index, key=labels_index.get)
+        trainer = create_trainer(args, converter, labels)
         logger.info("Starting training with %d examples" % len(examples))
 
         report_frequency = max(args.iterations / 200, 1)
         report_frequency = 1    # DEBUG
+        labels_ids = [labels_index[label] for label in sent_labels]
         trainer.train(examples, labels_ids, args.iterations, report_frequency,
                       args.threads)
     
@@ -294,14 +293,13 @@ def main():
     else:
         # predict
         with open(args.model) as file:
-            classifier = ConvTrainer.load(file)
-        reader = ClassifyReader(args.test)
+            classifier = Classifier.load(file)
+        reader = ClassifyReader(text_field=2, label_field=1)
         
         for example in reader:
-            text = example[reader.text_field]
-            input = classifier.converter.convert(text)
-            example[reader.label_field] = classifier.nn.forward(input).argmax()
-            print example
+            words = example[reader.text_field].split()
+            example[reader.label_field] = classifier.predict(words)
+            print '\t'.join(example).encode('utf-8')
 
 # ----------------------------------------------------------------------
 

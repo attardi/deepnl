@@ -9,17 +9,18 @@ A convolutional neural network for NLP tasks.
 import logging
 from itertools import izip
 import cPickle as pickle
+from numpy import int32 as INT
 import sys                      # DEBUG
 
 import numpy as np
 cimport numpy as np
 
+# for decorations
+cimport cython
+
 # local
 from math cimport *
 from network cimport *
-
-# for decorations
-cimport cython
 
 # ----------------------------------------------------------------------
 
@@ -44,6 +45,12 @@ cdef class ConvVariables(Variables):
         self.conv = np.empty((slen - pool_size + 1, hidden_size))
         self.hidden2 = np.empty(hidden2_size)
 
+    def addSquare(self, Gradients grads):
+        """For adaGrad"""
+        super(ConvGradients, self).addSquare(grads)
+        self.hidden2_weights += grads.hidden2_weights * grads.hidden2_weights
+        self.hidden2_bias += grads.hidden2_bias * grads.hidden2_bias
+
 # ----------------------------------------------------------------------
 
 cdef class ConvParameters(Parameters):
@@ -54,21 +61,19 @@ cdef class ConvParameters(Parameters):
     # the second hidden layer
     #cdef public np.ndarray hidden2_weights, hidden2_bias
     
-    def __init__(self, int input_size, int hidden1_size, int hidden2_size, int output_size):
+    def __init__(self, int_t input_size, int_t hidden1_size, int_t hidden2_size, int_t output_size):
         """
         :param input_size: number of input variables, #features x pool size
         """
-        #super(ConvParameters, self).__init__(input_size, hidden1_size, output_size)
-        self.hidden_weights = np.zeros((hidden1_size, input_size), dtype=float)
-        self.hidden_bias = np.zeros(hidden1_size, dtype=float)
-        self.hidden2_weights = np.zeros((hidden2_size, hidden1_size), dtype=float)
-        self.hidden2_bias = np.zeros(hidden2_size, dtype=float)
-        self.output_weights = np.zeros((output_size, hidden2_size), dtype=float)
-        self.output_bias = np.zeros(output_size, dtype=float)
+        self.hidden_weights = np.zeros((hidden1_size, input_size))
+        self.hidden_bias = np.zeros(hidden1_size)
+        self.hidden2_weights = np.zeros((hidden2_size, hidden1_size))
+        self.hidden2_bias = np.zeros(hidden2_size)
+        self.output_weights = np.zeros((output_size, hidden2_size))
+        self.output_bias = np.zeros(output_size)
 
-    def initialize(self, int input_size, int hidden_size, int hidden2_size,
-                   int output_size):
-        #super(ConvParameters, self).initialize(input_size, hidden_size, output_size)
+    def initialize(self, int_t input_size, int_t hidden_size, int_t hidden2_size,
+                   int_t output_size):
         high = 2.38 / np.sqrt(input_size) # [Bottou-88]
         self.hidden_weights = np.random.uniform(-high, high, (hidden_size, input_size))
         self.hidden_bias = np.random.uniform(-high, high, (hidden_size))
@@ -80,11 +85,10 @@ cdef class ConvParameters(Parameters):
         high = 2.38 / np.sqrt(output_size) # [Bottou-88]
         self.output_bias = np.random.uniform(-high, high, output_size)
 
-    cpdef update(self, Gradients grads, float learning_rate,
-                 Gradients ada=None):
-        super(ConvParameters, self).update(grads, learning_rate, ada)
+    cpdef update(self, Gradients grads, float_t learning_rate,
+                 Parameters ada=None, float_t adaEps=1e-6):
+        super(ConvParameters, self).update(grads, learning_rate, ada, adaEps)
         if ada:
-            global adaEps
             self.hidden2_weights += learning_rate * grads.hidden2_weights / np.sqrt(ada.hidden2_weights + adaEps)
             self.hidden2_bias += learning_rate * grads.hidden2_bias / np.sqrt(ada.hidden2_bias + adaEps)
         else:
@@ -119,25 +123,25 @@ cdef class ConvParameters(Parameters):
 
 cdef class ConvGradients(Gradients):
 
-    # cdef readonly int hidden2_size
+    # cdef readonly int_t hidden2_size
     # cdef public np.ndarray conv
     # input has size input_size * (slen + pool_size), pool_size is for padding
 
-    def __init__(self, int feat_size, int hidden1_size, int hidden2_size,
-                 int output_size, int pool_size, int slen):
+    def __init__(self, int_t feat_size, int_t hidden1_size, int_t hidden2_size,
+                 int_t output_size, int_t pool_size, int_t slen):
         """
         :param feat_size: number of features
         """
         #super(ConvGradients, self).__init__(feat_size * pool_size, hidden1_size, output_size)
         input_size = feat_size * pool_size
-        self.hidden_weights = np.zeros((hidden1_size, input_size), dtype=float)
-        self.hidden_bias = np.zeros(hidden1_size, dtype=float)
-        self.hidden2_weights = np.zeros((hidden2_size, hidden1_size), dtype=float)
-        self.hidden2_bias = np.zeros(hidden2_size, dtype=float)
-        self.output_weights = np.zeros((output_size, hidden2_size), dtype=float)
-        self.output_bias = np.zeros(output_size, dtype=float)
+        self.hidden_weights = np.zeros((hidden1_size, input_size))
+        self.hidden_bias = np.zeros(hidden1_size)
+        self.hidden2_weights = np.zeros((hidden2_size, hidden1_size))
+        self.hidden2_bias = np.zeros(hidden2_size)
+        self.output_weights = np.zeros((output_size, hidden2_size))
+        self.output_bias = np.zeros(output_size)
 
-        self.input = np.zeros(feat_size * (slen + pool_size), dtype=float)
+        self.input = np.zeros(feat_size * (slen + pool_size))
         self.conv = np.empty((slen, hidden1_size))
 
     def clear(self):
@@ -146,18 +150,15 @@ cdef class ConvGradients(Gradients):
         self.hidden2_bias.fill(0.0)
         self.conv.fill(0.0)
 
-    def addSquare(self, Gradients grads):
-        """For adaGrad"""
-        super(ConvGradients, self).addSquare(grads)
-        self.hidden2_weights += grads.hidden2_weights * grads.hidden2_weights
-        self.hidden2_bias += grads.hidden2_bias * grads.hidden2_bias
-
 # ----------------------------------------------------------------------
 
 cdef class ConvolutionalNetwork(Network):
     
-    def __init__(self, int input_size, int hidden1_size, int hidden2_size,
-                 int output_size, int pool_size, p=None):
+    # cdef public int hidden2_size
+    # cdef public int pool_size
+
+    def __init__(self, int_t input_size, int_t hidden1_size, int_t hidden2_size,
+                 int_t output_size, int_t pool_size, p=None):
         """
         Creates a new convolutional neural network.
         :parameter input_size: the number of network input variables.
@@ -169,9 +170,8 @@ cdef class ConvolutionalNetwork(Network):
                          output_size)
         super(ConvolutionalNetwork, self).__init__(input_size, hidden1_size,
                                                    output_size, p)
-
-        self.pool_size = pool_size
         self.hidden2_size = hidden2_size
+        self.pool_size = pool_size
         
     def description(self):
         """Returns a textual description of the network."""
@@ -187,7 +187,7 @@ Output size: %d
         
         return desc
     
-    cpdef variables(self, int slen=1):
+    cpdef variables(self, int_t slen=1):
         """
         Allocate variables.
         :param slen: sentence length.
@@ -196,7 +196,7 @@ Output size: %d
                              self.hidden_size, self.hidden2_size,
                              self.output_size, slen, self.pool_size)
 
-    cdef gradients(self, int slen=1):
+    cdef gradients(self, int_t slen=1):
         """Allocate gradients.
         :param slen: sentence length.
         """
@@ -204,14 +204,18 @@ Output size: %d
                              self.hidden2_size, self.output_size,
                              self.pool_size, slen)
 
+    cdef parameters(self):
+            return ConvParameters(self.input_size, self.hidden_size,
+                                  self.hidden2_size, self.output_size)
+
     cpdef forward(self, Variables vars):
         """Runs the network using the given :param vars:"""
 
         # convolution layer
         # f_1 = W_1 * f_0 + b1
-        cdef int slen = len(vars.conv)
-        cdef int feat_size = self.input_size / self.pool_size
-        cdef int i, s = 0
+        cdef int_t slen = len(vars.conv)
+        cdef int_t feat_size = self.input_size / self.pool_size
+        cdef int_t i, s = 0
         cdef ConvParameters p = self.p
         # run through all windows in the sentence
         # vars.input contains inputs for the whole sentence
@@ -237,7 +241,7 @@ Output size: %d
 
     @cython.boundscheck(False)
     @cython.wraparound(False)
-    cdef np.ndarray[FLOAT_t,ndim=1] predict(self, list tokens):
+    cdef np.ndarray[float_t] predict(self, list tokens):
         """
         Runs the network for each element in the sentence and returns 
         the predicted probabilities for each possible outcome.
@@ -246,9 +250,9 @@ Output size: %d
         :return: the predicted scores for each possible output variable.
         """
 
-        cdef np.ndarray[INT_t,ndim=2] converted = self.converter.convert(tokens)
+        cdef np.ndarray[int_t,ndim=2] converted = self.converter.convert(tokens)
         # add padding to the sentence
-        cdef np.ndarray[INT_t,ndim=2] padded_sentence = \
+        cdef np.ndarray[int_t,ndim=2] padded_sentence = \
             np.concatenate((self.pre_padding,
                             converted,
                             self.post_padding))
@@ -261,7 +265,7 @@ Output size: %d
         self.forward(vars)
         return vars.output
 
-    cdef float backpropagate(self, int y, Variables vars, Gradients grads):
+    cdef float_t backpropagate(self, int_t y, Variables vars, Gradients grads):
         """
         Cost is the hinge loss.
         Compute the gradients of the cost for each layer.
@@ -278,16 +282,16 @@ Output size: %d
         # m = argmax_t!=y f(x)[t]
         # dhl / df [y] = -1 if f(x)[m] - f(x)[y] > 1, else 0
         # dhl / df [t] = +1 if f(x)[t] - f(x)[y] > 1, else 0
-        cdef float fx_y = vars.output[y]
-        cdef float fx_m = np.NINF # negative infinity
-        cdef int i
-        cdef float v
+        cdef float_t fx_y = vars.output[y]
+        cdef float_t fx_m = np.NINF # negative infinity
+        cdef int_t i
+        cdef float_t v
         for i, v in enumerate(vars.output):
             if i == y:
                 continue
             if v > fx_m:
                 fx_m = v
-        cdef float hinge_loss = max(0.0, 1 + fx_m - fx_y)
+        cdef float_t hinge_loss = max(0.0, 1 + fx_m - fx_y)
 
         if hinge_loss == 0.0:
             return hinge_loss
@@ -327,17 +331,17 @@ Output size: %d
         grads.conv.fill(0.0)
 
         # (_size)
-        cdef np.ndarray a = vars.conv.argmax(1) # indices of max values
+        cdef np.ndarray[int_t] a = INT(vars.conv.argmax(1)) # indices of max values
 
         # @see Appendix A.4:
         # (dC / df_1)[t,i] = (dC / df_2)[t,i] if t = a[i], else 0
-        cdef int ai
+        cdef int_t ai
         for i, ai in enumerate(a):
             grads.conv[i, ai] = grads.hidden_bias[ai]
 
         # Convolution layer
-        cdef int slen = len(vars.conv)
-        cdef int feat_size = self.input_size / self.pool_size
+        cdef int_t slen = len(vars.conv)
+        cdef int_t feat_size = self.input_size / self.pool_size
 
         # f_1 = [W_1 f_0[t:t+w] + b_1   for t < slen]
         # see Appendix A.3:
@@ -347,7 +351,7 @@ Output size: %d
         grads.hidden_weights.fill(0.0)
         grads.hidden_bias.fill(0.0)
         grads.input.fill(0.0)
-        cdef int s = 0
+        cdef int_t s = 0
         for t in xrange(slen):
             # dC / db_1 = Sum_t((dC / df_1)[t])
             grads.hidden_bias += grads.conv[t]
@@ -363,6 +367,14 @@ Output size: %d
 
         return hinge_loss
 
+    def save(self, file):
+        """
+        Saves the neural network to a file.
+        It saves the parameters and the pool_size.
+        """
+        self.p.save(file)
+        pickle.dump(self.pool_size, file)
+
     @classmethod
     def load(cls, file):
         """
@@ -373,6 +385,7 @@ Output size: %d
         nn.p = ConvParameters.load(file)
         nn.input_size = nn.p.hidden_weights.shape[1]
         nn.hidden_size = nn.p.hidden_weights.shape[0]
-        nn.hidden2_size = nn.p.hidden2_weights.shape[1]
+        nn.hidden2_size = nn.p.output_weights.shape[1]
         nn.output_size = nn.p.output_weights.shape[0]
+        nn.pool_size = pickle.load(file)
         return nn

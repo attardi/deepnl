@@ -1,16 +1,12 @@
 
 cimport numpy as np
-from extractors cimport *
 
-# ctypedef np.ndarray[FLOAT_t, ndim=1] np.ndarray[FLOAT_t,ndim=1]
-# ctypedef np.ndarray[FLOAT_t, ndim=2] np.ndarray[FLOAT_t,ndim=2]
-# ctypedef np.ndarray[INT_t, ndim=1] np.ndarray[INT_t,ndim=1]
-# ctypedef np.ndarray[INT_t, ndim=2] np.ndarray[INT_t,ndim=2]
-
-cdef float skipErr
-
-# using globals, since can't use static variables
-cdef FLOAT_t l1_decay, l2_decay, momentum, adaRo, adaEps
+# Use double floats
+ctypedef double float_t
+# Use 32bit int
+ctypedef int int_t
+# dtype('int32')
+from numpy import int32 as INT
 
 cdef class Variables(object):
     """Visible and hidden variables.
@@ -29,7 +25,8 @@ cdef class Parameters(object):
 
     cdef copy(self, Parameters p)
     # cpdef since it is called with super
-    cpdef update(self, Gradients grads, float learning_rate, Gradients ada=*)
+    cpdef update(self, Gradients grads, float_t learning_rate,
+                 Parameters ada=*, float_t adaEps=*)
 
 cdef class Gradients(Parameters):
 
@@ -48,10 +45,12 @@ cdef class Network(object):
 
     cdef variables(self, int slen=*)
     cdef gradients(self, int slen=*)
+    cdef parameters(self)
 
     cpdef forward(self, Variables vars)
 
-    cdef float backpropagate(self, int y, Variables vars, Gradients grads)
+    cdef float_t backpropagate(self, int y, Variables vars, Gradients grads)
 
     # cpdef since used with super
-    cpdef update(self, Gradients grads, float learning_rate, Gradients ada=*)
+    cpdef update(self, Gradients grads, float_t learning_rate, Parameters ada=*,
+                 float_t adaEps=*)

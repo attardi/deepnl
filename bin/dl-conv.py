@@ -304,7 +304,7 @@ def main():
         # predict
         with open(args.model) as file:
             classifier = Classifier.load(file)
-        reader = ClassifyReader(text_field=args.text_Field, label_field=args.label_field)
+        reader = ClassifyReader(text_field=args.text_field, label_field=args.label_field)
         
         for example in reader:
             words = example[reader.text_field].split()

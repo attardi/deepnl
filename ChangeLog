@@ -1,3 +1,19 @@
+2015-11-18  Giuseppe Attardi  <attardi@di.unipi.it>
+
+	* deepnl/network.pyx (ConvolutionalNetwork.backpropagate):
+	in np.where condition > -1.
+
+	* deepnl/networkconv.pyx (ConvolutionalNetwork.backpropagate): use
+	MultiMarginCriterion
+	in np.where condition > -1.
+
+	* deepnl/classifier.pyx (Classifier.predict: use argmax(vars.output)
+
+2015-11-04  Giuseppe Attardi  <attardi@di.unipi.it>
+
+	* deepnl/network.pyx (Network.backpropagate): grads.hiddenx_bias
+	instead of vars.hidden_bias.
+
 2015-10-14  Giuseppe Attardi  <attardi@di.unipi.it>
 
 	* bin/dl-sentiwords.py (main): pass minOccurr and vocab_size to reader.create_vocabulary.

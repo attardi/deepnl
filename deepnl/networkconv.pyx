@@ -275,7 +275,7 @@ Output size: %d
         :return: the hinge loss.
         """
 
-        # Multiclass hinge loss:
+        # Multiclass hinge loss (Crammer&Singer):
         # hl(x, y) = max(0, 1 + max_t!=y f(x)[t] - f(x)[y])
         # Hinge loss is 0 if the score of the correct label exceeds the score
         # of every other label by a margin of at least 1.
@@ -283,15 +283,24 @@ Output size: %d
         # dhl / df [y] = -1 if f(x)[m] - f(x)[y] > 1, else 0
         # dhl / df [t] = +1 if f(x)[t] - f(x)[y] > 1, else 0
         cdef float_t fx_y = vars.output[y]
-        cdef float_t fx_m = np.NINF # negative infinity
+        # cdef float_t fx_m = np.NINF # negative infinity
+        # cdef int_t i
+        # cdef float_t v
+        # for i, v in enumerate(vars.output):
+        #     if i == y:
+        #         continue
+        #     if v > fx_m:
+        #         fx_m = v
+        # cdef float_t hinge_loss = max(0.0, 1 + fx_m - fx_y)
+        # MultiMarginCriterion
+        # see https://github.com/torch/nn/blob/master/doc/criterion.md
+        cdef float_t hinge_loss = 0.0
         cdef int_t i
-        cdef float_t v
-        for i, v in enumerate(vars.output):
-            if i == y:
-                continue
-            if v > fx_m:
-                fx_m = v
-        cdef float_t hinge_loss = max(0.0, 1 + fx_m - fx_y)
+        cdef float_t fx_i
+        for i, fx_i in enumerate(vars.output):
+            if i != y:
+                hinge_loss += max(0.0, 1 + fx_i - fx_y) # optionally squared
+        hinge_loss /= self.output_size
 
         if hinge_loss == 0.0:
             return hinge_loss
@@ -301,8 +310,8 @@ Output size: %d
         # f_5 = W_3 f_4 + b_3
         # dC / db_4 = dC / df_5					(22)
         # negative gradient:
-        grads.output_bias[:] = np.where(vars.output - fx_y > 1, -1, 0) # -1
-        grads.output_bias[y] = fx_y - fx_m < 1 # +1
+        grads.output_bias[:] = np.where(vars.output - fx_y > -1, -1, 0) # -1
+        grads.output_bias[y] = +1
         # dC / dW_4 = dC / df_5 * f_4				(22)
         # (output_size) x (hidden2_size) = (output_size, hidden2_size)
         np.outer(grads.output_bias, vars.hidden2, grads.output_weights)

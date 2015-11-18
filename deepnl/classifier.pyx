@@ -64,7 +64,7 @@ cdef class Classifier(object):
         # lookup layer
         self.converter.lookup(padded_sentence, vars.input)
         output = self.nn.forward(vars)
-        return self.labels[np.argmax(output)]
+        return self.labels[np.argmax(vars.output)]
 
     def save(self, file):
         """

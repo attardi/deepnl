@@ -6834,10 +6834,10 @@ static __pyx_t_6deepnl_7network_float_t __pyx_f_6deepnl_7network_7Network_backpr
   __pyx_t_3 = 0;
 
   /* "deepnl/network.pyx":274
- *         # dC / db_2 = dC / df_4					(22)
+ *         # dC / db_2 = dC / df_4
  *         # negative gradient:
- *         grads.output_bias[:] = np.where(vars.output - fx_y > 1, -1, 0) # -1             # <<<<<<<<<<<<<<
- *         grads.output_bias[y] = fx_y - fx_m < 1 # +1
+ *         grads.output_bias[:] = np.where(vars.output - fx_y > -1, -1, 0) # -1             # <<<<<<<<<<<<<<
+ *         grads.output_bias[y] = +1
  * 
  */
   __pyx_t_1 = __Pyx_GetModuleGlobalName(__pyx_n_s_np); if (unlikely(!__pyx_t_1)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 274; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
@@ -6850,7 +6850,7 @@ static __pyx_t_6deepnl_7network_float_t __pyx_f_6deepnl_7network_7Network_backpr
   __pyx_t_11 = PyNumber_Subtract(((PyObject *)__pyx_v_vars->output), __pyx_t_1); if (unlikely(!__pyx_t_11)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 274; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_GOTREF(__pyx_t_11);
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
-  __pyx_t_1 = PyObject_RichCompare(__pyx_t_11, __pyx_int_1, Py_GT); __Pyx_XGOTREF(__pyx_t_1); if (unlikely(!__pyx_t_1)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 274; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_t_1 = PyObject_RichCompare(__pyx_t_11, __pyx_int_neg_1, Py_GT); __Pyx_XGOTREF(__pyx_t_1); if (unlikely(!__pyx_t_1)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 274; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_DECREF(__pyx_t_11); __pyx_t_11 = 0;
   __pyx_t_11 = NULL;
   __pyx_t_5 = 0;
@@ -6887,21 +6887,18 @@ static __pyx_t_6deepnl_7network_float_t __pyx_f_6deepnl_7network_7Network_backpr
 
   /* "deepnl/network.pyx":275
  *         # negative gradient:
- *         grads.output_bias[:] = np.where(vars.output - fx_y > 1, -1, 0) # -1
- *         grads.output_bias[y] = fx_y - fx_m < 1 # +1             # <<<<<<<<<<<<<<
+ *         grads.output_bias[:] = np.where(vars.output - fx_y > -1, -1, 0) # -1
+ *         grads.output_bias[y] = +1             # <<<<<<<<<<<<<<
  * 
- *         # dC / dW_2 = dC / df_4 f_3				(22)
+ *         # dC / dW_2 = dC / df_4 f_3
  */
-  __pyx_t_3 = __Pyx_PyBool_FromLong(((__pyx_v_fx_y - __pyx_v_fx_m) < 1.0)); if (unlikely(!__pyx_t_3)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 275; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
-  __Pyx_GOTREF(__pyx_t_3);
-  if (unlikely(__Pyx_SetItemInt(((PyObject *)__pyx_v_grads->__pyx_base.output_bias), __pyx_v_y, __pyx_t_3, int, 1, __Pyx_PyInt_From_int, 0, 1, 1) < 0)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 275; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
-  __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
+  if (unlikely(__Pyx_SetItemInt(((PyObject *)__pyx_v_grads->__pyx_base.output_bias), __pyx_v_y, __pyx_int_1, int, 1, __Pyx_PyInt_From_int, 0, 1, 1) < 0)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 275; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
 
   /* "deepnl/network.pyx":279
- *         # dC / dW_2 = dC / df_4 f_3				(22)
+ *         # dC / dW_2 = dC / df_4 f_3
  *         # (output_size) x (hidden_size) = (output_size, hidden_size)
  *         np.outer(grads.output_bias, vars.hidden, grads.output_weights)             # <<<<<<<<<<<<<<
- *         # dC / df_3 = dC / df_4 * W_2				(23)
+ *         # dC / df_3 = dC / df_4 * W_2
  *         # (output_size) * (output_size, hidden_size) = (hidden_size)
  */
   __pyx_t_10 = __Pyx_GetModuleGlobalName(__pyx_n_s_np); if (unlikely(!__pyx_t_10)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 279; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
@@ -6942,7 +6939,7 @@ static __pyx_t_6deepnl_7network_float_t __pyx_f_6deepnl_7network_7Network_backpr
   __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
 
   /* "deepnl/network.pyx":282
- *         # dC / df_3 = dC / df_4 * W_2				(23)
+ *         # dC / df_3 = dC / df_4 * W_2
  *         # (output_size) * (output_size, hidden_size) = (hidden_size)
  *         grads.output_bias.dot(p.output_weights, grads.hidden_bias) # temporary             # <<<<<<<<<<<<<<
  * 
@@ -7004,7 +7001,7 @@ static __pyx_t_6deepnl_7network_float_t __pyx_f_6deepnl_7network_7Network_backpr
  *         # (hidden_size) x (input_size) = (hidden_size, input_size)
  *         np.outer(grads.hidden_bias, vars.input, grads.hidden_weights)             # <<<<<<<<<<<<<<
  * 
- *         # dC / df_1 = dC / df_2 * W_1				(23)
+ *         # dC / df_1 = dC / df_2 * W_1
  */
   __pyx_t_10 = __Pyx_GetModuleGlobalName(__pyx_n_s_np); if (unlikely(!__pyx_t_10)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 293; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_GOTREF(__pyx_t_10);
@@ -7044,33 +7041,30 @@ static __pyx_t_6deepnl_7network_float_t __pyx_f_6deepnl_7network_7Network_backpr
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
 
   /* "deepnl/network.pyx":297
- *         # dC / df_1 = dC / df_2 * W_1				(23)
+ *         # dC / df_1 = dC / df_2 * W_1
  *         # (hidden_size) * (hidden_size, input_size) = (input_size)
- *         vars.hidden_bias.dot(p.hidden_weights, grads.input)             # <<<<<<<<<<<<<<
+ *         grads.hidden_bias.dot(p.hidden_weights, grads.input)             # <<<<<<<<<<<<<<
  * 
  *         # Lookup layer
  */
-  __pyx_t_12 = __Pyx_PyObject_GetAttrStr(((PyObject *)__pyx_v_vars), __pyx_n_s_hidden_bias); if (unlikely(!__pyx_t_12)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 297; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_t_12 = __Pyx_PyObject_GetAttrStr(((PyObject *)__pyx_v_grads->__pyx_base.hidden_bias), __pyx_n_s_dot); if (unlikely(!__pyx_t_12)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 297; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_GOTREF(__pyx_t_12);
-  __pyx_t_3 = __Pyx_PyObject_GetAttrStr(__pyx_t_12, __pyx_n_s_dot); if (unlikely(!__pyx_t_3)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 297; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
-  __Pyx_GOTREF(__pyx_t_3);
-  __Pyx_DECREF(__pyx_t_12); __pyx_t_12 = 0;
-  __pyx_t_12 = NULL;
+  __pyx_t_3 = NULL;
   __pyx_t_5 = 0;
-  if (CYTHON_COMPILING_IN_CPYTHON && likely(PyMethod_Check(__pyx_t_3))) {
-    __pyx_t_12 = PyMethod_GET_SELF(__pyx_t_3);
-    if (likely(__pyx_t_12)) {
-      PyObject* function = PyMethod_GET_FUNCTION(__pyx_t_3);
-      __Pyx_INCREF(__pyx_t_12);
+  if (CYTHON_COMPILING_IN_CPYTHON && likely(PyMethod_Check(__pyx_t_12))) {
+    __pyx_t_3 = PyMethod_GET_SELF(__pyx_t_12);
+    if (likely(__pyx_t_3)) {
+      PyObject* function = PyMethod_GET_FUNCTION(__pyx_t_12);
+      __Pyx_INCREF(__pyx_t_3);
       __Pyx_INCREF(function);
-      __Pyx_DECREF_SET(__pyx_t_3, function);
+      __Pyx_DECREF_SET(__pyx_t_12, function);
       __pyx_t_5 = 1;
     }
   }
   __pyx_t_10 = PyTuple_New(2+__pyx_t_5); if (unlikely(!__pyx_t_10)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 297; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_GOTREF(__pyx_t_10);
-  if (__pyx_t_12) {
-    __Pyx_GIVEREF(__pyx_t_12); PyTuple_SET_ITEM(__pyx_t_10, 0, __pyx_t_12); __pyx_t_12 = NULL;
+  if (__pyx_t_3) {
+    __Pyx_GIVEREF(__pyx_t_3); PyTuple_SET_ITEM(__pyx_t_10, 0, __pyx_t_3); __pyx_t_3 = NULL;
   }
   __Pyx_INCREF(((PyObject *)__pyx_v_p->hidden_weights));
   __Pyx_GIVEREF(((PyObject *)__pyx_v_p->hidden_weights));
@@ -7078,10 +7072,10 @@ static __pyx_t_6deepnl_7network_float_t __pyx_f_6deepnl_7network_7Network_backpr
   __Pyx_INCREF(((PyObject *)__pyx_v_grads->input));
   __Pyx_GIVEREF(((PyObject *)__pyx_v_grads->input));
   PyTuple_SET_ITEM(__pyx_t_10, 1+__pyx_t_5, ((PyObject *)__pyx_v_grads->input));
-  __pyx_t_1 = __Pyx_PyObject_Call(__pyx_t_3, __pyx_t_10, NULL); if (unlikely(!__pyx_t_1)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 297; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_t_1 = __Pyx_PyObject_Call(__pyx_t_12, __pyx_t_10, NULL); if (unlikely(!__pyx_t_1)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 297; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_GOTREF(__pyx_t_1);
   __Pyx_DECREF(__pyx_t_10); __pyx_t_10 = 0;
-  __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
+  __Pyx_DECREF(__pyx_t_12); __pyx_t_12 = 0;
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
 
   /* "deepnl/network.pyx":303
@@ -11284,10 +11278,10 @@ static int __Pyx_InitCachedConstants(void) {
   __Pyx_GIVEREF(__pyx_tuple__13);
 
   /* "deepnl/network.pyx":274
- *         # dC / db_2 = dC / df_4					(22)
+ *         # dC / db_2 = dC / df_4
  *         # negative gradient:
- *         grads.output_bias[:] = np.where(vars.output - fx_y > 1, -1, 0) # -1             # <<<<<<<<<<<<<<
- *         grads.output_bias[y] = fx_y - fx_m < 1 # +1
+ *         grads.output_bias[:] = np.where(vars.output - fx_y > -1, -1, 0) # -1             # <<<<<<<<<<<<<<
+ *         grads.output_bias[y] = +1
  * 
  */
   __pyx_slice__14 = PySlice_New(Py_None, Py_None, Py_None); if (unlikely(!__pyx_slice__14)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 274; __pyx_clineno = __LINE__; goto __pyx_L1_error;}

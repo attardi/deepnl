@@ -1798,6 +1798,7 @@ static char __pyx_k_argmax[] = "argmax";
 static char __pyx_k_import[] = "__import__";
 static char __pyx_k_labels[] = "labels";
 static char __pyx_k_module[] = "__module__";
+static char __pyx_k_output[] = "output";
 static char __pyx_k_pickle[] = "pickle";
 static char __pyx_k_cPickle[] = "cPickle";
 static char __pyx_k_predict[] = "predict";
@@ -1849,6 +1850,7 @@ static PyObject *__pyx_kp_u_ndarray_is_not_Fortran_contiguou;
 static PyObject *__pyx_n_s_nn;
 static PyObject *__pyx_n_s_np;
 static PyObject *__pyx_n_s_numpy;
+static PyObject *__pyx_n_s_output;
 static PyObject *__pyx_n_s_pickle;
 static PyObject *__pyx_n_s_predict;
 static PyObject *__pyx_n_s_pyx_vtable;
@@ -2224,7 +2226,7 @@ static PyObject *__pyx_f_6deepnl_10classifier_10Classifier_predict(struct __pyx_
   PyArrayObject *__pyx_v_converted = 0;
   PyArrayObject *__pyx_v_padded_sentence = 0;
   PyObject *__pyx_v_vars = NULL;
-  PyObject *__pyx_v_output = NULL;
+  CYTHON_UNUSED PyObject *__pyx_v_output = NULL;
   __Pyx_LocalBuf_ND __pyx_pybuffernd_converted;
   __Pyx_Buffer __pyx_pybuffer_converted;
   __Pyx_LocalBuf_ND __pyx_pybuffernd_padded_sentence;
@@ -2397,7 +2399,7 @@ static PyObject *__pyx_f_6deepnl_10classifier_10Classifier_predict(struct __pyx_
  *         # lookup layer
  *         self.converter.lookup(padded_sentence, vars.input)             # <<<<<<<<<<<<<<
  *         output = self.nn.forward(vars)
- *         return self.labels[np.argmax(output)]
+ *         return self.labels[np.argmax(vars.output)]
  */
   __pyx_t_1 = __Pyx_PyObject_GetAttrStr(__pyx_v_vars, __pyx_n_s_input); if (unlikely(!__pyx_t_1)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 65; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_GOTREF(__pyx_t_1);
@@ -2413,7 +2415,7 @@ static PyObject *__pyx_f_6deepnl_10classifier_10Classifier_predict(struct __pyx_
  *         # lookup layer
  *         self.converter.lookup(padded_sentence, vars.input)
  *         output = self.nn.forward(vars)             # <<<<<<<<<<<<<<
- *         return self.labels[np.argmax(output)]
+ *         return self.labels[np.argmax(vars.output)]
  * 
  */
   if (!(likely(((__pyx_v_vars) == Py_None) || likely(__Pyx_TypeTest(__pyx_v_vars, __pyx_ptype_6deepnl_7network_Variables))))) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 66; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
@@ -2425,7 +2427,7 @@ static PyObject *__pyx_f_6deepnl_10classifier_10Classifier_predict(struct __pyx_
   /* "deepnl/classifier.pyx":67
  *         self.converter.lookup(padded_sentence, vars.input)
  *         output = self.nn.forward(vars)
- *         return self.labels[np.argmax(output)]             # <<<<<<<<<<<<<<
+ *         return self.labels[np.argmax(vars.output)]             # <<<<<<<<<<<<<<
  * 
  *     def save(self, file):
  */
@@ -2439,29 +2441,32 @@ static PyObject *__pyx_f_6deepnl_10classifier_10Classifier_predict(struct __pyx_
   __pyx_t_4 = __Pyx_PyObject_GetAttrStr(__pyx_t_1, __pyx_n_s_argmax); if (unlikely(!__pyx_t_4)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 67; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_GOTREF(__pyx_t_4);
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
-  __pyx_t_1 = NULL;
+  __pyx_t_1 = __Pyx_PyObject_GetAttrStr(__pyx_v_vars, __pyx_n_s_output); if (unlikely(!__pyx_t_1)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 67; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __Pyx_GOTREF(__pyx_t_1);
+  __pyx_t_2 = NULL;
   if (CYTHON_COMPILING_IN_CPYTHON && unlikely(PyMethod_Check(__pyx_t_4))) {
-    __pyx_t_1 = PyMethod_GET_SELF(__pyx_t_4);
-    if (likely(__pyx_t_1)) {
+    __pyx_t_2 = PyMethod_GET_SELF(__pyx_t_4);
+    if (likely(__pyx_t_2)) {
       PyObject* function = PyMethod_GET_FUNCTION(__pyx_t_4);
-      __Pyx_INCREF(__pyx_t_1);
+      __Pyx_INCREF(__pyx_t_2);
       __Pyx_INCREF(function);
       __Pyx_DECREF_SET(__pyx_t_4, function);
     }
   }
-  if (!__pyx_t_1) {
-    __pyx_t_3 = __Pyx_PyObject_CallOneArg(__pyx_t_4, __pyx_v_output); if (unlikely(!__pyx_t_3)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 67; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  if (!__pyx_t_2) {
+    __pyx_t_3 = __Pyx_PyObject_CallOneArg(__pyx_t_4, __pyx_t_1); if (unlikely(!__pyx_t_3)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 67; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+    __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
     __Pyx_GOTREF(__pyx_t_3);
   } else {
-    __pyx_t_2 = PyTuple_New(1+1); if (unlikely(!__pyx_t_2)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 67; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
-    __Pyx_GOTREF(__pyx_t_2);
-    __Pyx_GIVEREF(__pyx_t_1); PyTuple_SET_ITEM(__pyx_t_2, 0, __pyx_t_1); __pyx_t_1 = NULL;
-    __Pyx_INCREF(__pyx_v_output);
-    __Pyx_GIVEREF(__pyx_v_output);
-    PyTuple_SET_ITEM(__pyx_t_2, 0+1, __pyx_v_output);
-    __pyx_t_3 = __Pyx_PyObject_Call(__pyx_t_4, __pyx_t_2, NULL); if (unlikely(!__pyx_t_3)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 67; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+    __pyx_t_5 = PyTuple_New(1+1); if (unlikely(!__pyx_t_5)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 67; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+    __Pyx_GOTREF(__pyx_t_5);
+    __Pyx_GIVEREF(__pyx_t_2); PyTuple_SET_ITEM(__pyx_t_5, 0, __pyx_t_2); __pyx_t_2 = NULL;
+    __Pyx_GIVEREF(__pyx_t_1);
+    PyTuple_SET_ITEM(__pyx_t_5, 0+1, __pyx_t_1);
+    __pyx_t_1 = 0;
+    __pyx_t_3 = __Pyx_PyObject_Call(__pyx_t_4, __pyx_t_5, NULL); if (unlikely(!__pyx_t_3)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 67; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
     __Pyx_GOTREF(__pyx_t_3);
-    __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
+    __Pyx_DECREF(__pyx_t_5); __pyx_t_5 = 0;
   }
   __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
   __pyx_t_4 = PyObject_GetItem(__pyx_v_self->labels, __pyx_t_3); if (unlikely(__pyx_t_4 == NULL)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 67; __pyx_clineno = __LINE__; goto __pyx_L1_error;};
@@ -2556,7 +2561,7 @@ static PyObject *__pyx_pf_6deepnl_10classifier_10Classifier_2predict(struct __py
 }
 
 /* "deepnl/classifier.pyx":69
- *         return self.labels[np.argmax(output)]
+ *         return self.labels[np.argmax(vars.output)]
  * 
  *     def save(self, file):             # <<<<<<<<<<<<<<
  *         """
@@ -2829,7 +2834,7 @@ static PyObject *__pyx_pf_6deepnl_10classifier_10Classifier_4save(struct __pyx_o
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
 
   /* "deepnl/classifier.pyx":69
- *         return self.labels[np.argmax(output)]
+ *         return self.labels[np.argmax(vars.output)]
  * 
  *     def save(self, file):             # <<<<<<<<<<<<<<
  *         """
@@ -5636,6 +5641,7 @@ static __Pyx_StringTabEntry __pyx_string_tab[] = {
   {&__pyx_n_s_nn, __pyx_k_nn, sizeof(__pyx_k_nn), 0, 0, 1, 1},
   {&__pyx_n_s_np, __pyx_k_np, sizeof(__pyx_k_np), 0, 0, 1, 1},
   {&__pyx_n_s_numpy, __pyx_k_numpy, sizeof(__pyx_k_numpy), 0, 0, 1, 1},
+  {&__pyx_n_s_output, __pyx_k_output, sizeof(__pyx_k_output), 0, 0, 1, 1},
   {&__pyx_n_s_pickle, __pyx_k_pickle, sizeof(__pyx_k_pickle), 0, 0, 1, 1},
   {&__pyx_n_s_predict, __pyx_k_predict, sizeof(__pyx_k_predict), 0, 0, 1, 1},
   {&__pyx_n_s_pyx_vtable, __pyx_k_pyx_vtable, sizeof(__pyx_k_pyx_vtable), 0, 0, 1, 1},

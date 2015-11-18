@@ -245,7 +245,7 @@ cdef class Network(object):
         :return: the hinge loss.
         """
 
-        # Multiclass hinge loss:
+        # Multiclass hinge loss (Crammer&Singer):
         # hl(x, y) = max(0, 1 + max_t!=y f(x)[t] - f(x)[y])
         # Hinge loss is 0 if the score of the correct label exceeds the score
         # of every other label by a margin of at least 1.
@@ -269,15 +269,15 @@ cdef class Network(object):
 
         # minimizing C(f_4)
         # f_4 = W_2 f_3 + b_2
-        # dC / db_2 = dC / df_4					(22)
+        # dC / db_2 = dC / df_4
         # negative gradient:
-        grads.output_bias[:] = np.where(vars.output - fx_y > 1, -1, 0) # -1
-        grads.output_bias[y] = fx_y - fx_m < 1 # +1
+        grads.output_bias[:] = np.where(vars.output - fx_y > -1, -1, 0) # -1
+        grads.output_bias[y] = +1
 
-        # dC / dW_2 = dC / df_4 f_3				(22)
+        # dC / dW_2 = dC / df_4 f_3
         # (output_size) x (hidden_size) = (output_size, hidden_size)
         np.outer(grads.output_bias, vars.hidden, grads.output_weights)
-        # dC / df_3 = dC / df_4 * W_2				(23)
+        # dC / df_3 = dC / df_4 * W_2
         # (output_size) * (output_size, hidden_size) = (hidden_size)
         grads.output_bias.dot(p.output_weights, grads.hidden_bias) # temporary
 
@@ -286,15 +286,15 @@ cdef class Network(object):
         hardtanh_back(vars.hidden, grads.hidden_bias, grads.hidden_bias)
 
         # f_2 = W_1 f_1 + b_1
-        # dC / db_1 = dC / df_2					(22)
+        # dC / db_1 = dC / df_2
 
         # dC / dW_1 = dC / df_2 * f_1
         # (hidden_size) x (input_size) = (hidden_size, input_size)
         np.outer(grads.hidden_bias, vars.input, grads.hidden_weights)
 
-        # dC / df_1 = dC / df_2 * W_1				(23)
+        # dC / df_1 = dC / df_2 * W_1
         # (hidden_size) * (hidden_size, input_size) = (input_size)
-        vars.hidden_bias.dot(p.hidden_weights, grads.input)
+        grads.hidden_bias.dot(p.hidden_weights, grads.input)
 
         # Lookup layer
         # f_1 = W_0 f_0

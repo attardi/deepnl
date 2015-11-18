@@ -274,9 +274,11 @@ def main():
         examples = [converter.convert(example) for example in sentences]
         # assign index to labels
         sent_labels = reader.polarities
-        labels_index = {c:i for i,c in enumerate(set(sent_labels))}
-
-        labels = sorted(labels_index, key=labels_index.get)
+        labels_index = {}
+        labels = []
+        for i,c in enumerate(set(sent_labels)):
+            labels_index[c] = i 
+            labels.append(c)
         trainer = create_trainer(args, converter, labels)
         logger.info("Starting training with %d examples" % len(examples))
 

@@ -105,6 +105,14 @@ def main():
     parser.add_argument('model', type=str,
                         help='Model file to train/use.')
 
+    # input format
+    format = parser.add_argument_group('Format')
+
+    format.add_argument('--label-field', type=int, default=1,
+                      help='Field containing label.')
+    format.add_argument('--text-field', type=int, default=2,
+                      help='Field containing text.')
+
     # training options
     train = parser.add_argument_group('Train')
 
@@ -176,7 +184,7 @@ def main():
     # merge args with config
 
     if args.train:
-        reader = ClassifyReader(text_field=2, label_field=1)
+        reader = ClassifyReader(text_field=args.text_field, label_field=args.label_field)
         # a generator (can be iterated several times)
         sentences = reader.read(args.train)
 
@@ -296,7 +304,7 @@ def main():
         # predict
         with open(args.model) as file:
             classifier = Classifier.load(file)
-        reader = ClassifyReader(text_field=2, label_field=1)
+        reader = ClassifyReader(text_field=args.text_Field, label_field=args.label_field)
         
         for example in reader:
             words = example[reader.text_field].split()

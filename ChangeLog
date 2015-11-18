@@ -1,5 +1,8 @@
 2015-11-18  Giuseppe Attardi  <attardi@di.unipi.it>
 
+	* bin/dl-conv.py (main): added options text_field and label_field
+	to select fields from tsv input files.
+
 	* deepnl/network.pyx (ConvolutionalNetwork.backpropagate):
 	in np.where condition > -1.
 

@@ -32,6 +32,10 @@ cdef class SeqParameters(Parameters):
         super(SeqParameters, self).__init__(input_size, hidden_size, output_size)
         self.transitions = np.zeros((output_size + 1, output_size))
 
+    def clear(self, val=0.0):
+        super(SeqParameters, self).clear(val)
+        self.transitions[:,:] = val
+
     def initialize(self, int input_size, int hidden_size, int output_size):
         super(SeqParameters, self).initialize(input_size, hidden_size, output_size)
         # A_i_j score for jumping from tag i to j
@@ -46,18 +50,18 @@ cdef class SeqParameters(Parameters):
         self.transitions += grads.transitions * grads.transitions
 
     cpdef update(self, Gradients grads, float_t learning_rate,
-                 Parameters ada=None, float_t adaEps=1e-6):
+                 Parameters ada=None):
         """
         Adjust the weights.
         :param ada: cumulative square gradients for performing AdaGrad.
         """
-        super(SeqParameters, self).update(grads, learning_rate, ada, adaEps)
+        super(SeqParameters, self).update(grads, learning_rate, ada)
 
         # Adjusts the transition scores table with the calculated gradients.
         if ada:
             # this is done in super.update(), which calls back addSquare().
             #ada.transitions += grads.transitions * grads.transitions
-            self.transitions += learning_rate * (<SeqGradients>grads).transitions / np.sqrt((<SeqParameters>ada).transitions + adaEps)
+            self.transitions += learning_rate * (<SeqGradients>grads).transitions / np.sqrt((<SeqParameters>ada).transitions)
         else:
             self.transitions += (<SeqGradients>grads).transitions * learning_rate
 
@@ -129,8 +133,8 @@ cdef class SequenceNetwork(Network):
                             self.output_size, seqlen)
 
     cdef parameters(self):
-            return SeqParameters(self.input_size, self.hidden_size,
-                                 self.output_size)
+        return SeqParameters(self.input_size, self.hidden_size,
+                             self.output_size)
 
     cdef np.ndarray[float_t,ndim=2] _calculate_delta(self, scores):
         """

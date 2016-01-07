@@ -47,7 +47,7 @@ def create_trainer(args, converter):
     else:
         logger.info('Creating new network...')
         # sum the number of features in all extractors' tables 
-        input_size = converter.size() * args.window * 2 + 1
+        input_size = converter.size() * (args.window * 2 + 1)
         nn = Network(input_size, args.hidden, 2)
         options = {
             'learning_rate': args.learning_rate,

@@ -45,6 +45,12 @@ cdef class Parameters(object):
         self.hidden_weights = np.zeros((hidden_size, input_size))
         self.hidden_bias = np.zeros(hidden_size)
 
+    def clear(self, val=0.0):
+        self.output_weights[:,:] = val
+        self.output_bias[:] = val
+        self.hidden_weights[:,:] = val
+        self.hidden_bias[:] = val
+
     def initialize(self, int input_size, int hidden_size, int output_size):
         """
         Creates the weight matrices with random values.
@@ -83,7 +89,7 @@ cdef class Parameters(object):
         self.hidden_bias += grads.hidden_bias * grads.hidden_bias
 
     cpdef update(self, Gradients grads, float_t learning_rate,
-                 Parameters ada=None, float_t adaEps=1e-6):
+                 Parameters ada=None):
         """
         Adjust the weights.
         :param ada: cumulative square gradients for performing AdaGrad.
@@ -99,14 +105,14 @@ cdef class Parameters(object):
         if ada:
             # print >> sys.stderr, 'ada', ada.hidden_weights[:5,:5], ada.hidden_weights[-5:,-5:] # DEBUG
             ada.addSquare(grads)
-            self.output_weights += learning_rate * grads.output_weights / np.sqrt(ada.output_weights + adaEps)
-            self.output_bias += learning_rate * grads.output_bias / np.sqrt(ada.output_bias + adaEps)
+            self.output_weights += learning_rate * grads.output_weights / np.sqrt(ada.output_weights)
+            self.output_bias += learning_rate * grads.output_bias / np.sqrt(ada.output_bias)
 
             # print >> sys.stderr, 'ada', ada.hidden_weights[:5,:5], ada.hidden_weights[-5:,-5:] # DEBUG
             # print >> sys.stderr, 'uhw', learning_rate, adaEps, self.hidden_weights[:5,:5], grads.hidden_weights[:5,:5], grads.hidden_weights[-5:,-5:] # DEBUG
 
-            self.hidden_weights += learning_rate * grads.hidden_weights / np.sqrt(ada.hidden_weights + adaEps)
-            self.hidden_bias += learning_rate * grads.hidden_bias / np.sqrt(ada.hidden_bias + adaEps)
+            self.hidden_weights += learning_rate * grads.hidden_weights / np.sqrt(ada.hidden_weights)
+            self.hidden_bias += learning_rate * grads.hidden_bias / np.sqrt(ada.hidden_bias)
         else:
             # divide by the fan-in
             self.output_weights += grads.output_weights * learning_rate / 100  # DEBUG / self.hidden_size
@@ -154,12 +160,12 @@ cdef class Gradients(Parameters):
         super(Gradients, self).__init__(input_size, hidden_size, output_size)
         self.input = np.zeros(input_size)
 
-    def clear(self):
-        self.output_weights.fill(0.0)
-        self.output_bias.fill(0.0)
-        self.hidden_weights.fill(0.0)
-        self.hidden_bias.fill(0.0)
-        self.input.fill(0.0)
+    def clear(self, val=0.0):
+        self.output_weights.fill(val)
+        self.output_bias.fill(val)
+        self.hidden_weights.fill(val)
+        self.hidden_bias.fill(val)
+        self.input.fill(val)
 
 # ----------------------------------------------------------------------
 
@@ -303,8 +309,8 @@ cdef class Network(object):
         return hinge_loss
 
     cpdef update(self, Gradients grads, float_t learning_rate,
-                 Parameters ada=None, float_t adaEps=1e-6):
-        self.p.update(grads, learning_rate, ada, adaEps)
+                 Parameters ada=None):
+        self.p.update(grads, learning_rate, ada)
 
     def save(self, file):
         """

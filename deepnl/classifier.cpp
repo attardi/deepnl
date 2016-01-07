@@ -831,13 +831,12 @@ struct __pyx_opt_args_6deepnl_7network_7Network_update;
  *     cdef copy(self, Parameters p)
  *     # cpdef since it is called with super
  *     cpdef update(self, Gradients grads, float_t learning_rate,             # <<<<<<<<<<<<<<
- *                  Parameters ada=*, float_t adaEps=*)
+ *                  Parameters ada=*)
  * 
  */
 struct __pyx_opt_args_6deepnl_7network_10Parameters_update {
   int __pyx_n;
   struct __pyx_obj_6deepnl_7network_Parameters *ada;
-  __pyx_t_6deepnl_7network_float_t adaEps;
 };
 
 /* "network.pxd":46
@@ -867,16 +866,13 @@ struct __pyx_opt_args_6deepnl_7network_7Network_gradients {
 /* "network.pxd":55
  * 
  *     # cpdef since used with super
- *     cpdef update(self, Gradients grads, float_t learning_rate, Parameters ada=*,             # <<<<<<<<<<<<<<
- *                  float_t adaEps=*)
+ *     cpdef update(self, Gradients grads, float_t learning_rate, Parameters ada=*)             # <<<<<<<<<<<<<<
  */
 struct __pyx_opt_args_6deepnl_7network_7Network_update {
   int __pyx_n;
   struct __pyx_obj_6deepnl_7network_Parameters *ada;
-  __pyx_t_6deepnl_7network_float_t adaEps;
 };
 struct __pyx_opt_args_6deepnl_10extractors_9Converter_lookup;
-struct __pyx_opt_args_6deepnl_10extractors_9Converter_update;
 
 /* "extractors.pxd":37
  *     cpdef np.ndarray[int_t,ndim=2] convert(self, list sent)
@@ -888,18 +884,6 @@ struct __pyx_opt_args_6deepnl_10extractors_9Converter_update;
 struct __pyx_opt_args_6deepnl_10extractors_9Converter_lookup {
   int __pyx_n;
   PyArrayObject *out;
-};
-
-/* "extractors.pxd":43
- *     cpdef adaGradInit(self)
- * 
- *     cpdef update(self, np.ndarray[float_t] grads, np.ndarray[int_t,ndim=2] sentence,             # <<<<<<<<<<<<<<
- *     	  	 float_t learning_rate, float_t adaEps=*)
- * 
- */
-struct __pyx_opt_args_6deepnl_10extractors_9Converter_update {
-  int __pyx_n;
-  __pyx_t_6deepnl_7network_float_t adaEps;
 };
 
 /* "network.pxd":11
@@ -935,7 +919,7 @@ struct __pyx_obj_6deepnl_7network_Parameters {
 
 
 /* "network.pxd":31
- *                  Parameters ada=*, float_t adaEps=*)
+ *                  Parameters ada=*)
  * 
  * cdef class Gradients(Parameters):             # <<<<<<<<<<<<<<
  * 
@@ -993,7 +977,7 @@ struct __pyx_obj_6deepnl_10extractors_Converter {
 
 
 /* "extractors.pxd":46
- *     	  	 float_t learning_rate, float_t adaEps=*)
+ *     	  	 float_t learning_rate)
  * 
  * cdef class Extractor(object):             # <<<<<<<<<<<<<<
  * 
@@ -1129,7 +1113,7 @@ static struct __pyx_vtabstruct_6deepnl_7network_Parameters *__pyx_vtabptr_6deepn
 
 
 /* "network.pxd":31
- *                  Parameters ada=*, float_t adaEps=*)
+ *                  Parameters ada=*)
  * 
  * cdef class Gradients(Parameters):             # <<<<<<<<<<<<<<
  * 
@@ -1175,14 +1159,14 @@ struct __pyx_vtabstruct_6deepnl_10extractors_Converter {
   __pyx_t_6deepnl_7network_int_t (*size)(struct __pyx_obj_6deepnl_10extractors_Converter *, int __pyx_skip_dispatch);
   PyArrayObject *(*convert)(struct __pyx_obj_6deepnl_10extractors_Converter *, PyObject *, int __pyx_skip_dispatch);
   PyArrayObject *(*lookup)(struct __pyx_obj_6deepnl_10extractors_Converter *, PyArrayObject *, int __pyx_skip_dispatch, struct __pyx_opt_args_6deepnl_10extractors_9Converter_lookup *__pyx_optional_args);
-  PyObject *(*adaGradInit)(struct __pyx_obj_6deepnl_10extractors_Converter *, int __pyx_skip_dispatch);
-  PyObject *(*update)(struct __pyx_obj_6deepnl_10extractors_Converter *, PyArrayObject *, PyArrayObject *, __pyx_t_6deepnl_7network_float_t, int __pyx_skip_dispatch, struct __pyx_opt_args_6deepnl_10extractors_9Converter_update *__pyx_optional_args);
+  PyObject *(*adaGradInit)(struct __pyx_obj_6deepnl_10extractors_Converter *, __pyx_t_6deepnl_7network_float_t, int __pyx_skip_dispatch);
+  PyObject *(*update)(struct __pyx_obj_6deepnl_10extractors_Converter *, PyArrayObject *, PyArrayObject *, __pyx_t_6deepnl_7network_float_t, int __pyx_skip_dispatch);
 };
 static struct __pyx_vtabstruct_6deepnl_10extractors_Converter *__pyx_vtabptr_6deepnl_10extractors_Converter;
 
 
 /* "extractors.pxd":46
- *     	  	 float_t learning_rate, float_t adaEps=*)
+ *     	  	 float_t learning_rate)
  * 
  * cdef class Extractor(object):             # <<<<<<<<<<<<<<
  * 
@@ -1191,7 +1175,7 @@ static struct __pyx_vtabstruct_6deepnl_10extractors_Converter *__pyx_vtabptr_6de
 
 struct __pyx_vtabstruct_6deepnl_10extractors_Extractor {
   __pyx_t_6deepnl_7network_int_t (*size)(struct __pyx_obj_6deepnl_10extractors_Extractor *, int __pyx_skip_dispatch);
-  PyObject *(*adaGradInit)(struct __pyx_obj_6deepnl_10extractors_Extractor *, int __pyx_skip_dispatch);
+  PyObject *(*adaGradInit)(struct __pyx_obj_6deepnl_10extractors_Extractor *, __pyx_t_6deepnl_7network_float_t, int __pyx_skip_dispatch);
   __pyx_t_6deepnl_7network_int_t (*get_padding_left)(struct __pyx_obj_6deepnl_10extractors_Extractor *, int __pyx_skip_dispatch);
   __pyx_t_6deepnl_7network_int_t (*get_padding_right)(struct __pyx_obj_6deepnl_10extractors_Extractor *, int __pyx_skip_dispatch);
   PyObject *(*extract)(struct __pyx_obj_6deepnl_10extractors_Extractor *, PyObject *, __pyx_t_6deepnl_7network_int_t, int __pyx_skip_dispatch);

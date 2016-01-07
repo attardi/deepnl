@@ -50,14 +50,15 @@ def create_trainer(args, converter, labels):
         logger.info('Creating new network...')
         # sum the number of features in all extractors' tables 
         feat_size = converter.size()
-        pool_size = args.window
+        pool_size = args.window * 2 + 1
         nn = ConvolutionalNetwork(feat_size * pool_size, args.hidden,
                                   args.hidden2, len(labels), pool_size)
         options = {
             'learning_rate': args.learning_rate,
+            'eps': args.eps,
             'verbose': args.verbose,
-            'left_context': args.window/2,
-            'right_context': args.window/2
+            'left_context': args.window,
+            'right_context': args.window
         }
         trainer = ConvTrainer(nn, converter, labels, options)
 
@@ -109,31 +110,33 @@ def main():
     format = parser.add_argument_group('Format')
 
     format.add_argument('--label-field', type=int, default=1,
-                      help='Field containing label.')
+                        help='Field containing label (default %(default)s).')
     format.add_argument('--text-field', type=int, default=2,
-                      help='Field containing text.')
+                        help='Field containing text (default %(default)s).')
 
     # training options
     train = parser.add_argument_group('Train')
 
     train.add_argument('-t', '--train', type=str, default=None,
-                      help='File with annotated data for training.')
+                       help='File with annotated data for training.')
 
     train.add_argument('-w', '--window', type=int, default=5,
-                        help='Size of the word window (default %(default)s)')
+                       help='Size of the word window (default %(default)s)')
     train.add_argument('-s', '--embeddings-size', type=int, default=50,
-                        help='Number of features per word (default %(default)s)',
-                        dest='embeddings_size')
+                       help='Number of features per word (default %(default)s)',
+                       dest='embeddings_size')
     train.add_argument('-e', '--epochs', type=int, default=100,
-                        help='Number of training epochs (default %(default)s)',
-                        dest='iterations')
+                       help='Number of training epochs (default %(default)s)',
+                       dest='iterations')
     train.add_argument('-l', '--learning_rate', type=float, default=0.001,
-                        help='Learning rate for network weights (default %(default)s)',
-                        dest='learning_rate')
+                       help='Learning rate for network weights (default %(default)s)',
+                       dest='learning_rate')
+    train.add_argument('--eps', type=float, default=1e-6,
+                        help='Epsilon value for AdaGrad (default %(default)s)')
     train.add_argument('-n', '--hidden', type=int, default=200,
-                        help='Number of hidden neurons (default %(default)s)')
+                       help='Number of hidden neurons (default %(default)s)')
     train.add_argument('-n2', '--hidden2', type=int, default=200,
-                        help='Number of hidden neurons (default %(default)s)')
+                       help='Number of hidden neurons (default %(default)s)')
 
     # Extractors:
     extractors = parser.add_argument_group('Extractors')
@@ -189,7 +192,7 @@ def main():
         sentences = reader.read(args.train)
 
         if args.vocab and os.path.exists(args.vocab):
-            if args.vectors and  os.path.exists(args.vectors):
+            if args.vectors and os.path.exists(args.vectors):
                 # use supplied embeddings
                 embeddings = Embeddings(vectors=args.vectors, vocab_file=args.vocab,
                                         variant=args.variant)
@@ -285,7 +288,7 @@ def main():
         labels_index = {}
         labels = []
         for i,c in enumerate(set(sent_labels)):
-            labels_index[c] = i 
+            labels_index[c] = i
             labels.append(c)
         trainer = create_trainer(args, converter, labels)
         logger.info("Starting training with %d examples" % len(examples))

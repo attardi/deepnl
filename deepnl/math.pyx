@@ -173,7 +173,7 @@ cdef np.ndarray[float_t] hardtanh_back(np.ndarray[float_t] y,
     it = np.nditer([y, grads, grads_in],
                    op_flags = [['readonly'], ['readonly'], ['writeonly']])
     for w, g, o in it:
-        if  w == -1.0 or w == 1.0:
+        if w == -1.0 or w == 1.0:
             o[...] = 0.0
         else:
             o[...] = g[...]
@@ -182,7 +182,7 @@ cdef np.ndarray[float_t] hardtanh_back(np.ndarray[float_t] y,
 cdef np.ndarray[float_t, ndim=2] hardtanh_back2d(np.ndarray[float_t, ndim=2] y,
                                                  np.ndarray[float_t, ndim=2] grads_out,
                                                  np.ndarray[float_t, ndim=2] grads_in):
-    """derivative of hardtanh in terms of y = hardtanh(x)/
+    """derivative of hardtanh in terms of y = hardtanh(x)
     Propagates the output gradients to the input, by multiplying with the
     derivative of hardtanh.
     grads_out:  gradients of output.
@@ -191,7 +191,7 @@ cdef np.ndarray[float_t, ndim=2] hardtanh_back2d(np.ndarray[float_t, ndim=2] y,
     it = np.nditer([y, grads_out, grads_in],
                    op_flags = [['readonly'], ['readonly'], ['writeonly']])
     for w, gout, gin in it:
-        if  w == -1.0 or w == 1.0:
+        if w == -1.0 or w == 1.0:
             gin[...] = 0.0
         else:
             gin[...] = gout[...]
@@ -207,7 +207,7 @@ cdef np.ndarray[float_t] hardtanhe(np.ndarray[float_t] y,
                    op_flags = [['readonly'],
                                ['writeonly', 'allocate', 'no_broadcast']])
     for w, o in it:
-        if  w == -1.0 or w == 1.0:
+        if w == -1.0 or w == 1.0:
             o[...] = 0.0
         else:
             o[...] = 1.0
@@ -223,7 +223,7 @@ cdef np.ndarray[float_t, ndim=2] hardtanhe2d(np.ndarray[float_t, ndim=2] y,
                    op_flags = [['readonly'],
                                ['writeonly', 'allocate', 'no_broadcast']])
     for w, o in it:
-        if  w == -1.0 or w == 1.0:
+        if w == -1.0 or w == 1.0:
             o[...] = 0.0
         else:
             o[...] = 1.0

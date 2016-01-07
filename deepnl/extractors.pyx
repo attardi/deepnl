@@ -25,7 +25,6 @@ import sys                      # modules
 from word_dictionary import WordDictionary as WD
 import embeddings
 from utils import Trie, strip_accents
-#from network cimport adaEps
 
 # ----------------------------------------------------------------------
 
@@ -154,15 +153,15 @@ cdef class Converter(object):
                 start = end
         return out
 
-    cpdef adaGradInit(self):
+    cpdef adaGradInit(self, float_t adaEps):
         """
         Initialize AdaGrad.
         """
         for e in self.extractors:
-            e.adaGradInit()
+            e.adaGradInit(adaEps)
 
     cpdef update(self, np.ndarray[float_t] grads, np.ndarray[int_t,ndim=2] sequence,
-                 float_t learning_rate, float_t adaEps=1e-6):
+                 float_t learning_rate):
         """
         Update the features according to the given gradients.
         :param grads: vector of feature gradients.
@@ -179,7 +178,7 @@ cdef class Converter(object):
                 else:
                     # AdaGrad
                     extractor.adaGrads[feature] += grads[start:end] * grads[start:end]
-                    extractor.table[feature] += learning_rate * grads[start:end] / np.sqrt(extractor.adaGrads[feature] + adaEps)
+                    extractor.table[feature] += learning_rate * grads[start:end] / np.sqrt(extractor.adaGrads[feature])
                 start = end
 
     def save(self, file):
@@ -268,8 +267,8 @@ cdef class Extractor(object):
         """
         return self.table.shape[1]
 
-    cpdef adaGradInit(self):
-        self.adaGrads = np.zeros_like(self.table);
+    cpdef adaGradInit(self, float_t adaEps):
+        self.adaGrads = np.full_like(self.table, adaEps);
 
     def save(self, file):
         pickle.dump(self.dict, file)
@@ -312,6 +311,7 @@ cdef class Embeddings(Extractor):
             # add vectors for special symbols
             extra = len(self.dict) - len(self.table)
             if extra > 0:
+                logging.info('Adding %d special symbols' % extra)
                 self.table = np.concatenate((self.table, embeddings.generate_vectors(extra, self.table.shape[1])))
         elif vocab_file:
             self.dict = <dict>WD(None, wordlist=self.load_vocabulary(vocab_file), variant=variant)
@@ -327,6 +327,7 @@ cdef class Embeddings(Extractor):
         # generate vectors for added words
         extra = len(self.dict) - len(self.table)
         if extra > 0:
+            logging.info('Added %d words' % extra)
             self.table = np.concatenate((self.table, embeddings.generate_vectors(extra, self.table.shape[1])))
 
     def save(self, file):

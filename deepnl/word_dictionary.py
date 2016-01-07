@@ -110,7 +110,7 @@ class WordDictionary(dict):
     
     def size(self):
         """
-        :return: the number of words ins the dictionary, excluding special symbols.
+        :return: the number of words in the dictionary, excluding special symbols.
         """
         return len(self) - len(self.special_symbols)
 

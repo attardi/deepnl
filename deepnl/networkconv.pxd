@@ -18,8 +18,7 @@ cdef class ConvParameters(Parameters):
     # the second hidden layer
     cdef public np.ndarray hidden2_weights, hidden2_bias
 
-    cpdef update(self, Gradients grads, float_t learning_rate, Parameters ada=*,
-    	  	 float_t adaEps=*)
+    cpdef update(self, Gradients grads, float_t learning_rate, Parameters ada=*)
 
 cdef class ConvGradients(Gradients):
     

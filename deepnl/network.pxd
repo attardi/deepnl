@@ -26,7 +26,7 @@ cdef class Parameters(object):
     cdef copy(self, Parameters p)
     # cpdef since it is called with super
     cpdef update(self, Gradients grads, float_t learning_rate,
-                 Parameters ada=*, float_t adaEps=*)
+                 Parameters ada=*)
 
 cdef class Gradients(Parameters):
 
@@ -52,5 +52,4 @@ cdef class Network(object):
     cdef float_t backpropagate(self, int y, Variables vars, Gradients grads)
 
     # cpdef since used with super
-    cpdef update(self, Gradients grads, float_t learning_rate, Parameters ada=*,
-                 float_t adaEps=*)
+    cpdef update(self, Gradients grads, float_t learning_rate, Parameters ada=*)

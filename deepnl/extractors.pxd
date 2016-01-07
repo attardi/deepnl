@@ -38,10 +38,10 @@ cdef class Converter(Iterable):
                                      np.ndarray[int_t,ndim=2] sentence,
                                      np.ndarray out=*)
 
-    cpdef adaGradInit(self)
+    cpdef adaGradInit(self, float_t adaEps)
 
     cpdef update(self, np.ndarray[float_t] grads, np.ndarray[int_t,ndim=2] sentence,
-    	  	 float_t learning_rate, float_t adaEps=*)
+    	  	 float_t learning_rate)
 
 cdef class Extractor(object):
 
@@ -51,7 +51,7 @@ cdef class Extractor(object):
 
     cpdef int_t size(self)
 
-    cpdef adaGradInit(self)
+    cpdef adaGradInit(self, float_t adaEps)
 
     cpdef int_t get_padding_left(self)
     cpdef int_t get_padding_right(self)

@@ -820,13 +820,12 @@ struct __pyx_opt_args_6deepnl_7network_7Network_update;
  *     cdef copy(self, Parameters p)
  *     # cpdef since it is called with super
  *     cpdef update(self, Gradients grads, float_t learning_rate,             # <<<<<<<<<<<<<<
- *                  Parameters ada=*, float_t adaEps=*)
+ *                  Parameters ada=*)
  * 
  */
 struct __pyx_opt_args_6deepnl_7network_10Parameters_update {
   int __pyx_n;
   struct __pyx_obj_6deepnl_7network_Parameters *ada;
-  __pyx_t_6deepnl_7network_float_t adaEps;
 };
 
 /* "network.pxd":46
@@ -856,13 +855,11 @@ struct __pyx_opt_args_6deepnl_7network_7Network_gradients {
 /* "network.pxd":55
  * 
  *     # cpdef since used with super
- *     cpdef update(self, Gradients grads, float_t learning_rate, Parameters ada=*,             # <<<<<<<<<<<<<<
- *                  float_t adaEps=*)
+ *     cpdef update(self, Gradients grads, float_t learning_rate, Parameters ada=*)             # <<<<<<<<<<<<<<
  */
 struct __pyx_opt_args_6deepnl_7network_7Network_update {
   int __pyx_n;
   struct __pyx_obj_6deepnl_7network_Parameters *ada;
-  __pyx_t_6deepnl_7network_float_t adaEps;
 };
 struct __pyx_opt_args_6deepnl_4math_softmax;
 struct __pyx_opt_args_6deepnl_4math_softmax2d;
@@ -1056,7 +1053,7 @@ struct __pyx_obj_6deepnl_7network_Parameters {
 
 
 /* "network.pxd":31
- *                  Parameters ada=*, float_t adaEps=*)
+ *                  Parameters ada=*)
  * 
  * cdef class Gradients(Parameters):             # <<<<<<<<<<<<<<
  * 
@@ -1145,7 +1142,7 @@ static struct __pyx_vtabstruct_6deepnl_7network_Parameters *__pyx_vtabptr_6deepn
 
 
 /* "network.pxd":31
- *                  Parameters ada=*, float_t adaEps=*)
+ *                  Parameters ada=*)
  * 
  * cdef class Gradients(Parameters):             # <<<<<<<<<<<<<<
  * 
@@ -1187,6 +1184,7 @@ static struct __pyx_vtabstruct_6deepnl_7network_Network *__pyx_vtabptr_6deepnl_7
 
 struct __pyx_vtabstruct_6deepnl_10networkseq_SeqParameters {
   struct __pyx_vtabstruct_6deepnl_7network_Parameters __pyx_base;
+  PyObject *(*update)(struct __pyx_obj_6deepnl_10networkseq_SeqParameters *, struct __pyx_obj_6deepnl_7network_Gradients *, __pyx_t_6deepnl_7network_float_t, int __pyx_skip_dispatch, struct __pyx_opt_args_6deepnl_10networkseq_13SeqParameters_update *__pyx_optional_args);
 };
 static struct __pyx_vtabstruct_6deepnl_10networkseq_SeqParameters *__pyx_vtabptr_6deepnl_10networkseq_SeqParameters;
 
@@ -1832,7 +1830,8 @@ static int __Pyx_ImportFunction(PyObject *module, const char *funcname, void (**
 
 static int __Pyx_InitStrings(__Pyx_StringTabEntry *t);
 
-static PyObject *__pyx_f_6deepnl_10networkseq_13SeqParameters_update(struct __pyx_obj_6deepnl_10networkseq_SeqParameters *__pyx_v_self, struct __pyx_obj_6deepnl_7network_Gradients *__pyx_v_grads, __pyx_t_6deepnl_7network_float_t __pyx_v_learning_rate, int __pyx_skip_dispatch, struct __pyx_opt_args_6deepnl_10networkseq_13SeqParameters_update *__pyx_optional_args); /* proto*/
+PyObject *__pyx_f_6deepnl_10networkseq_13SeqParameters_update(struct __pyx_obj_6deepnl_10networkseq_SeqParameters *__pyx_v_self, struct __pyx_obj_6deepnl_7network_Gradients *__pyx_v_grads, __pyx_t_6deepnl_7network_float_t __pyx_v_learning_rate, int __pyx_skip_dispatch, struct __pyx_opt_args_6deepnl_10networkseq_13SeqParameters_update *__pyx_optional_args); /* proto*/
+PyObject *__pyx_f_6deepnl_10networkseq_13SeqParameters_update__pyx_wrap_1(struct __pyx_obj_6deepnl_10networkseq_SeqParameters *__pyx_v_self, struct __pyx_obj_6deepnl_7network_Gradients *__pyx_v_grads, __pyx_t_6deepnl_7network_float_t __pyx_v_learning_rate, int __pyx_skip_dispatch, struct __pyx_opt_args_6deepnl_10networkseq_13SeqParameters_update *__pyx_optional_args); /* proto*/
 static PyObject *__pyx_f_6deepnl_10networkseq_15SequenceNetwork_gradients(struct __pyx_obj_6deepnl_10networkseq_SequenceNetwork *__pyx_v_self, struct __pyx_opt_args_6deepnl_10networkseq_15SequenceNetwork_gradients *__pyx_optional_args); /* proto*/
 static PyObject *__pyx_f_6deepnl_10networkseq_15SequenceNetwork_parameters(struct __pyx_obj_6deepnl_10networkseq_SequenceNetwork *__pyx_v_self); /* proto*/
 static PyArrayObject *__pyx_f_6deepnl_10networkseq_15SequenceNetwork__calculate_delta(struct __pyx_obj_6deepnl_10networkseq_SequenceNetwork *__pyx_v_self, PyObject *__pyx_v_scores); /* proto*/
@@ -2770,7 +2769,7 @@ static PyObject *__pyx_pf_6deepnl_10networkseq_13SeqParameters_4addSquare(struct
  */
 
 static PyObject *__pyx_pw_6deepnl_10networkseq_13SeqParameters_7update(PyObject *__pyx_v_self, PyObject *__pyx_args, PyObject *__pyx_kwds); /*proto*/
-static PyObject *__pyx_f_6deepnl_10networkseq_13SeqParameters_update(struct __pyx_obj_6deepnl_10networkseq_SeqParameters *__pyx_v_self, struct __pyx_obj_6deepnl_7network_Gradients *__pyx_v_grads, __pyx_t_6deepnl_7network_float_t __pyx_v_learning_rate, int __pyx_skip_dispatch, struct __pyx_opt_args_6deepnl_10networkseq_13SeqParameters_update *__pyx_optional_args) {
+PyObject *__pyx_f_6deepnl_10networkseq_13SeqParameters_update(struct __pyx_obj_6deepnl_10networkseq_SeqParameters *__pyx_v_self, struct __pyx_obj_6deepnl_7network_Gradients *__pyx_v_grads, __pyx_t_6deepnl_7network_float_t __pyx_v_learning_rate, int __pyx_skip_dispatch, struct __pyx_opt_args_6deepnl_10networkseq_13SeqParameters_update *__pyx_optional_args) {
 
   /* "deepnl/networkseq.pyx":49
  * 
@@ -3177,7 +3176,7 @@ static PyObject *__pyx_pf_6deepnl_10networkseq_13SeqParameters_6update(struct __
   __Pyx_TraceDeclarations
   __Pyx_RefNannyDeclarations
   PyObject *__pyx_t_1 = NULL;
-  struct __pyx_opt_args_6deepnl_7network_10Parameters_update __pyx_t_2;
+  struct __pyx_opt_args_6deepnl_10networkseq_13SeqParameters_update __pyx_t_2;
   int __pyx_lineno = 0;
   const char *__pyx_filename = NULL;
   int __pyx_clineno = 0;
@@ -3187,7 +3186,7 @@ static PyObject *__pyx_pf_6deepnl_10networkseq_13SeqParameters_6update(struct __
   __pyx_t_2.__pyx_n = 2;
   __pyx_t_2.ada = __pyx_v_ada;
   __pyx_t_2.adaEps = __pyx_v_adaEps;
-  __pyx_t_1 = __pyx_vtabptr_6deepnl_10networkseq_SeqParameters->__pyx_base.update(((struct __pyx_obj_6deepnl_7network_Parameters *)__pyx_v_self), __pyx_v_grads, __pyx_v_learning_rate, 1, &__pyx_t_2); if (unlikely(!__pyx_t_1)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 48; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_t_1 = __pyx_vtabptr_6deepnl_10networkseq_SeqParameters->update(__pyx_v_self, __pyx_v_grads, __pyx_v_learning_rate, 1, &__pyx_t_2); if (unlikely(!__pyx_t_1)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 48; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_GOTREF(__pyx_t_1);
   __pyx_r = __pyx_t_1;
   __pyx_t_1 = 0;
@@ -3203,6 +3202,10 @@ static PyObject *__pyx_pf_6deepnl_10networkseq_13SeqParameters_6update(struct __
   __Pyx_TraceReturn(__pyx_r, 0);
   __Pyx_RefNannyFinishContext();
   return __pyx_r;
+}
+
+PyObject *__pyx_f_6deepnl_10networkseq_13SeqParameters_update__pyx_wrap_1(struct __pyx_obj_6deepnl_10networkseq_SeqParameters *__pyx_v_self, struct __pyx_obj_6deepnl_7network_Gradients *__pyx_v_grads, __pyx_t_6deepnl_7network_float_t __pyx_v_learning_rate, int __pyx_skip_dispatch, struct __pyx_opt_args_6deepnl_10networkseq_13SeqParameters_update *__pyx_optional_args) {
+  return __pyx_f_6deepnl_10networkseq_13SeqParameters_update(__pyx_v_self, __pyx_v_grads, __pyx_v_learning_rate, __pyx_skip_dispatch, __pyx_optional_args);
 }
 
 /* "deepnl/networkseq.pyx":64
@@ -11542,7 +11545,8 @@ PyMODINIT_FUNC PyInit_networkseq(void)
   __pyx_vtabptr_6deepnl_7network_Parameters = (struct __pyx_vtabstruct_6deepnl_7network_Parameters*)__Pyx_GetVtable(__pyx_ptype_6deepnl_7network_Parameters->tp_dict); if (unlikely(!__pyx_vtabptr_6deepnl_7network_Parameters)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 1; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __pyx_vtabptr_6deepnl_10networkseq_SeqParameters = &__pyx_vtable_6deepnl_10networkseq_SeqParameters;
   __pyx_vtable_6deepnl_10networkseq_SeqParameters.__pyx_base = *__pyx_vtabptr_6deepnl_7network_Parameters;
-  __pyx_vtable_6deepnl_10networkseq_SeqParameters.__pyx_base.update = (PyObject *(*)(struct __pyx_obj_6deepnl_7network_Parameters *, struct __pyx_obj_6deepnl_7network_Gradients *, __pyx_t_6deepnl_7network_float_t, int __pyx_skip_dispatch, struct __pyx_opt_args_6deepnl_7network_10Parameters_update *__pyx_optional_args))__pyx_f_6deepnl_10networkseq_13SeqParameters_update;
+  __pyx_vtable_6deepnl_10networkseq_SeqParameters.__pyx_base.update = (PyObject *(*)(struct __pyx_obj_6deepnl_7network_Parameters *, struct __pyx_obj_6deepnl_7network_Gradients *, __pyx_t_6deepnl_7network_float_t, int __pyx_skip_dispatch, struct __pyx_opt_args_6deepnl_7network_10Parameters_update *__pyx_optional_args))__pyx_f_6deepnl_10networkseq_13SeqParameters_update__pyx_wrap_1;
+  __pyx_vtable_6deepnl_10networkseq_SeqParameters.update = (PyObject *(*)(struct __pyx_obj_6deepnl_10networkseq_SeqParameters *, struct __pyx_obj_6deepnl_7network_Gradients *, __pyx_t_6deepnl_7network_float_t, int __pyx_skip_dispatch, struct __pyx_opt_args_6deepnl_10networkseq_13SeqParameters_update *__pyx_optional_args))__pyx_f_6deepnl_10networkseq_13SeqParameters_update;
   __pyx_type_6deepnl_10networkseq_SeqParameters.tp_base = __pyx_ptype_6deepnl_7network_Parameters;
   if (PyType_Ready(&__pyx_type_6deepnl_10networkseq_SeqParameters) < 0) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 26; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __pyx_type_6deepnl_10networkseq_SeqParameters.tp_print = 0;

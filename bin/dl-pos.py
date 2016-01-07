@@ -48,15 +48,15 @@ def create_trainer(args, converter, tag_index):
     else:
         logger.info('Creating new network...')
         # sum the number of features in all tables 
-        input_size = converter.size() * args.window
+        input_size = converter.size() * args.window * 2 + 1
         nn = SequenceNetwork(input_size, args.hidden, len(tag_index))
         options = {
             'learning_rate': args.learning_rate,
             'eps': args.eps,
             'ro': args.ro,
             'verbose': args.verbose,
-            'left_context': args.window/2,
-            'right_context': args.window/2
+            'left_context': args.window,
+            'right_context': args.window
         }
         trainer = TaggerTrainer(nn, converter, tag_index, options)
 
@@ -112,7 +112,7 @@ def main():
     train.add_argument('-t', '--train', type=str, default=None,
                         help='File with annotated data for training.')
 
-    train.add_argument('-w', '--window', type=int, default=5,
+    train.add_argument('-w', '--window', type=int, default=2,
                         help='Size of the word window (default %(default)s)')
     train.add_argument('-s', '--embeddings-size', type=int, default=50,
                         help='Number of features per word (default %(default)s)',

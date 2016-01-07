@@ -78,10 +78,20 @@ cdef class ConvTrainer(Trainer):
                 self.error += loss
                 self.update(grads, sent)
                 # # DEBUG. verify
+                # label1 = np.argmax(vars.output)
                 # nn.forward(vars) # DEBUG
+                # grads.clear() # allocate gradients
                 # loss2 = nn.backpropagate(label, vars, grads) # DEBUG
-                # if loss2 > loss:                             # DEBUG
-                #     print >> sys.stderr, 'WORSE', i, label, loss, loss2 # DEBUG
+                # if loss2 > 0.5: # loss:                             # DEBUG
+                #     label2 = np.argmax(vars.output)
+                #     self.update(grads, sent)
+                #     # check again
+                #     nn.forward(vars) # DEBUG
+                #     label3 = np.argmax(vars.output)
+                #     if label != label3:
+                #         grads.clear() # allocate gradients
+                #         loss3 = nn.backpropagate(label, vars, grads)
+                #         print >> sys.stderr, 'NOFIX', i, label, label1, label2, label3, loss, loss2, loss3
             else:
                 self.epoch_hits += 1
             self.epoch_items += 1
@@ -109,7 +119,7 @@ cdef class ConvTrainer(Trainer):
         cdef int_t count = 0
         cdef int_t hits = 0
 
-        cdef int_t i, label
+        cdef int_t i, label, pred
         cdef np.ndarray[int_t,ndim=2] sent
         cdef Variables vars
 
@@ -121,19 +131,11 @@ cdef class ConvTrainer(Trainer):
             vars = self.nn.variables(len(sent)) # allocate variables
             self.converter.lookup(sent, vars.input)
             self.nn.forward(vars)
-            if np.argmax(vars.output) == label:
+            pred = np.argmax(vars.output)
+            if pred == label:
                 hits += 1
             count += 1
-            if self.verbose:
-                if (i+1-idx)%1000 == 0:
-                    sys.stderr.write('+')
-                    sys.stderr.flush()
-                elif (i+1-idx)%100 == 0:
-                    sys.stderr.write('.')
-                    sys.stderr.flush()
-        if self.verbose:
-            sys.stderr.write('\n')
-        return float(hits) / count if count else 0.0
+        return float(hits) / count if count else 1.0
 
     # def save(self, file): inherited
 

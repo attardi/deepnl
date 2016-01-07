@@ -226,7 +226,7 @@ cdef class SentimentTrainer(LmTrainer):
         # add the change to the negative token
         deltas = np.concatenate((deltas, grads.input_neg[start:end])) # negative token
         
-        self.converter.update(deltas, tokens, self.learning_rate, self.adaEps)
+        self.converter.update(deltas, tokens, self.learning_rate)
 
     def train(self, Iterable sentences, list polarities, trie,
               int_t epochs, int_t report_freq):
@@ -241,7 +241,7 @@ cdef class SentimentTrainer(LmTrainer):
 
         # prepare for AdaGrad
         if self.adaEps:
-            self.converter.adaGradInit()
+            self.converter.adaGradInit(self.adaEps)
 
         # generate 1000 random indices at a time to save time
         # (generating 1000 integers at once takes about ten times the time for a single one)

@@ -86,15 +86,16 @@ cdef class ConvParameters(Parameters):
         self.output_bias = np.random.uniform(-high, high, output_size)
 
     cpdef update(self, Gradients grads, float_t learning_rate,
-                 Parameters ada=None, float_t adaEps=1e-6):
-        super(ConvParameters, self).update(grads, learning_rate, ada, adaEps)
+                 Parameters ada=None):
+        super(ConvParameters, self).update(grads, learning_rate, ada)
         if ada:
-            self.hidden2_weights += learning_rate * grads.hidden2_weights / np.sqrt(ada.hidden2_weights + adaEps)
-            self.hidden2_bias += learning_rate * grads.hidden2_bias / np.sqrt(ada.hidden2_bias + adaEps)
+            self.hidden2_weights += learning_rate * grads.hidden2_weights / np.sqrt(ada.hidden2_weights)
+            self.hidden2_bias += learning_rate * grads.hidden2_bias / np.sqrt(ada.hidden2_bias)
         else:
             # divide by the fan-in
-            self.hidden2_weights += grads.hidden2_weights * learning_rate / self.hidden_size
-            self.hidden2_bias += grads.hidden2_bias * learning_rate / self.hidden_size
+            hidden1_size = self.hidden_bias.size
+            self.hidden2_weights += grads.hidden2_weights * learning_rate / hidden1_size
+            self.hidden2_bias += grads.hidden2_bias * learning_rate / hidden1_size
 
     def save(self, file):
         """
@@ -293,25 +294,37 @@ Output size: %d
         #         fx_m = v
         # cdef float_t hinge_loss = max(0.0, 1 + fx_m - fx_y)
         # MultiMarginCriterion
-        # see https://github.com/torch/nn/blob/master/doc/criterion.md
+        # see https://github.com/torch/nn/blob/master/doc/criterion.md#nn.MultiMarginCriterion
+        # https://github.com/torch/nn/blob/master/generic/MultiMarginCriterion.c
         cdef float_t hinge_loss = 0.0
         cdef int_t i
-        cdef float_t fx_i
+        cdef float_t fx_i, z
+        grads.output_bias[y] = 0.0
         for i, fx_i in enumerate(vars.output):
-            if i != y:
-                hinge_loss += max(0.0, 1 + fx_i - fx_y) # optionally squared
+            if i == y:
+                continue
+            z = 1 + fx_i - fx_y
+            hinge_loss += max(0.0, z) # optionally squared
+            if z > 0:
+                # negative gradient:
+                grads.output_bias[i] = -1 # optionally -2 * z
+                grads.output_bias[y] += 1.0
+            else:
+                grads.output_bias[i] = 0.0
         hinge_loss /= self.output_size
 
         if hinge_loss == 0.0:
             return hinge_loss
         cdef ConvParameters p = self.p
 
-        # minimizing C(f_5) = hl(f_5)
-        # f_5 = W_3 f_4 + b_3
-        # dC / db_4 = dC / df_5					(22)
+        # minimizing C = hl(f_5)
+        # f_5 = W_4 f_4 + b_4
+        # dC / db_4 = d hl / df_54 * d f_5 / db_4 = d hl / df_5
         # negative gradient:
-        grads.output_bias[:] = np.where(vars.output - fx_y > -1, -1, 0) # -1
-        grads.output_bias[y] = +1
+        # grads.output_bias[:] = np.where(vars.output - fx_y > -1, -1, 0) # -1
+        # grads.output_bias[y] = 1
+        # MultiMarginCriterion: computed above
+        # print >> sys.stderr, y, vars.output, grads.output_bias # DEBUG
         # dC / dW_4 = dC / df_5 * f_4				(22)
         # (output_size) x (hidden2_size) = (output_size, hidden2_size)
         np.outer(grads.output_bias, vars.hidden2, grads.output_weights)

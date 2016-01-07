@@ -116,7 +116,8 @@ cdef class Trainer(object):
         # prepare for AdaGrad
         if self.adaEps:
             self.ada = self.nn.parameters()
-            self.converter.adaGradInit()
+            self.ada = self.ada.clear(self.adaEps)
+            self.converter.adaGradInit(self.adaEps)
         else:
             self.ada = None
 
@@ -267,10 +268,10 @@ cdef class Trainer(object):
         """
 
         # update network weights.
-        self.nn.update(grads, self.learning_rate, self.ada, self.adaEps)
+        self.nn.update(grads, self.learning_rate, self.ada)
 
         self.converter.update(grads.input, sequence,
-                              self.learning_rate, self.adaEps)
+                              self.learning_rate)
 
     def save(self, file):
         np.save(file, (self.pre_padding, self.post_padding, self.ngram_size))
@@ -407,7 +408,7 @@ cdef class TaggerTrainer(Trainer):
         :param sentence: the padded sentence.
         """
         # update network weights and transition weights.
-        self.nn.update(grads, self.learning_rate, self.ada, self.adaEps)
+        self.nn.update(grads, self.learning_rate, self.ada)
         #
         # Adjust the features indexed by the input windows.
         #
@@ -430,5 +431,4 @@ cdef class TaggerTrainer(Trainer):
         cdef np.ndarray[int_t,ndim=2] window
         for i in xrange(slen):
             window = sentence[i: i+window_size]
-            self.converter.update(grads.input[i], window, self.learning_rate,
-                                  self.adaEps)
+            self.converter.update(grads.input[i], window, self.learning_rate)

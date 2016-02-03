@@ -21,7 +21,7 @@ extensions = [
               language="c++",
               extra_compile_args=["-fopenmp"]),
     Extension('deepnl/hpca',
-              sources=["deepnl/hpca.pyx", "deepnl/HPCA.cpp"],
+              sources=["deepnl/hpca.pyx", "deepnl/HPCA_impl.cpp"],
               include_dirs=[np.get_include(),
                             "/usr/include/eigen3"],
               language="c++",

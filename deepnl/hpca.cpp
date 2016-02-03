@@ -21,7 +21,7 @@
         ], 
         "language": "c++", 
         "sources": [
-            "deepnl/HPCA.cpp"
+            "deepnl/HPCA_impl.cpp"
         ]
     }
 }
@@ -1414,7 +1414,7 @@ static char __pyx_k_full_matrices[] = "full_matrices";
 static char __pyx_k_scipy_linalg_lapack[] = "scipy.linalg.lapack";
 static char __pyx_k_ndarray_is_not_C_contiguous[] = "ndarray is not C contiguous";
 static char __pyx_k_Learn_word_embeddings_from_plai[] = "\nLearn word embeddings from plain text using Hellinger PCA.\n\nSee\nLebret, R\303\251mi, and Ronan Collobert. \"Word Embeddings through Hellinger PCA.\" EACL 2014 (2014): 482.\n\nAuthor: Giuseppe Attardi\n";
-static char __pyx_k_net_marea_export_project_piqass[] = "/net/marea/export/project/piqasso/tools/deepnl/deepnl/hpca.pyx";
+static char __pyx_k_net_medialab_di_unipi_it_l_disc[] = "/net/medialab.di.unipi.it/l/disc1/home/miceli/deepnl/deepnl/hpca.pyx";
 static char __pyx_k_unknown_dtype_code_in_numpy_pxd[] = "unknown dtype code in numpy.pxd (%d)";
 static char __pyx_k_Format_string_allocated_too_shor[] = "Format string allocated too short, see comment in numpy.pxd";
 static char __pyx_k_Non_native_byte_order_not_suppor[] = "Non-native byte order not supported";
@@ -1444,7 +1444,7 @@ static PyObject *__pyx_n_s_n_components;
 static PyObject *__pyx_n_s_name;
 static PyObject *__pyx_kp_u_ndarray_is_not_C_contiguous;
 static PyObject *__pyx_kp_u_ndarray_is_not_Fortran_contiguou;
-static PyObject *__pyx_kp_s_net_marea_export_project_piqass;
+static PyObject *__pyx_kp_s_net_medialab_di_unipi_it_l_disc;
 static PyObject *__pyx_n_s_np;
 static PyObject *__pyx_n_s_numpy;
 static PyObject *__pyx_n_s_numpy_linalg;
@@ -4416,7 +4416,7 @@ static __Pyx_StringTabEntry __pyx_string_tab[] = {
   {&__pyx_n_s_name, __pyx_k_name, sizeof(__pyx_k_name), 0, 0, 1, 1},
   {&__pyx_kp_u_ndarray_is_not_C_contiguous, __pyx_k_ndarray_is_not_C_contiguous, sizeof(__pyx_k_ndarray_is_not_C_contiguous), 0, 1, 0, 0},
   {&__pyx_kp_u_ndarray_is_not_Fortran_contiguou, __pyx_k_ndarray_is_not_Fortran_contiguou, sizeof(__pyx_k_ndarray_is_not_Fortran_contiguou), 0, 1, 0, 0},
-  {&__pyx_kp_s_net_marea_export_project_piqass, __pyx_k_net_marea_export_project_piqass, sizeof(__pyx_k_net_marea_export_project_piqass), 0, 0, 1, 0},
+  {&__pyx_kp_s_net_medialab_di_unipi_it_l_disc, __pyx_k_net_medialab_di_unipi_it_l_disc, sizeof(__pyx_k_net_medialab_di_unipi_it_l_disc), 0, 0, 1, 0},
   {&__pyx_n_s_np, __pyx_k_np, sizeof(__pyx_k_np), 0, 0, 1, 1},
   {&__pyx_n_s_numpy, __pyx_k_numpy, sizeof(__pyx_k_numpy), 0, 0, 1, 1},
   {&__pyx_n_s_numpy_linalg, __pyx_k_numpy_linalg, sizeof(__pyx_k_numpy_linalg), 0, 0, 1, 1},
@@ -4535,7 +4535,7 @@ static int __Pyx_InitCachedConstants(void) {
   __pyx_tuple__8 = PyTuple_Pack(4, __pyx_n_s_corpus, __pyx_n_s_vocabFile, __pyx_n_s_top, __pyx_n_s_window); if (unlikely(!__pyx_tuple__8)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 39; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_GOTREF(__pyx_tuple__8);
   __Pyx_GIVEREF(__pyx_tuple__8);
-  __pyx_codeobj__9 = (PyObject*)__Pyx_PyCode_New(4, 0, 4, 0, 0, __pyx_empty_bytes, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_tuple__8, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_kp_s_net_marea_export_project_piqass, __pyx_n_s_cooccurrences, 39, __pyx_empty_bytes); if (unlikely(!__pyx_codeobj__9)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 39; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_codeobj__9 = (PyObject*)__Pyx_PyCode_New(4, 0, 4, 0, 0, __pyx_empty_bytes, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_tuple__8, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_kp_s_net_medialab_di_unipi_it_l_disc, __pyx_n_s_cooccurrences, 39, __pyx_empty_bytes); if (unlikely(!__pyx_codeobj__9)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 39; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_RefNannyFinishContext();
   return 0;
   __pyx_L1_error:;
@@ -4816,7 +4816,7 @@ PyMODINIT_FUNC PyInit_hpca(void)
   /* "deepnl/hpca.pyx":1
  * # -*- coding: utf-8 -*-             # <<<<<<<<<<<<<<
  * # distutils: language = c++
- * # distutils: sources = deepnl/HPCA.cpp
+ * # distutils: sources = deepnl/HPCA_impl.cpp
  */
   __pyx_t_1 = PyDict_New(); if (unlikely(!__pyx_t_1)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 1; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_GOTREF(__pyx_t_1);

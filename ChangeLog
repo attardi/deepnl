@@ -1,3 +1,10 @@
+2016-02-03  Antonio Valerio Miceli Barone < github.com/Avmb >
+
+	* deepnl/HPCA.cpp: renamed to deepnl/HPCA_impl.cpp in order to avoid a
+        conflict with deepnl/hpca.cpp in case-insensitive file systems.
+        * deepnl/hpca.pyx: updated to reflect the above change.
+        * setup.py: idem.
+
 2016-01-06  Giuseppe Attardi  <attardi@di.unipi.it>
 
 	* deepnl/trainer.pyx (train): initialize AdaGrad accumulators by adaEps.

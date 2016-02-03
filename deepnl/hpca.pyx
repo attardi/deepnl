@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 # distutils: language = c++
-# distutils: sources = deepnl/HPCA.cpp
+# distutils: sources = deepnl/HPCA_impl.cpp
 # cython: profile=False
 
 """

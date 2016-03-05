@@ -239,8 +239,8 @@ class TweetReader(Reader):
                     bigramCount.update([(a, b)])
                     if unigramCount[c] >= min_occurrences:
                         trigramCount.update([(a, b, c)])
-        if len(tweet) > 1 and unigramCount[tweet[-2]] >= min_occurrences and unigramCount[tweet[-1]] >= min_occurrences:
-            bigramCount.update([(tweet[-2], tweet[-1])])
+            if len(tweet) > 1 and unigramCount[tweet[-2]] >= min_occurrences and unigramCount[tweet[-1]] >= min_occurrences:
+                bigramCount.update([(tweet[-2], tweet[-1])])
         bigrams = []
         for b, c in bigramCount.iteritems():
             if (float(c) - TweetReader.delta) / (unigramCount[b[0]] * unigramCount[b[1]]) > threshold:

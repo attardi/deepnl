@@ -121,6 +121,10 @@ if __name__ == '__main__':
                         help='Number of hidden neurons (default %(default)s)')
     parser.add_argument('--ngrams', type=int, default=2,
                         help='Length of ngrams (default %(default)s)')
+    parser.add_argument('--textField', type=int, default=3,
+                        help='field containing text (default %(default)s)')
+    parser.add_argument('--tagField', type=int, default=2,
+                        help='field containing polarity (default %(default)s)')
     parser.add_argument('--alpha', type=float, default=0.5,
                         help='Relative weight of normal wrt sentiment score (default %(default)s)')
     parser.add_argument('train', type=str,
@@ -158,7 +162,7 @@ if __name__ == '__main__':
 
     # merge args with config
 
-    reader = TweetReader(args.ngrams)
+    reader = TweetReader(text_field=args.textField, label_field=args.tagField, ngrams=args.ngrams)
     reader.read(args.train)
     vocab, bigrams, trigrams = reader.create_vocabulary(reader.sentences,
                                                         args.vocab_size,

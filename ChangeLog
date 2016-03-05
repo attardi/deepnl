@@ -1,3 +1,8 @@
+2016-03-05  Giuseppe Attardi  <attardi@R730-gpu>
+
+	* deepnl/reader.py (TweetReader.__init__): specify fileds for text and polarity.
+	(TweetReader.create_vocabulary): fixed indentation.
+
 2016-02-03  Antonio Valerio Miceli Barone < github.com/Avmb >
 
 	* deepnl/HPCA.cpp: renamed to deepnl/HPCA_impl.cpp in order to avoid a

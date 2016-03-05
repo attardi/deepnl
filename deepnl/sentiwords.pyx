@@ -200,6 +200,7 @@ cdef class SentimentTrainer(LmTrainer):
         """
         Update the weights along the gradients :param grads:
         """
+        # FIXME: use adagrad
         #cdef float_t LR_0 = max(0.001, self.learning_rate * remaining)
         cdef float_t LR_0 = self.learning_rate
         cdef float_t LR_1 = max(0.001, self.learning_rate / self.nn.input_size * remaining)

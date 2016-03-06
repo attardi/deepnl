@@ -415,7 +415,7 @@ cdef class LmTrainer(Trainer):
         accuracy.
         """
         # logging.__init__() invokes acquire lock.
-        print >> sys.stderr, ("Epoch %d, examples: %d, sent: %d, avg. error: %.3f"
+        print >> sys.stderr, ("Epoch: %d, pairs: %d, sent: %d, avg. error: %.3f"
                      % (epoch, total_pairs, sent, self.avg_error.mean))
 
 

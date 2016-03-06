@@ -2,6 +2,7 @@
 
 	* deepnl/reader.py (TweetReader.__init__): specify fileds for text and polarity.
 	(TweetReader.create_vocabulary): fixed indentation.
+	(TweetReader.read): added optional polarity dictionary.
 
 2016-02-03  Antonio Valerio Miceli Barone < github.com/Avmb >
 

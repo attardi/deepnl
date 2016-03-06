@@ -160,6 +160,9 @@ class PosReader(TaggerReader):
 
 # ----------------------------------------------------------------------
 
+# other polarities will be given 0.
+default_polarities = { 'positive': 1, 'negative': -1 }
+
 class TweetReader(Reader):
     """
     Reader for tweets in SemEval 2013 format, one tweet per line consisting  of:
@@ -184,7 +187,7 @@ class TweetReader(Reader):
         for tweet in TsvReader(): # stdin
             yield tweet
 
-    def read(self, filename=None):
+    def read(self, filename=None, polarities=default_polarities):
         """
         Builds a list of sentences and a list corresponding polarities [-1, 0, 1]
         """
@@ -192,13 +195,8 @@ class TweetReader(Reader):
             if len(tweet) <= self.text_field:
                 # drop empty tweets
                 continue
-            if tweet[self.label_field] == 'positive':
-                polarity = 1
-            elif tweet[self.label_field] == 'negative':
-                polarity = -1
-            else:
-                polarity = 0    # neutral or objective
             self.sentences.append(tweet[self.text_field].split())
+            polarity = polarities.get(tweet[self.label_field], 0)
             self.polarities.append(polarity)
         return self.sentences
                     

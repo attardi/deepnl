@@ -2664,12 +2664,12 @@ static char __pyx_k_ndarray_is_not_C_contiguous[] = "ndarray is not C contiguous
 static char __pyx_k_Estimating_max_number_of_pairs[] = "Estimating max number of pairs";
 static char __pyx_k_home_attardi_tools_deepnl_deepn[] = "/home/attardi/tools/deepnl/deepnl/words.pyx";
 static char __pyx_k_unknown_dtype_code_in_numpy_pxd[] = "unknown dtype code in numpy.pxd (%d)";
-static char __pyx_k_Epoch_d_examples_d_sent_d_avg_er[] = "Epoch %d, examples: %d, sent: %d, avg. error: %.3f";
+static char __pyx_k_Epoch_d_pairs_d_sent_d_avg_error[] = "Epoch: %d, pairs: %d, sent: %d, avg. error: %.3f";
 static char __pyx_k_Format_string_allocated_too_shor[] = "Format string allocated too short, see comment in numpy.pxd";
 static char __pyx_k_Non_native_byte_order_not_suppor[] = "Non-native byte order not supported";
 static char __pyx_k_ndarray_is_not_Fortran_contiguou[] = "ndarray is not Fortran contiguous";
 static char __pyx_k_Format_string_allocated_too_shor_2[] = "Format string allocated too short.";
-static PyObject *__pyx_kp_s_Epoch_d_examples_d_sent_d_avg_er;
+static PyObject *__pyx_kp_s_Epoch_d_pairs_d_sent_d_avg_error;
 static PyObject *__pyx_kp_s_Estimating_max_number_of_pairs;
 static PyObject *__pyx_n_s_Exception;
 static PyObject *__pyx_kp_u_Format_string_allocated_too_shor;
@@ -5512,12 +5512,12 @@ static PyObject *__pyx_pf_6deepnl_5words_9LmTrainer_5train_train_worker(PyObject
               __Pyx_XDECREF(__pyx_t_17); __pyx_t_17 = 0;
               goto __pyx_L29_try_end;
               __pyx_L22_error:;
-              __Pyx_XDECREF(__pyx_t_18); __pyx_t_18 = 0;
               __Pyx_XDECREF(__pyx_t_1); __pyx_t_1 = 0;
               __Pyx_XDECREF(__pyx_t_2); __pyx_t_2 = 0;
               __Pyx_XDECREF(__pyx_t_5); __pyx_t_5 = 0;
               __Pyx_XDECREF(__pyx_t_3); __pyx_t_3 = 0;
               __Pyx_XDECREF(__pyx_t_4); __pyx_t_4 = 0;
+              __Pyx_XDECREF(__pyx_t_18); __pyx_t_18 = 0;
               /*except:*/ {
                 __Pyx_AddTraceback("deepnl.words.LmTrainer.train.train_worker", __pyx_clineno, __pyx_lineno, __pyx_filename);
                 if (__Pyx_GetException(&__pyx_t_4, &__pyx_t_3, &__pyx_t_5) < 0) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 269; __pyx_clineno = __LINE__; goto __pyx_L24_except_error;}
@@ -5749,7 +5749,6 @@ static PyObject *__pyx_pf_6deepnl_5words_9LmTrainer_5train_train_worker(PyObject
     __Pyx_XDECREF(__pyx_t_8); __pyx_t_8 = 0;
     goto __pyx_L10_try_end;
     __pyx_L3_error:;
-    __Pyx_XDECREF(__pyx_t_18); __pyx_t_18 = 0;
     __Pyx_XDECREF(__pyx_t_21); __pyx_t_21 = 0;
     __Pyx_XDECREF(__pyx_t_4); __pyx_t_4 = 0;
     __Pyx_XDECREF(__pyx_t_2); __pyx_t_2 = 0;
@@ -5757,6 +5756,7 @@ static PyObject *__pyx_pf_6deepnl_5words_9LmTrainer_5train_train_worker(PyObject
     __Pyx_XDECREF(__pyx_t_1); __pyx_t_1 = 0;
     __Pyx_XDECREF(__pyx_t_3); __pyx_t_3 = 0;
     __Pyx_XDECREF(__pyx_t_5); __pyx_t_5 = 0;
+    __Pyx_XDECREF(__pyx_t_18); __pyx_t_18 = 0;
 
     /* "deepnl/words.pyx":294
  *                     #jobs.task_done() # only needed if using jobs.join()
@@ -8520,7 +8520,7 @@ static PyObject *__pyx_pf_6deepnl_5words_9LmTrainer_10_progress_report(struct __
   /* "deepnl/words.pyx":418
  *         """
  *         # logging.__init__() invokes acquire lock.
- *         print >> sys.stderr, ("Epoch %d, examples: %d, sent: %d, avg. error: %.3f"             # <<<<<<<<<<<<<<
+ *         print >> sys.stderr, ("Epoch: %d, pairs: %d, sent: %d, avg. error: %.3f"             # <<<<<<<<<<<<<<
  *                      % (epoch, total_pairs, sent, self.avg_error.mean))
  * 
  */
@@ -8532,7 +8532,7 @@ static PyObject *__pyx_pf_6deepnl_5words_9LmTrainer_10_progress_report(struct __
 
   /* "deepnl/words.pyx":419
  *         # logging.__init__() invokes acquire lock.
- *         print >> sys.stderr, ("Epoch %d, examples: %d, sent: %d, avg. error: %.3f"
+ *         print >> sys.stderr, ("Epoch: %d, pairs: %d, sent: %d, avg. error: %.3f"
  *                      % (epoch, total_pairs, sent, self.avg_error.mean))             # <<<<<<<<<<<<<<
  * 
  * 
@@ -8553,7 +8553,7 @@ static PyObject *__pyx_pf_6deepnl_5words_9LmTrainer_10_progress_report(struct __
   __Pyx_GIVEREF(__pyx_t_1);
   PyTuple_SET_ITEM(__pyx_t_3, 3, __pyx_t_1);
   __pyx_t_1 = 0;
-  __pyx_t_1 = __Pyx_PyString_Format(__pyx_kp_s_Epoch_d_examples_d_sent_d_avg_er, __pyx_t_3); if (unlikely(!__pyx_t_1)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 419; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
+  __pyx_t_1 = __Pyx_PyString_Format(__pyx_kp_s_Epoch_d_pairs_d_sent_d_avg_error, __pyx_t_3); if (unlikely(!__pyx_t_1)) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 419; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
   __Pyx_GOTREF(__pyx_t_1);
   __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
   if (__Pyx_PrintOne(__pyx_t_2, __pyx_t_1) < 0) {__pyx_filename = __pyx_f[0]; __pyx_lineno = 418; __pyx_clineno = __LINE__; goto __pyx_L1_error;}
@@ -13401,7 +13401,7 @@ static struct PyModuleDef __pyx_moduledef = {
 #endif
 
 static __Pyx_StringTabEntry __pyx_string_tab[] = {
-  {&__pyx_kp_s_Epoch_d_examples_d_sent_d_avg_er, __pyx_k_Epoch_d_examples_d_sent_d_avg_er, sizeof(__pyx_k_Epoch_d_examples_d_sent_d_avg_er), 0, 0, 1, 0},
+  {&__pyx_kp_s_Epoch_d_pairs_d_sent_d_avg_error, __pyx_k_Epoch_d_pairs_d_sent_d_avg_error, sizeof(__pyx_k_Epoch_d_pairs_d_sent_d_avg_error), 0, 0, 1, 0},
   {&__pyx_kp_s_Estimating_max_number_of_pairs, __pyx_k_Estimating_max_number_of_pairs, sizeof(__pyx_k_Estimating_max_number_of_pairs), 0, 0, 1, 0},
   {&__pyx_n_s_Exception, __pyx_k_Exception, sizeof(__pyx_k_Exception), 0, 0, 1, 1},
   {&__pyx_kp_u_Format_string_allocated_too_shor, __pyx_k_Format_string_allocated_too_shor, sizeof(__pyx_k_Format_string_allocated_too_shor), 0, 1, 0, 0},

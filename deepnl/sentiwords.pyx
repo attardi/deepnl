@@ -19,6 +19,7 @@ from extractors cimport Iterable
 
 # ----------------------------------------------------------------------
 
+
 cdef class SentGradients(Gradients):
 
     cdef public np.ndarray hidden_pos
@@ -26,6 +27,7 @@ cdef class SentGradients(Gradients):
     #cdef public np.ndarray input_pos: as Gradients.input
     cdef public np.ndarray input_neg
     
+
     def __init__(self, int_t input_size, int_t hidden_size, int_t output_size):
         super(SentGradients, self).__init__(input_size, hidden_size, output_size)
         # gradients for positive hidden variables
@@ -34,6 +36,7 @@ cdef class SentGradients(Gradients):
         self.hidden_neg = np.zeros(hidden_size)
         # gradients for negative input variables
         self.input_neg = np.zeros(input_size)
+
 
     def clear(self):
         super(SentGradients, self).clear()
@@ -59,6 +62,7 @@ def itertrie(trie, sent, start, depth=0):
 
 # ----------------------------------------------------------------------
 
+
 cdef class SentimentTrainer(LmTrainer): 
     """
     A neural network for sentiment specific language model, aimed 
@@ -75,6 +79,7 @@ cdef class SentimentTrainer(LmTrainer):
 
     cdef RandomPool random_pool
 
+
     def __init__(self, nn, converter, options):
         """
         Initializes a new neural network initialized for training.
@@ -89,17 +94,18 @@ cdef class SentimentTrainer(LmTrainer):
 
         self.alpha = options.get('alpha', 0.5)
 
+
     @cython.boundscheck(False)
     cdef _train_pair_s(self, np.ndarray[int_t,ndim=2] example, Gradients grads,
-                       int_t size=1, int_t polarity=0):
+                       int_t polarity, int_t size=1):
         """
         Trains the network with a pair of positive/negative examples.
         The negative one is randomly generated.
 	:param example: the positive example, i.e. a list of a list of token IDs
         :param grads: the computed gradients are accumulated here, except for
         inputs, which are updated immediately.
+        :param polarity: 1 for positive, -1 for negative sentences.
 	:param size: size of ngram to generate for replacing window center
-        :param polarity: 1 for positive, -1 for negative sentences, 0 for neutral..
         """
         
         # a token is a list of feature IDs.
@@ -131,10 +137,11 @@ cdef class SentimentTrainer(LmTrainer):
         #print >> sys.stderr, vars_neg.input[128:132] # DEBUG
         nn.forward(vars_neg)
         
+        # hinge loss
         cdef float_t errorCW = max(0, 1 - vars_pos.output[0] + vars_neg.output[0])
         cdef float_t errorUS = max(0, 1 - polarity * vars_pos.output[1] + polarity * vars_neg.output[1])
         cdef float_t error = self.alpha * errorCW + (1 - self.alpha) * errorUS
-        #print >> sys.stderr, 'error', errorCW, errorUS, error # DEBUG
+        #if error > 2: print >> sys.stderr, 'error', errorCW, errorUS, error # DEBUG
         self.error += error
         self.avg_error.add(error) # moving average
         self.total_pairs += 1
@@ -193,6 +200,7 @@ cdef class SentimentTrainer(LmTrainer):
 
         return error, variant
 
+
     cdef _update(self, Gradients grads, float_t remaining,
                  np.ndarray[int_t,ndim=2] example,
                  np.ndarray[int_t] middle_token,
@@ -228,6 +236,7 @@ cdef class SentimentTrainer(LmTrainer):
         deltas = np.concatenate((deltas, grads.input_neg[start:end])) # negative token
         
         self.converter.update(deltas, tokens, self.learning_rate)
+
 
     def train(self, Iterable sentences, list polarities, trie,
               int_t epochs, int_t report_freq):
@@ -290,7 +299,7 @@ cdef class SentimentTrainer(LmTrainer):
                         # FIXME: avoid overlaps like 0-3, 1-2
                         # extract a window of tokens around the given position
                         token = self._extract_window(window, sentence, pos, size)
-                        error, neg_token = self._train_pair_s(window, grads, size, polarities[num])
+                        error, neg_token = self._train_pair_s(window, grads, polarities[num], size)
                         self.total_items += 1
                         if error > self.skipErr:
                             self.error += error

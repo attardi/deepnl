@@ -84,8 +84,6 @@ cdef class SentimentTrainer(LmTrainer):
         """
         Initializes a new neural network initialized for training.
         :param options: provides
-        :param left_context: defaut 1
-        :param right_context: defaut 1
         :param hidden_size: default 20
         :param ngrams: size of ngrams to extract
         :param alpha: default 0.5

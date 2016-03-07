@@ -117,12 +117,9 @@ cdef class LmTrainer(Trainer):
 
     def __init__(self, nn, Converter converter, dict options):
         """
-        :param learning_rate: initial learning rate
-        :param left_cotext: left window size
-        :param right_cotext: right window size
-        :param hidden_size: number of hidden units
-        :param output_size: number of outputs
-        :param ngrams: size of ngrams to extract
+        :param nn: the network to train.
+        :param converter: the feature extractor
+        :param options: dict with training options
         """
         super(LmTrainer, self).__init__(nn, converter, options)
         self.feature_tables = [e.table for e in converter.extractors]
@@ -175,6 +172,8 @@ cdef class LmTrainer(Trainer):
         cdef np.ndarray[float_t,ndim=2] table
         cdef int i, j
         cdef int start = 0, end
+        cdef int left_context = len(self.pre_padding)
+        cdef int right_context = len(self.post_padding)
 
         for i, token in enumerate(example):
             for j, table in enumerate(self.feature_tables): # just one table
@@ -183,7 +182,7 @@ cdef class LmTrainer(Trainer):
                 end = start + table.shape[1]
                 deltas_pos = LR_0 * grads_input_pos[start:end]
                 deltas_neg = LR_0 * grads_input_neg[start:end]
-                if i == self.left_context:
+                if i == left_context:
                     # this is the middle position.
                     # apply negative and positive deltas to different tokens
                     table[token_pos[j]] += deltas_pos
@@ -242,10 +241,12 @@ cdef class LmTrainer(Trainer):
             Train the model, lifting lists of sentences from the job queue.
             """
             cdef Network nn = self.nn
+            cdef int left_context = len(self.pre_padding)
+            cdef int right_context = len(self.post_padding)
             # each worker thread has its own network, but they all share the
             # same converter tables (and hence feature_tables)
             worker = LmWorker(self.converter, self.learning_rate,
-                              self.left_context, self.right_context,
+                              left_context, right_context,
                               dims, nn.hidden_size, ngrams=self.ngram_size)
 
             cdef int total_pairs

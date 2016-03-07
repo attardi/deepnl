@@ -1,3 +1,8 @@
+2016-03-07  Giuseppe Attardi  <attardi@di.unipi.it>
+
+	* deepnl/words.pyx (train.train_worker): get left_context from
+	self_prepadding.
+
 2016-03-05  Giuseppe Attardi  <attardi@R730-gpu>
 
 	* deepnl/reader.py (TweetReader.__init__): specify fileds for text and polarity.

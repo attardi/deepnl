@@ -370,8 +370,8 @@ cdef class TaggerTrainer(Trainer):
 
         self.accuracy = self._validate(sentences, tags, validation)
         # DEBUG
-        # print >> sys.stderr, 'hw', nn.hidden_weights[:4,:4]
-        # print >> sys.stderr, 'ow', nn.output_weights[0:4,:4]
+        # print('hw', nn.hidden_weights[:4,:4], file=sys.stderr)
+        # print('ow', nn.output_weights[0:4,:4], file=sys.stderr)
 
     @cython.boundscheck(False)
     cdef float_t _validate(self, list sentences, tags, int_t idx):

@@ -8,6 +8,7 @@ import os
 import numpy as np
 import logging
 from itertools import izip
+from __future__ import print_function
 
 # local
 from word_dictionary import WordDictionary
@@ -48,7 +49,7 @@ class Plain(object):
         """
         with open(filename, 'wb') as f:
             for word in vocab:
-                print >> f, word.encode('utf-8')
+                print(word.encode('utf-8'), file=f)
 
     @classmethod
     def write_vectors(cls, filename, matrix):
@@ -58,7 +59,7 @@ class Plain(object):
         """
         with open(filename, 'wb') as file:
             for row in matrix:
-                print >> file, ' '.join(["%f" % x for x in row])
+                print(' '.join(["%f" % x for x in row]), file=file)
 
 # ----------------------------------------------------------------------
 
@@ -127,9 +128,9 @@ class Word2Vec(object):
         :param vectors: is a Numpy array
         """
         with open(filename, 'wb') as f:
-            print >> f, len(words), vectors.shape[1]
+            print(len(words), vectors.shape[1], file=f)
             for word, vector in izip(words, vectors):
-                print >> f, word.encode('UTF-8'), ' '.join('%f' % w for w in vector)
+                print(word.encode('UTF-8'), ' '.join('%f' % w for w in vector), file=f)
 
 # ----------------------------------------------------------------------
 

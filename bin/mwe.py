@@ -10,6 +10,7 @@ Options:
   -h, --help              : display this help and exit
 """
 
+from __future__ import print_function
 import sys
 from optparse import OptionParser
 import cPickle as pickle
@@ -81,15 +82,15 @@ def show(embeddings, word_id, id_word, counts):
     words = words.strip().decode('utf-8').split()
     words = [normalize(word, word_id) for word in words]
     if not all(words):
-      print "OOV word"
+      print("OOV word")
       continue
     phrase = ' '.join(words)
     freq = counts.get(phrase, 0)
-    print phrase.encode('utf-8'), freq
+    print(phrase.encode('utf-8'), freq)
     for ngram in closest(words, word_id, id_word, embeddings):
       phrase = ' '.join(ngram)
       freq = counts.get(phrase, 0)
-      print phrase.encode('utf-8'), freq
+      print(phrase.encode('utf-8'), freq)
 
 def loadVocab(vocab_file):
   vocab = []

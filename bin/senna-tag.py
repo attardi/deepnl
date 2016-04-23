@@ -6,6 +6,7 @@ This script will run a POS or SRL tagger on the input data and print the results
 to stdout.
 """
 
+from __future__ import print_function
 import argparse
 import logging
 import ipdb
@@ -201,20 +202,20 @@ def _print_tagged_pos(tagged_sents):
     """Prints one sentence per line as token_tag"""
     # for sent in tagged_sents:
     #     s = ' '.join('_'.join(item) for item in sent)
-    #     print s
+    #     print(s)
 
     # print in tsv
     for sent in tagged_sents:
         for token in sent:
-            print '\t'.join([item.encode('utf-8') for item in token])
-        print
+            print('\t'.join([item.encode('utf-8') for item in token]))
+        print()
 
 def _print_tagged_ner(tagged_sents):
     """Prints one token per line as token\ttag"""
     for sent in tagged_sents:
         for tok, tag in sent:
-            print tok[0] + '\t' + tag # tok is (form, POS)
-        print
+            print(tok[0] + '\t' + tag # tok is (form, POS))
+        print()
 
 if __name__ == '__main__':
     

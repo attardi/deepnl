@@ -11,6 +11,7 @@ They are resposible for loading and saving these data to/from a model file.
 """
 
 # standard
+from __future__ import print_function
 import logging
 import numpy as np
 import os
@@ -555,7 +556,7 @@ cdef class AffixExtractor(Extractor):
             for a, i in self.dict.iteritems():
                 affixes[i - self.specials] = a
             for i in range(self.specials, len(self.dict)):
-                print >> f, affixes[i].encode('utf-8')
+                print(affixes[i].encode('utf-8'), file=f)
 
 # ----------------------------------------------------------------------
 

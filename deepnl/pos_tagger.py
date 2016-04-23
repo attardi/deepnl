@@ -6,6 +6,7 @@ POS tagger exploiting a deep neural network.
 
 # standard
 import sys
+from __future__ import print_function
 
 # local
 from network import Network
@@ -25,5 +26,5 @@ class PosTagger(Tagger):
         reader = PosReader(file)
         writer = ConllWriter()
         for sent in reader:
-            print writer.write(self.tag_sequence(sent))
+            print(writer.write(self.tag_sequence(sent)))
 

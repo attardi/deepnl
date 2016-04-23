@@ -7,6 +7,7 @@ Train and use a NE tagger.
 Author: Giuseppe Attardi
 """
 
+from __future__ import print_function
 import logging
 import numpy as np
 import argparse
@@ -311,7 +312,7 @@ def main():
                 with open(args.gazetteer, 'wb') as file:
                     for tag, trie in tries.iteritems():
                         for ngram in trie:
-                            print >> file, ('%s\t%s' % (tag, ' '.join(ngram))).encode('UTF-8')
+                            print(('%s\t%s' % (tag, ' '.join(ngram))).encode('UTF-8'), file=file)
 
         # if args.pos:
         #     converter.add(POS(arg.pos))

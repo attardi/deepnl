@@ -7,12 +7,13 @@ Upgrade to new IOB convention: Inside, Outside, Begin.
 # I I -> I I
 # I O -> I O
 
+from __future__ import print_function
 import sys
 import getopt
 
 def usage():
-    print 'usage:', sys.argv[0], '[-hr] < inFile '
-    print '  -r   revert to old convention.'
+    print('usage:', sys.argv[0], '[-hr] < inFile '
+    print('  -r   revert to old convention.')
     sys.exit()
 
 try:
@@ -32,8 +33,8 @@ def main():
     previous = None
     for line in sys.stdin:
         if line == '\n':
-            print '\t'.join(previous)
-            print
+            print('\t'.join(previous))
+            print()
             previous = None
             continue
         words = line.split()
@@ -46,9 +47,9 @@ def main():
             if tag[0] == 'I' and (previous == None or previous[-1] == 'O'):
                 words[-1] = 'B' + tag[1:]
         if previous:
-            print '\t'.join(previous)
+            print('\t'.join(previous))
         previous = words
     if previous:                # leftover
-        print '\t'.join(previous)
+        print('\t'.join(previous))
 
 main()

@@ -8,6 +8,7 @@ Train a Language model.
 """
 
 # standard
+from __future__ import print_function
 import numpy as np
 import logging, sys
 import time
@@ -416,8 +417,8 @@ cdef class LmTrainer(Trainer):
         accuracy.
         """
         # logging.__init__() invokes acquire lock.
-        print >> sys.stderr, ("Epoch: %d, pairs: %d, sent: %d, avg. error: %.3f"
-                     % (epoch, total_pairs, sent, self.avg_error.mean))
+        print("Epoch: %d, pairs: %d, sent: %d, avg. error: %.3f"
+              % (epoch, total_pairs, sent, self.avg_error.mean), file=sys.stderr)
 
 
 cdef class LmWorker(LmTrainer):

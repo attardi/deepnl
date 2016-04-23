@@ -8,6 +8,7 @@ A neural network for NLP tagging tasks.
 """
 
 # standard
+from __future__ import print_function
 import logging
 import sys                      # DEBUG
 
@@ -103,13 +104,13 @@ cdef class Parameters(object):
 
         """
         if ada:
-            # print >> sys.stderr, 'ada', ada.hidden_weights[:5,:5], ada.hidden_weights[-5:,-5:] # DEBUG
+            # print('ada', ada.hidden_weights[:5,:5], ada.hidden_weights[-5:,-5:], file=sys.stderr) # DEBUG
             ada.addSquare(grads)
             self.output_weights += learning_rate * grads.output_weights / np.sqrt(ada.output_weights)
             self.output_bias += learning_rate * grads.output_bias / np.sqrt(ada.output_bias)
 
-            # print >> sys.stderr, 'ada', ada.hidden_weights[:5,:5], ada.hidden_weights[-5:,-5:] # DEBUG
-            # print >> sys.stderr, 'uhw', learning_rate, adaEps, self.hidden_weights[:5,:5], grads.hidden_weights[:5,:5], grads.hidden_weights[-5:,-5:] # DEBUG
+            # print('ada', ada.hidden_weights[:5,:5], ada.hidden_weights[-5:,-5:], file=sys.stderr) # DEBUG
+            # print('uhw', learning_rate, adaEps, self.hidden_weights[:5,:5], grads.hidden_weights[:5,:5], grads.hidden_weights[-5:,-5:], file=sys.stderr) # DEBUG
 
             self.hidden_weights += learning_rate * grads.hidden_weights / np.sqrt(ada.hidden_weights)
             self.hidden_bias += learning_rate * grads.hidden_bias / np.sqrt(ada.hidden_bias)
@@ -117,7 +118,7 @@ cdef class Parameters(object):
             # divide by the fan-in
             self.output_weights += grads.output_weights * learning_rate / 100  # DEBUG / self.hidden_size
             self.output_bias += grads.output_bias * learning_rate / 100 # DEBUG self.hidden_size
-            # print >> sys.stderr, 'uhw', learning_rate, self.hidden_weights[:2,:2], grads.hidden_weights[:2,:2] # DEBUG
+            # print('uhw', learning_rate, self.hidden_weights[:2,:2], grads.hidden_weights[:2,:2], file=sys.stderr) # DEBUG
             self.hidden_weights += grads.hidden_weights * learning_rate / 100  # DEBUG self.input_size
             self.hidden_bias += grads.hidden_bias * learning_rate / 100 # DEBUG self.input_size
 

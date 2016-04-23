@@ -7,6 +7,7 @@ Sequence tagger exploiting a neural network.
 """
 
 # standard
+from __future__ import print_function
 import numpy as np
 import cPickle as pickle
 import sys                      # DEBUG
@@ -99,10 +100,10 @@ cdef class Tagger(object):
             vars.input = np.empty(nn.input_size)
             vars.hidden = np.empty(nn.hidden_size)
 
-        # print >> sys.stderr, sentence[:,:3]   # DEBUG
-        # #print >> sys.stderr, self.converter.extractors[0].sentence(sentence[:4]) # DEBUG
-        # print >> sys.stderr, 'hweights', nn.p.hidden_weights[:4,:4] # DEBUG
-        # print >> sys.stderr, 'hbias', nn.p.hidden_bias[:4]          # DEBUG
+        # print(sentence[:,:3], file=sys.stderr)   # DEBUG
+        # #print(self.converter.extractors[0].sentence(sentence[:4]), file=sys.stderr) # DEBUG
+        # print('hweights', nn.p.hidden_weights[:4,:4], file=sys.stderr) # DEBUG
+        # print('hbias', nn.p.hidden_bias[:4], file=sys.stderr)          # DEBUG
 
         # lookup the whole sentence at once
         # number of features in a window
@@ -122,12 +123,12 @@ cdef class Tagger(object):
             nn.forward(vars)
             # DEBUG
             # if train:
-            #     # print >> sys.stderr, 'window:', self.converter.extractors[0].sentence(window)
-            #     # print >> sys.stderr, 'sent:', window[:4], window[-4:]
-            #     print >> sys.stderr, 'input', vars.input[:4], vars.input[-4:]
-            #     #print >> sys.stderr, 'iw', self.nn.p.hidden_weights[0,:4], self.nn.p.hidden_weights[-1,-4:]
-            #     print >> sys.stderr, 'hidden', vars.hidden[:4], vars.hidden[-4:]
-            #     print >> sys.stderr, 'output', vars.output[:4], vars.output[-4:]
+            #     # print('window:', self.converter.extractors[0].sentence(window), file=sys.stderr)
+            #     # print('sent:', window[:4], window[-4:], file=sys.stderr)
+            #     print('input', vars.input[:4], vars.input[-4:], file=sys.stderr)
+            #     #print('iw', self.nn.p.hidden_weights[0,:4], self.nn.p.hidden_weights[-1,-4:], file=sys.stderr)
+            #     print('hidden', vars.hidden[:4], vars.hidden[-4:], file=sys.stderr)
+            #     print('output', vars.output[:4], vars.output[-4:], file=sys.stderr)
         
         return scores
 

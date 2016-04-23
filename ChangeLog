@@ -1,3 +1,7 @@
+2016-04-23  Giuseppe Attardi  <attardi@di.unipi.it>
+
+	* deepnl/*.py: use print function for Python 3 compatibility.
+
 2016-03-07  Giuseppe Attardi  <attardi@di.unipi.it>
 
 	* deepnl/words.pyx (train.train_worker): get left_context from

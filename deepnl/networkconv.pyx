@@ -324,7 +324,7 @@ Output size: %d
         # grads.output_bias[:] = np.where(vars.output - fx_y > -1, -1, 0) # -1
         # grads.output_bias[y] = 1
         # MultiMarginCriterion: computed above
-        # print >> sys.stderr, y, vars.output, grads.output_bias # DEBUG
+        # print(y, vars.output, grads.output_bias, file=sys.stderr) # DEBUG
         # dC / dW_4 = dC / df_5 * f_4				(22)
         # (output_size) x (hidden2_size) = (output_size, hidden2_size)
         np.outer(grads.output_bias, vars.hidden2, grads.output_weights)

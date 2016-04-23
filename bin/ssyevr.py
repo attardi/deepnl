@@ -1,5 +1,6 @@
 #!/usr/bin/python
 
+from __future__ import print_function
 import numpy as np
 from scipy.linalg.lapack import ssyevr
 
@@ -12,13 +13,13 @@ A = np.array([[ 0.67, -0.20,  0.19, -1.06,  0.46],
 
 n = np.linalg.norm(A, axis=1)
 
-print A
+print(A)
 
 w,z,info = ssyevr(A, range='I', il=3, overwrite_a=1)
 
-print w
-print z
+print(w)
+print(z)
 # z = (5 x 3)
-print A.dot(z)
+print(A.dot(z))
 
 

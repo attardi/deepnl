@@ -9,6 +9,7 @@ Classes for reading/writing various types of corpora.
 # standard
 import sys
 import codecs
+from __future__ import print_function
 
 class ConllReader(object):
     """
@@ -70,8 +71,8 @@ class ConllWriter(object):
         :param sent: the sentence to write.
         """
         for token in sent:
-            print '\t'.join([item.encode('utf-8') for item in token])
-        print
+            print('\t'.join([item.encode('utf-8') for item in token]))
+        print()
 
 # ----------------------------------------------------------------------
 
@@ -82,14 +83,14 @@ class SrlWriter(object):
         """
         :param sent: must be of type SRLAnnotatedSentence
         """
-        print ' '.join(sent.tokens).encode('utf-8')
+        print(' '.join(sent.tokens).encode('utf-8'))
         for predicate, arg_structure in sent.arg_structures:
-            print predicate.encode('utf-8')
+            print(predicate.encode('utf-8'))
             for label in arg_structure:
                 argument = ' '.join(arg_structure[label])
                 line = '\t%s: %s' % (label, argument)
-                print line.encode('utf-8')
-        print
+                print(line.encode('utf-8'))
+        print()
 
 # ----------------------------------------------------------------------
 

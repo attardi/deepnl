@@ -5,6 +5,7 @@
 Train a sentiment specific language model.
 """
 
+from __future__ import print_function
 import numpy as np
 from numpy import int32 as INT
 import sys                      # DEBUG
@@ -127,19 +128,19 @@ cdef class SentimentTrainer(LmTrainer):
 
         vars_neg = nn.variables()
         cdef np.ndarray[int_t] negative_token = np.array(variant, dtype=INT)
-        #print >> sys.stderr, 'pos', self.converter.extractors[0].sentence(example).encode('utf-8') # DEBUG
-        #print >> sys.stderr, vars_pos.input[128:132] # DEBUG
+        #print('pos', self.converter.extractors[0].sentence(example).encode('utf-8'), file=sys.stderr) # DEBUG
+        #print(vars_pos.input[128:132], file=sys.stderr) # DEBUG
         example[left_context] = negative_token
         self.converter.lookup(example, vars_neg.input)
-        #print >> sys.stderr, 'neg', self.converter.extractors[0].sentence(example).encode('utf-8') # DEBUG
-        #print >> sys.stderr, vars_neg.input[128:132] # DEBUG
+        #print('neg', self.converter.extractors[0].sentence(example).encode('utf-8'), file=sys.stderr) # DEBUG
+        #print(file=sys.stderr, vars_neg.input[128:132]) # DEBUG
         nn.forward(vars_neg)
         
         # hinge loss
         cdef float_t errorCW = max(0, 1 - vars_pos.output[0] + vars_neg.output[0])
         cdef float_t errorUS = max(0, 1 - polarity * vars_pos.output[1] + polarity * vars_neg.output[1])
         cdef float_t error = self.alpha * errorCW + (1 - self.alpha) * errorUS
-        #if error > 2: print >> sys.stderr, 'error', errorCW, errorUS, error # DEBUG
+        #if error > 2: print(file=sys.stderr, 'error', errorCW, errorUS, error) # DEBUG
         self.error += error
         self.avg_error.add(error) # moving average
         self.total_pairs += 1
@@ -176,7 +177,7 @@ cdef class SentimentTrainer(LmTrainer):
         # (2, hidden_size) = (2) x (hidden_size)
         grads.output_weights = np.outer(grads_pos_score, vars_pos.hidden) +\
                                np.outer(grads_neg_score, vars_neg.hidden)
-        #print >> sys.stderr, 'gow', grads.output_weights[0,128:132] # DEBUG
+        #print('gow', grads.output_weights[0,128:132], file=sys.stderr) # DEBUG
 
         # Hidden layer
         # (hidden_size) = (2) * (2, hidden_size)
@@ -188,7 +189,7 @@ cdef class SentimentTrainer(LmTrainer):
         grads.hidden_weights = np.outer(grads.hidden_pos, vars_pos.input) +\
                                np.outer(grads.hidden_neg, vars_neg.input)
 
-        #print >> sys.stderr, 'ghw', grads.hidden_weights[0,128:132] # DEBUG
+        #print('ghw', grads.hidden_weights[0,128:132], file=sys.stderr) # DEBUG
         grads.hidden_bias = grads.hidden_pos + grads.hidden_neg
 
         # Lookup layer
@@ -290,7 +291,7 @@ cdef class SentimentTrainer(LmTrainer):
                 if polarities[num] == 0:
                     # skip neutral sentences
                     continue
-                #print >> sys.stderr, self.converter.extractors[0].sentence(sentence).encode('utf-8') # DEBUG
+                #print(self.converter.extractors[0].sentence(sentence).encode('utf-8'), file=sys.stderr) # DEBUG
                 for pos in xrange(len(sentence)):
                     # for any word or ngram at sentence[pos:pos+size]
                     for size in itertrie(trie, sentence, pos):

@@ -7,6 +7,7 @@ Train and use a convolutional neural network classifier.
 Author: Giuseppe Attardi
 """
 
+from __future__ import print_function
 import logging
 import numpy as np
 import argparse
@@ -312,7 +313,7 @@ def main():
         for example in reader:
             words = example[reader.text_field].split()
             example[reader.label_field] = classifier.predict(words)
-            print '\t'.join(example).encode('utf-8')
+            print('\t'.join(example).encode('utf-8'))
 
 # ----------------------------------------------------------------------
 

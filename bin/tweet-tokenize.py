@@ -16,6 +16,7 @@ Optons:
 import os
 import sys
 import getopt
+from __future__ import print_function
 
 # Tanl directory
 tanl = '/project/piqasso/QA/Tanl/'
@@ -33,13 +34,13 @@ from Tokenizer_it import *
 ### CLI INTERFACE ############################################################
 
 def show_help():
-    print __doc__,
+    print(__doc__, end='')
 
 def show_usage(scriptname):
-    print >> sys.stderr, 'Usage: %s [options] [file]' % scriptname
+    print('Usage: %s [options] [file]' % scriptname, file=sys.stderr)
 
 def show_suggestion(scriptname):
-    print >> sys.stderr, 'Try \'%s --help\' for more information.' % scriptname
+    print('Try \'%s --help\' for more information.' % scriptname, file=sys.stderr)
 
 def main():
     scriptname = os.path.basename(sys.argv[0])
@@ -67,7 +68,7 @@ def main():
     # Tanl modules
     splitterModel = data + 'split/sentence/' + lang + '.punkt'
     if os.path.exists(splitterModel):
-        print "No such model:" + splitterModel
+        print("No such model:" + splitterModel)
         return
     t0 = SentenceSplitter(splitterModel)
     t1 = Tokenizer()
@@ -85,7 +86,7 @@ def main():
             if form != '\n':
                 tokens.append(form)
         fields[text_field] = ' '.join(tokens)
-        print '\t'.join(fields)
+        print('\t'.join(fields))
 
 if __name__ == '__main__':
     main()

@@ -8,6 +8,7 @@ A neural network for tagging sequences.
 It uses a sliding window of items through the sequence.
 """
 
+from __future__ import print_function
 import numpy as np
 from itertools import izip
 import cPickle as pickle
@@ -417,9 +418,9 @@ cdef class SequenceNetwork(Network):
         # (len, hidden_size) (hidden_size, input_size) = (len, input_size)
         # dCdf_2.dot(self.p.hidden_weights, grads.input)
         grads.hidden.dot(self.p.hidden_weights, grads.input)
-        # print >> sys.stderr, 'hwg', grads.hidden_weights[:4,:4], grads.hidden_weights[-4:,-4:] # DEBUG
-        # print >> sys.stderr, 'hbg', grads.hidden_bias[:4], grads.hidden_bias[-4:] # DEBUG
-        # print >> sys.stderr, 'ig', grads.input[0,:4], grads.input[-1,-4:] # DEBUG
+        # print('hwg', grads.hidden_weights[:4,:4], grads.hidden_weights[-4:,-4:], file=sys.stderr) # DEBUG
+        # print('hbg', grads.hidden_bias[:4], grads.hidden_bias[-4:], file=sys.stderr) # DEBUG
+        # print('ig', grads.input[0,:4], grads.input[-1,-4:], file=sys.stderr) # DEBUG
 
     @classmethod
     def load(cls, file):

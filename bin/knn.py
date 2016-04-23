@@ -16,6 +16,7 @@ Options:
 # sudo pip install --upgrade nose
 # sudo pip install -U scikit-learn
 
+from __future__ import print_function
 import sys
 from optparse import OptionParser
 from math import sqrt
@@ -87,7 +88,7 @@ def knn(embeddings, id_word, word_id):
     # numpy version
     i = 0
     for index, distance2 in l2_nearest(embeddings, embeddings[word_id[word]], top+1):
-      print '%i\t%s\t%f' % (i, id_word[index].encode('utf-8'), sqrt(distance2))
+      print('%i\t%s\t%f' % (i, id_word[index].encode('utf-8'), sqrt(distance2)))
       i += 1
 
 def Kmeans(file, vocabfile, k):
@@ -96,17 +97,17 @@ def Kmeans(file, vocabfile, k):
   codebook, distortion = kmeans(whitened, k)
   clusters = [l2_nearest(embeddings, c, representatives+1) for c in codebook]
   # output
-  print len(codebook), distortion
+  print(len(codebook), distortion)
   for centroid in codebook:
-    print ' '.join([str(x) for x in centroid])
-  print
+    print(' '.join([str(x) for x in centroid]))
+  print()
   for cluster in clusters:
-    print ' '.join([id_word[i] for i, d in cluster]).encode('utf-8')
-  print
+    print(' '.join([id_word[i] for i, d in cluster]).encode('utf-8'))
+  print()
   # assign clusters to words
   codes, _ = vq(embeddings, codebook)
   for w, c in zip(word_id.keys(), codes):
-    print w, c
+    print(w, c)
 
 def Dbscan(embeddings, id_word, word_id, eps, min_size):
   coreSamples, labels = dbscan(embeddings, eps, min_size)
@@ -117,14 +118,14 @@ def Dbscan(embeddings, id_word, word_id, eps, min_size):
       clusters[label] = []
     clusters[label].append(id_word[i].encode('utf-8'))
   # output
-  print len(clusters) - 1
+  print(len(clusters) - 1)
   for c in clusters.iterkeys():
     if c < 0: continue          # -1 is noise
-    print ' '.join([str(x) for x in embeddings[int(c)]])
-  print
+    print(' '.join([str(x) for x in embeddings[int(c)]]))
+  print()
   # show clusters
   for c, words in clusters.iteritems():
-    print c, ' '.join(words)
+    print(c, ' '.join(words))
 
 def readClusters(clusterfile):
   cfile = open(clusterfile)
@@ -140,7 +141,7 @@ def annotate(embeddings, id_word, word_id, clusterfile, col = 0):
   for line in sys.stdin:
     line = line.strip().decode('utf-8')
     if not line:
-      print
+      print()
       continue
     attrs = line.split('\t')
     # detect which column to use
@@ -168,7 +169,7 @@ def annotate(embeddings, id_word, word_id, clusterfile, col = 0):
         min = d2
         c = i
     attrs[col] = 'C%i' % (c)
-    print '\t'.join(attrs).encode('utf-8')
+    print('\t'.join(attrs).encode('utf-8'))
 
 def loadVocab(vocab_file):
   vocab = []
@@ -246,7 +247,7 @@ Show knn of words typed on stdin."""
   elif options.dbscan:
     Dbscan(embeddings, id_word, word_id, options.dbscan, min_core)
   elif options.group:
-    # print the clusters
+    # print(the clusters
     codebook = readClusters(options.group)
     codes, _ = vq(embeddings, np.array(codebook))
     groups = {}
@@ -255,7 +256,7 @@ Show knn of words typed on stdin."""
         groups[c] = []
       groups[c].append(id_word[i])
     for c,members in groups.iteritems():
-      print c, ' '.join(members).encode('utf-8')
+      print(c, ' '.join(members).encode('utf-8'))
   elif options.annotate:
     anontate(embeddings, id_word, word_id, options.annotate, options.col)
   else:

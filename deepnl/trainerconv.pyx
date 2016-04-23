@@ -91,7 +91,7 @@ cdef class ConvTrainer(Trainer):
                 #     if label != label3:
                 #         grads.clear() # allocate gradients
                 #         loss3 = nn.backpropagate(label, vars, grads)
-                #         print >> sys.stderr, 'NOFIX', i, label, label1, label2, label3, loss, loss2, loss3
+                #         print('NOFIX', i, label, label1, label2, label3, loss, loss2, loss3, file=sys.stderr)
             else:
                 self.epoch_hits += 1
             self.epoch_items += 1

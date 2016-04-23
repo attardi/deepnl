@@ -246,9 +246,9 @@ cdef class LmTrainer(Trainer):
             cdef int right_context = len(self.post_padding)
             # each worker thread has its own network, but they all share the
             # same converter tables (and hence feature_tables)
-            worker = LmWorker(self.converter, self.learning_rate,
+            worker = LmWorker(nn, self.converter, self.learning_rate,
                               left_context, right_context,
-                              dims, nn.hidden_size, ngrams=self.ngram_size)
+                              dims, ngrams=self.ngram_size)
 
             cdef int total_pairs
             cdef float remaining, error
@@ -437,13 +437,22 @@ cdef class LmWorker(LmTrainer):
 
     # cdef WordsTrainer* trainer
 
-    def __init__(self, Converter converter, float learning_rate,
-                 int left_context, int right_context,
-                 dims, int hidden_size, int output_size=1, int ngrams=1):
+    def __init__(self, nn, Converter converter, float learning_rate,
+                 left_context, right_context,
+                 dims, ngram_size):
+        """
+        Creates a neural network initialized for training.
+        :param nn: the network to be trained.
+        :param converter: feature extractor.
+        """
 
-        super(LmWorker, self).__init__(converter, learning_rate,
-                                       left_context, right_context,
-                                       hidden_size, output_size, ngrams)
+        super(LmWorker, self).__init__(nn, converter,
+                                       {'learning_rate': learning_rate,
+                                        'left_context': left_context,
+                                        'right_context': right_context,
+                                        'ngrams_size': ngram_size
+                                        }
+                                    )
 
         # generate 1000 random indices at a time to save time
         # (generating 1000 integers at once takes about 10 times the time
@@ -452,6 +461,8 @@ cdef class LmWorker(LmTrainer):
 
         # local storage to avoid allocations:
         input_size = self.nn.input_size
+        hidden_size = self.nn.hidden_size
+        output_size = self.nn.output_size
         self.grads = self.nn.gradients()
         self.vars_pos = Variables(input_size, hidden_size, output_size)
         self.vars_neg = Variables(input_size, hidden_size, output_size)

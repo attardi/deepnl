@@ -4,11 +4,11 @@
 Load word embeddings from different representations.
 """
 
+from __future__ import print_function
 import os
 import numpy as np
 import logging
 from itertools import izip
-from __future__ import print_function
 
 # local
 from word_dictionary import WordDictionary

@@ -7,9 +7,9 @@ Classes for reading/writing various types of corpora.
 """
 
 # standard
+from __future__ import print_function
 import sys
 import codecs
-from __future__ import print_function
 
 class ConllReader(object):
     """

@@ -1,3 +1,8 @@
+2016-06-26  Giuseppe Attardi  <attardi@di.unipi.it>
+
+	* deepnl/corpus.py: moved from __future__ import print_function to top.
+	* deepnl/embeddings.py: idem.
+
 2016-04-23  Giuseppe Attardi  <attardi@di.unipi.it>
 
 	* deepnl/words.pyx (LmWorker.__init__): fixed.

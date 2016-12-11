@@ -11,8 +11,9 @@ from __future__ import print_function
 import sys
 import getopt
 
+
 def usage():
-    print('usage:', sys.argv[0], '[-hr] < inFile '
+    print('usage:', sys.argv[0], '[-hr] < inFile ')
     print('  -r   revert to old convention.')
     sys.exit()
 
@@ -28,6 +29,7 @@ for opt, arg in opts:
         usage()
     if opt == '-r':
         reverse = True
+
 
 def main():
     previous = None

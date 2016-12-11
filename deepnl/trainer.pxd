@@ -2,6 +2,7 @@
 from cpython cimport bool
 cimport numpy as np
 
+# local
 from network cimport Network, Parameters, Gradients, float_t, int_t
 from extractors cimport Converter
 from networkseq cimport SeqGradients

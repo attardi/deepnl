@@ -13,7 +13,7 @@ import argparse
 from ConfigParser import ConfigParser
 
 # profiling
-#import yappi
+# import yappi
 
 # allow executing from anywhere without installing the package
 import sys
@@ -32,6 +32,7 @@ from deepnl.words import LmTrainer
 # ----------------------------------------------------------------------
 # Auxiliary functions
 
+
 def create_trainer(args, converter):
     """
     Creates or loads a neural network according to the specified args.
@@ -45,7 +46,7 @@ def create_trainer(args, converter):
         trainer.learning_rate = args.learning_rate
     else:
         logger.info('Creating new network...')
-        # sum the number of features in all extractors' tables 
+        # sum the number of features in all extractors' tables
         input_size = converter.size() * (args.windows * 2 + 1)
         nn = LmNetwork(input_size, args.hidden, 1)
         options = {
@@ -63,8 +64,9 @@ def create_trainer(args, converter):
 
     logger.info("... with the following parameters:")
     logger.info(trainer.nn.description())
-    
+
     return trainer
+
 
 def saver(model_file, vectors_file):
     """Function for saving model periodically"""
@@ -77,15 +79,16 @@ def saver(model_file, vectors_file):
 
 # ----------------------------------------------------------------------
 
+
 def main():
 
     # set the seed for replicability
     np.random.seed(42)
 
     defaults = {}
-    
+
     parser = argparse.ArgumentParser(description="Learn word embeddings.")
-    
+
     parser.add_argument('-c', '--config', dest='config_file',
                         help='Specify config file', metavar='FILE')
 
@@ -162,7 +165,7 @@ def main():
     converter.add(embeddings)
 
     trainer = create_trainer(args, converter)
-    
+
     report_intervals = max(args.iterations / 200, 1)
     report_intervals = 10000    # DEBUG
 
@@ -175,7 +178,7 @@ def main():
 
     trainer.train(converted_sentences, args.iterations, report_intervals,
                   args.threads, epoch_pairs=args.words)
-    
+
     logger.info("Saving vectors ...")
     trainer.save_vectors(args.vectors)
     logger.info("... to %s" % args.vectors)

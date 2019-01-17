@@ -1,3 +1,4 @@
+# distutils: language=c++
 
 from cpython cimport bool
 cimport numpy as np

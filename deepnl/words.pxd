@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+# distutils: language=c++
 
 """
 Train a Language model

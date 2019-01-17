@@ -44,15 +44,19 @@ Build
 
 To compile the library, run::
 
-   $ python setup.py build
+   $ python2 setup.py build
 
-This will invoce the C++ compiler to compile the code on your platform.
+This will invoke the C++ compiler to compile the code on your platform.
 
 You can run the scripts directly from the ``bin`` directory, or you can
 install them by calling::
 
    $ sudo python setup.py install
 
+If Cython gets invoked and raises error, force an update on the file
+timestamps, with:
+
+   $ touch deepnl/*.cpp
 
 Basic usage
 ===========
